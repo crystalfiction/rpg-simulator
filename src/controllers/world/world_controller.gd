@@ -123,7 +123,7 @@ func _init_controllers():
 		_init_world_entity(),
 		_init_terrain_controller(),
 		_init_player_controller(),
-		# _init_time_controller(),
+		_init_time_controller(),
 	]
 	# run init scrips
 	for s in range(init_controllers.size()):
