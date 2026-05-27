@@ -2,6 +2,10 @@ extends Controller
 
 # references
 var player_scene = preload("res://src/entities/player/player.tscn")
+<<<<<<< HEAD
+=======
+var movement_controller_script = preload("res://src/controllers/player/movement_controller.gd")
+>>>>>>> 432b7a088b6d83cdee095d66db4ab258f2439182
 var actions_controller_script = preload("res://src/controllers/player/actions_controller.gd")
 
 var movement_controller: Controller
