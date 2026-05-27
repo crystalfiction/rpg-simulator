@@ -6,9 +6,9 @@
 
 ### Structure
 
-Top-level diagram of Initialization Flow
+World Controller Init Flow
 ```mermaid
-flowchart LR
+flowchart
     controller.World --instantiates--> entity.World
     
     controller.World --instantiates--> Controller
@@ -33,6 +33,7 @@ flowchart
         Controller.Weather
         Controller.Resources
         Controller.Encounters
+        Controller.Player
         Controller.Time
 
         Controller.Terrain -.-> Controller.Weather
