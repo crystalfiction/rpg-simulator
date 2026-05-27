@@ -50,9 +50,9 @@ func _check_cycle_completion():
 		# cycle should be complete,
 		else:
 			# a controller was not fully processed...
-			print("Loose controller thread detected.")
+			# don't start next cycle until thread is resolved
+			print("Loose controller thread detected...")
 
-	
 	# if all controller cycles complete...
 	if all_done:
 		# reset cycle
@@ -77,7 +77,15 @@ func _reset_time_cycle():
 
 ## main entry point of the time system
 func _process_time_cycle():
-	print("Starting time cycle" + " " + str(self.cycles + 1) + ".")
+	# if time still processing last cycle,
+	# that is, if a dependency controller is not done cycling
+	if self.cycling && ! self.cycle_complete:
+		# do not start another cycle until current complete
+		# check for cycle completion and break
+		_check_cycle_completion()
+		return
+
+	print("Starting time cycle" + " " + str(self.cycles) + ".")
 	
 	# check controllers for time cycle processing
 	for d in self.dependencies:
@@ -129,8 +137,8 @@ func _process(delta: float) -> void:
 		
 		# check for frame interval
 		if self.frames % self.frame_rate == 0:
-			# process controllers
-			_process_time_cycle()
-			
 			# update cycle count
 			self.cycles += 1
+			
+			# process controllers
+			_process_time_cycle()
