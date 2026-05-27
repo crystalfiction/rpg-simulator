@@ -8,4 +8,6 @@ var data = {
 		"grid": [], # [[ Vector2i(x, y) ]]
 		"tile_map": [], # [[ Tile<Sprite2D> ]]
 	},
+	"resources": [],
+	## TODO: encounters
 }

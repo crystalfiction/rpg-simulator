@@ -21,7 +21,9 @@ var world: World
 var data = {
 	"uid": 0,
 	"grid_idx": Vector2i(0, 0),
-	# contains world system data at runtime
+	"terrain": {},
+	# "weather": {},
+	# "encounters": {},
 }
 
 
@@ -70,30 +72,6 @@ func _update_label_text(tile_data: Dictionary):
 		self.label_grid_y
 	]
 	for l in labels:
-		# update terrain labels
-		if "grid_idx" in keys:
-			if l == self.label_grid_x:
-				l.text = str(self.data.grid_idx.x) + ","
-			if l == self.label_grid_y:
-				l.text = str(self.data.grid_idx.y)
-		if "terrain" in keys:
-			if l == self.label_density:
-				# soil density label
-				l.text = str(snapped(tile_data.terrain.density, 0.01))
-				# map label alpha to value density
-				l.add_theme_color_override("font_color", Color(1, 1, 1, tile_data.terrain.density + 0.22))
-		# update weather labels
-		if "weather" in keys:
-			if l == self.label_water:
-				# water label
-				l.text = str(snapped(tile_data.weather.water, 0.01))
-				# map label alpha to value density
-				l.add_theme_color_override("font_color", Color(1, 1, 1, tile_data.weather.water + 0.44))
-			if l == self.label_erosion:
-				# erosion label
-				l.text = str(snapped(tile_data.weather.erosion, 0.01))
-				# map label alpha to value density
-				l.add_theme_color_override("font_color", Color(1, 1, 1, tile_data.weather.erosion + 0.66))
 		# update resource labels
 		if "resources" in keys:
 			if l == self.label_resources:
