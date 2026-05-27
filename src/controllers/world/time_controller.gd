@@ -141,12 +141,12 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	# only process specific things if tree is paused
 	if !get_tree().paused:
+		# update frames
+		frames += 1
+		
 		# check for frame interval
 		if self.frames % self.frame_rate == 0:
 			# process controllers
 			_process_time_cycle()
 			# update cycle count
 			self.cycles += 1
-		
-		# update frames
-		frames += 1
