@@ -9,33 +9,55 @@
 Top-level diagram of Initialization Flow
 ```mermaid
 flowchart LR
-    world_controller --instantiates--> entity.world
+    controller.World --instantiates--> entity.World
     
-    world_controller --instantiates--> system.controllers
-    system.controllers --initializes--> controller.data
-    controller.data -.valid.-> entity.world
+    controller.World --instantiates--> Controller
+    Controller --initializes--> Controller.data
+    Controller.data -.valid.-> entity.World
     
 ```
 
-Controller Dependencies
+World Controller Dependencies
 ```mermaid
 flowchart
     subgraph entities
-        entity.world
+        Entity.World
+
     end
 
-    entity.world -.-> controller.terrain
+    Entity.World -.-> Controller.Terrain
+    Entity.World -.-> Controller.Time
 
     subgraph controllers
-        controller.terrain
-        controller.weather
-        controller.resources
-        controller.encounters
+        Controller.Terrain
+        Controller.Weather
+        Controller.Resources
+        Controller.Encounters
+        Controller.Time
 
-        controller.terrain -.-> controller.weather
-        controller.terrain -.-> controller.resources
-        controller.terrain -.-> controller.encounters
+        Controller.Terrain -.-> Controller.Weather
+        Controller.Terrain -.-> Controller.Resources
+        Controller.Terrain -.-> Controller.Encounters
+
     end
 
-    
+```
+
+Player Controller Dependencies
+```mermaid
+flowchart
+    subgraph entities
+        Entity.Player
+
+    end
+
+    Entity.Player -.-> Controller.Player
+
+    subgraph controllers
+        Controller.Player
+        Controller.Actions
+
+        Controller.Player -.-> Controller.Actions
+    end
+
 ```
