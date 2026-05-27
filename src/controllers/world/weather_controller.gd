@@ -1,11 +1,13 @@
 extends Controller
 
 # components
-var weather_map: Array
 var weather_optimized = null
 var erosion_complete = null
 var erosion_cycle = 0
 var weather_iterations = 0
+var weather = {
+	"tile_map": []
+}
 # water
 var rainfall_min = 0.22
 var rainfall_max = 1.00
@@ -18,14 +20,13 @@ var erosion_factor = 0.11
 
 
 # applies erosion to the current weather_map given the paramaters
-func _apply_erosion():
-	var curr_map = weather_map
+func _apply_erosion(tile_map: Array):
 	var avg_erosion = 0.0
 	var count = 0
-	for x in range(curr_map.size()):
-		for y in range(curr_map[x].size()):
+	for x in range(tile_map.size()):
+		for y in range(tile_map[x].size()):
 			# tile
-			var w = curr_map[x][y]
+			var w = tile_map[x][y]
 			# apply erosion
 			w.data.weather.erosion += w.data.weather.erosion
 			# reduce soil density by erosion value
@@ -43,18 +44,18 @@ func _apply_erosion():
 	avg_erosion /= count
 	
 	# return new map
-	return curr_map
+	return tile_map
 
 
 # calculates erosion values per tile given water values
-func _calculate_erosion():
+func _calculate_erosion(tile_map: Array):
 	var avg_erosion = 0.0
 	var avg_soil_density = 0.0
 	var count = 0
-	for x in range(weather_map.size()):
-		for y in range(weather_map[x].size()):
+	for x in range(tile_map.size()):
+		for y in range(tile_map[x].size()):
 			# tile
-			var w = weather_map[x][y]
+			var w = tile_map[x][y]
 			var erosion = (
 				((w.data.weather.water) *
 				(w.data.weather.drainage) *
@@ -78,15 +79,15 @@ func _calculate_erosion():
 
 
 # calculates water values per tile given rainfall, drainage
-func _calculate_water():
+func _calculate_water(tile_map: Array):
 	var avg_rainfall = 0.0
 	var avg_drainage = 0.0
 	var avg_water = 0.0
 	var count = 0
-	for x in range(weather_map.size()):
-		for y in range(weather_map[x].size()):
+	for x in range(tile_map.size()):
+		for y in range(tile_map[x].size()):
 			# tile
-			var w = weather_map[x][y]
+			var w = tile_map[x][y]
 			# calculate water value
 			var water = clamp(
 				(w.data.weather.rainfall ** 2) *
@@ -116,24 +117,25 @@ func _calculate_water():
 
 
 # processes weather for the current weather_map
-func _optimize_weather():
+func _optimize_weather(tile_map: Array):
 	print("Optimizing weather...")
 	
 	# calculate features
 	var new_metrics: Dictionary
-	var water_metrics = _calculate_water()
+	var water_metrics = _calculate_water(tile_map)
 	new_metrics.merge(water_metrics)
-	var erosion_metrics = _calculate_erosion()
+	var erosion_metrics = _calculate_erosion(tile_map)
 	new_metrics.merge(erosion_metrics)
 	
 	## TODO: optimize features with metrics
 	
 	# run weather erosion cycle
 	var complete = false
+	var final: Array
 	while !complete:
 		# apply erosion
 		#var result = true
-		var result = _apply_erosion()
+		var result = _apply_erosion(tile_map)
 		erosion_cycle += 1
 		# log metrics if complete
 		print(
@@ -143,16 +145,18 @@ func _optimize_weather():
 			"avg_erosion: " + str(snapped(new_metrics.avg_erosion * erosion_cycle, 0.001)) + " | ",
 			"erosion_cycles: " + str(snapped(erosion_cycle, 0.001)),
 		)
-
 		# test result
 		if result:
-			## TODO: loop optimization
+			## TODO: elaborate on optimization
 			# terrain is optimized and valid
 			complete = true
 			erosion_complete = complete
+			final = result
 
 	weather_iterations += 1
 	weather_optimized = complete
+
+	return final
 
 
 # initializes the weather system controller
@@ -161,38 +165,21 @@ func _init_controller(terrain: Array):
 	rainfall = randf_range(rainfall_min, rainfall_max)
 	
 	## loop through tile entities and create init weather data
-	var entities_array = []
 	for x in range(len(terrain)):
-		entities_array.append([])
 		for y in range(len(terrain[x])):
 			var e = terrain[x][y]
-			# if tile
-			if e is Tile:
-				# initialize weather data
-				var drainage = 1 - e.data.terrain.density # invert density
-				drainage = clamp(drainage, drainage_min, drainage_max)
-				e.data.weather = {
-					"rainfall": rainfall,
-					"drainage": drainage,
-					"water": 0.0,
-					"erosion": 0.0
-				}
-				# push to terrain entities array
-				entities_array[x].append(e)
+			# initialize weather data
+			var drainage = 1 - e.data.terrain.density # invert density
+			drainage = clamp(drainage, drainage_min, drainage_max)
+			e.data.weather = {
+				"rainfall": rainfall,
+				"drainage": drainage,
+				"water": 0.0,
+				"erosion": 0.0
+			}
 	
 	# reset metrics
 	weather_iterations = 0
-	
-	# validate the result
-	var result = true
-	if entities_array:
-		# result valid, update terrain map/terrain state
-		self.weather_map = entities_array
-		result = self.weather_map
-	else:
-		# return error
-		result = ERR_SCRIPT_FAILED
-	return result
 
 
 # Called when the node enters the scene tree for the first time.
@@ -202,8 +189,8 @@ func _ready() -> void:
 	# make sure terrain optimized
 	if world_controller.terrain_controller.terrain_optimized:
 		# initialize weather controller
-		var result = _init_controller(self.world.data.tiles.objs)
-		# validate initialization
-		if result:
-			# try to optimize weather
-			result = _optimize_weather()
+		_init_controller(self.world.data.terrain.tile_map)
+		# optimize weather
+		var new_tile_map = _optimize_weather(self.world.data.terrain.tile_map)
+		if weather_optimized:
+			self.world.data.terrain.tile_map = new_tile_map

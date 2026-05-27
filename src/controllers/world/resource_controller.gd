@@ -7,19 +7,14 @@ var resources_optimized = null
 # resources
 var food_count = 0
 var stone_count = 0
-var food_factor = 0.11 # chance to generate resources on a given tile
-#var stone_factor = 0.22
-var resource_tiles = []
-var resources_left = 0
+var food_factor = 0.11 # chance to generate resource on a given tile
+var resources = []
 
 
 # evaluates resource generation given a world's tile conditions
 func _evaluate_resources(tile: Tile):
 	# init resources as bool
-	var resources = {
-		"food": false,
-	}
-	tile.data.resources = resources
+	tile.data.resources = {"food": false}
 	for k in tile.data.resources.keys():
 		# test conditions depending on resource type
 		var rand_f = randf_range(0, 1)
@@ -32,19 +27,15 @@ func _evaluate_resources(tile: Tile):
 			) else false
 			if food_conditions:
 				tile.data.resources.food = true
-				self.resource_tiles.append(tile)
+				self.resources.append(tile)
 				self.food_count += 1
 	
-	# return the tile with update data
+	# return the tile with updated data
 	return tile
 
 
 ## evaluates current terrain for resource conditions
-func _evaluate_terrain(terrain: Array):
-	# return if invalid
-	if !terrain:
-		return false
-	
+func _evaluate_terrain(tile_map: Array):
 	# loop through terrain
 	var count = 0
 	var avg_density = 0.0
@@ -52,21 +43,19 @@ func _evaluate_terrain(terrain: Array):
 	var avg_water = 0.0
 	var avg_drainage = 0.0
 	var avg_erosion = 0.0
-	for x in range(len(terrain)):
-		for y in range(len(terrain[x])):
-			var e = terrain[x][y]
-			# if tile
-			if e is Tile:
-				# init resource data
-				var new_tile = _evaluate_resources(e)
-				e = new_tile
-				# get metrics
-				count += 1
-				avg_density += e.data.terrain.density
-				avg_rainfall += e.data.weather.rainfall
-				avg_water += e.data.weather.water
-				avg_drainage += e.data.weather.drainage
-				avg_erosion += e.data.weather.erosion
+	for x in range(len(tile_map)):
+		for y in range(len(tile_map[x])):
+			var t = tile_map[x][y]
+			# init resource data
+			var new_tile = _evaluate_resources(t)
+			t = new_tile
+			# get metrics
+			count += 1
+			avg_density += t.data.terrain.density
+			avg_rainfall += t.data.weather.rainfall
+			avg_water += t.data.weather.water
+			avg_drainage += t.data.weather.drainage
+			avg_erosion += t.data.weather.erosion
 	
 	# update metrics
 	avg_density /= count
@@ -74,7 +63,6 @@ func _evaluate_terrain(terrain: Array):
 	avg_water /= count
 	avg_drainage /= count
 	avg_erosion /= count
-	self.resources_left = (self.food_count + self.stone_count)
 	
 	# print verbose metrics
 	var metrics = {
@@ -96,36 +84,16 @@ func _evaluate_terrain(terrain: Array):
 	)
 	
 	# return metrics if valid
-	if metrics:
-		return [terrain, metrics]
-	else:
-		return ERR_INVALID_DATA
+	if tile_map:
+		return tile_map
+	return ERR_INVALID_DATA
 
 
 # initializes world resource system
-func _init_controller(terrain: Array):
-	# evaluate the current terrain map and get metrics
-	var result = _evaluate_terrain(terrain)
-	var curr_terrain = result[0]
-	var metrics = result[1]
-	
-	# calculate resources for the current terrain map
-	#result = _calculate_resources(curr_terrain, metrics)
-	## TODO: update tile data with results
-	
-	# update world refs
-	self.world.data.tiles.data.resources = resource_tiles
-	
-	# validate the result
-	if !result:
-		result = "Invalid resource map."
-	else:
-		# result valid, update terrain map/terrain state
-		self.resource_map = terrain
-		result = self.resource_map
-	
-	# return result
-	return result
+func _init_controller(tile_map: Array):
+	# evaluate the current terrain map and place resources
+	var new_tile_map = _evaluate_terrain(tile_map)
+	return new_tile_map
 
 
 # Called when the node enters the scene tree for the first time.
@@ -136,11 +104,15 @@ func _ready() -> void:
 	if (world_controller.terrain_controller.terrain_optimized) && (
 		world_controller.weather_controller.weather_optimized
 	):
-		var result = _init_controller(self.world.data.tiles.objs)
-		if !result:
-			# result invalid
-			# print error
-			print(result)
+		var new_tile_map = _init_controller(self.world.data.terrain.tile_map)
+		if new_tile_map:
+			# update world refs
+			self.world.data.terrain.tile_map = new_tile_map
+			self.world.data.resources = self.resources
+			## TODO: make this actually true
+			self.resources_optimized = true
+	
+	print("Weather unable to initialize.")
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.

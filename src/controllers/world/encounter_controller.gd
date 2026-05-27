@@ -34,25 +34,22 @@ func _get_random_tiles(tiles: Array, r: int):
 
 
 # generates player encounters for the given terrain map
-func _generate_encounters(terrain: Array):
+func _generate_encounters(tile_map: Array):
 	# get world resources
-	var world_resources = self.world.data.tiles.data.resources.size()
+	var world_resources = self.world.data.resources.size()
 	# update n_encounters to 50% of resource count
 	self.n_encounters = floor(world_resources * encounter_ratio)
 	# get n random tiles according to encounter count
-	var r_tiles = _get_random_tiles(terrain, self.n_encounters)
+	var r_tiles = _get_random_tiles(tile_map, self.n_encounters)
 	# break if could not find random tiles
 	if !r_tiles:
 		print("Error finding encounter tiles")
 		return
-		
 	# loop through terrain and place encounters n_times
-	var new_terrain = []
-	for x in range(terrain.size()):
-		new_terrain.append([])
-		for y in range(terrain[x].size()):
+	for x in range(tile_map.size()):
+		for y in range(tile_map[x].size()):
 			# get current tile
-			var t = terrain[x][y]
+			var t = tile_map[x][y]
 			# initialize encounters struct
 			t.data.encounters = {
 				"ready": [],
@@ -65,13 +62,10 @@ func _generate_encounters(terrain: Array):
 				t.data.encounters.ready.append([ self ])
 				# update encounter tiles array for world ref
 				self.encounter_tiles.append(t)
-			
-			# append to new terrain array
-			new_terrain[x].append(t)
 	
 	# return new terrain
-	if new_terrain:
-		return new_terrain
+	if tile_map:
+		return tile_map
 	return ERR_DOES_NOT_EXIST
 
 
@@ -79,14 +73,6 @@ func _generate_encounters(terrain: Array):
 # called by player_controller
 func process_encounter(p: Player, t: Tile):
 	print("Processing encounter...")
-
-	# flag encounter_controller as encountering
-	self.encountering = true
-
-	# do encounter
-
-	# unflag encountering
-	self.encountering = false
 
 	## after encounter
 	# add encounter to player encounters array
@@ -104,7 +90,7 @@ func process_encounter(p: Player, t: Tile):
 # initializes controller dependencies
 func _init_controller():
 	# generate player encounters in world tiles
-	var result = _generate_encounters(self.world.data.tiles.objs)
+	var result = _generate_encounters(self.world.data.terrain.tile_map)
 	# validate result
 	if result:
 		return result
@@ -113,11 +99,13 @@ func _init_controller():
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	# initialize the controller
-	var result = _init_controller()
-	if result:
-		# done
-		pass
-	else:
-		# did not initialize
-		print(result)
+	# initialize the controller if resources initialized
+	var world_controller = self.world.data.controller
+	if world_controller.resource_controller.resources_optimized:
+		var result = _init_controller()
+		if result is Error:
+			# did not initialize
+			print(result)
+		else:
+			# update world tile_map if valid
+			self.world.data.terrain.tile_map = result

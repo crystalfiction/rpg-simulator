@@ -174,9 +174,9 @@ func _init_controllers():
 	var init_controllers = [
 		_init_world(),
 		_init_terrain(),
-		# _init_weather(),
-		# _init_resources(),
-		# _init_encounters(),
+		_init_weather(),
+		_init_resources(),
+		_init_encounters(),
 		# _init_player(),
 		# _init_time(),
 	]
