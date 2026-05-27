@@ -1,0 +1,17 @@
+[gd_scene format=3 uid="uid://iy5fc4jgn8ve"]
+
+[ext_resource type="Script" uid="uid://tvqjxeutg01" path="res://src/entities/world/world.gd" id="1_tp5op"]
+
+[sub_resource type="Gradient" id="Gradient_iletc"]
+offsets = PackedFloat32Array(0)
+colors = PackedColorArray(0, 0, 0, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_p35q0"]
+gradient = SubResource("Gradient_iletc")
+fill_from = Vector2(1, 0)
+
+[node name="World" type="Sprite2D" unique_id=1124284112]
+process_mode = 1
+texture = SubResource("GradientTexture2D_p35q0")
+centered = false
+script = ExtResource("1_tp5op")

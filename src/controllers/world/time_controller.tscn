@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://cko62vukuoyrn"]
+
+[ext_resource type="Script" uid="uid://d1suk6d37axr3" path="res://src/controllers/world/time_controller.gd" id="1_7ris1"]
+
+[node name="TimeController" type="Node2D" unique_id=433144638]
+process_priority = 1
+script = ExtResource("1_7ris1")

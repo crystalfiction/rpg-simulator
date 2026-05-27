@@ -1,0 +1,22 @@
+[gd_scene format=3 uid="uid://b8dv3geqakw5"]
+
+[ext_resource type="Script" uid="uid://dutx1solsm652" path="res://src/entities/player/player.gd" id="1_vt6n5"]
+[ext_resource type="FontFile" uid="uid://dvjb12pu7hof1" path="res://src/assets/JetBrainsMono-Medium.ttf" id="2_vt6n5"]
+
+[node name="Player" type="Sprite2D" unique_id=11157754 groups=["players"]]
+centered = false
+script = ExtResource("1_vt6n5")
+
+[node name="Label" type="Label" parent="." unique_id=1708650066]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_right = 31.0
+offset_bottom = 37.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_fonts/font = ExtResource("2_vt6n5")
+theme_override_font_sizes/font_size = 28
+text = "P"
+metadata/_edit_use_anchors_ = true

@@ -1,0 +1,106 @@
+[gd_scene format=3 uid="uid://gg1b5vs25d6r"]
+
+[ext_resource type="Script" uid="uid://da2ik1gon7omk" path="res://src/entities/world/tile.gd" id="1_1rpgm"]
+[ext_resource type="Gradient" uid="uid://chwasyj7f5pin" path="res://src/assets/world/tile/soil_5YR.tres" id="1_f75nv"]
+[ext_resource type="FontFile" uid="uid://dvjb12pu7hof1" path="res://src/assets/JetBrainsMono-Medium.ttf" id="3_mk1qm"]
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_mk1qm"]
+gradient = ExtResource("1_f75nv")
+
+[node name="Tile" type="Sprite2D" unique_id=1023157020 node_paths=PackedStringArray("label_density", "label_water", "label_erosion", "label_resources", "label_encounters", "label_grid_x", "label_grid_y", "tile_color") groups=["tiles"]]
+texture = SubResource("GradientTexture2D_mk1qm")
+centered = false
+script = ExtResource("1_1rpgm")
+label_density = NodePath("Terrain/Labels/TileData/Density")
+label_water = NodePath("Terrain/Labels/TileData/Water")
+label_erosion = NodePath("Terrain/Labels/TileData/Erosion")
+label_resources = NodePath("Terrain/Labels/Interactables/Resources")
+label_encounters = NodePath("Terrain/Labels/Interactables/Encounters")
+label_grid_x = NodePath("Terrain/Labels/GridLabels/x")
+label_grid_y = NodePath("Terrain/Labels/GridLabels/y")
+tile_color = NodePath("Terrain")
+
+[node name="Terrain" type="ColorRect" parent="." unique_id=1311118609]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(1, 1, 1, 0.5)
+
+[node name="Labels" type="VBoxContainer" parent="Terrain" unique_id=923950552]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 0
+alignment = 1
+
+[node name="GridLabels" type="HBoxContainer" parent="Terrain/Labels" unique_id=1984204596]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="x" type="Label" parent="Terrain/Labels/GridLabels" unique_id=1081054208]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_mk1qm")
+theme_override_font_sizes/font_size = 8
+
+[node name="y" type="Label" parent="Terrain/Labels/GridLabels" unique_id=705566109]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_mk1qm")
+theme_override_font_sizes/font_size = 8
+
+[node name="TileData" type="VBoxContainer" parent="Terrain/Labels" unique_id=677915849]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 0
+alignment = 1
+
+[node name="Density" type="Label" parent="Terrain/Labels/TileData" unique_id=1381096554]
+visible = false
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_mk1qm")
+theme_override_font_sizes/font_size = 8
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Water" type="Label" parent="Terrain/Labels/TileData" unique_id=1985171848]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_mk1qm")
+theme_override_font_sizes/font_size = 8
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Erosion" type="Label" parent="Terrain/Labels/TileData" unique_id=482804579]
+visible = false
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_mk1qm")
+theme_override_font_sizes/font_size = 8
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Interactables" type="VBoxContainer" parent="Terrain/Labels" unique_id=1575132520]
+layout_mode = 2
+theme_override_constants/separation = -6
+alignment = 1
+
+[node name="Encounters" type="Label" parent="Terrain/Labels/Interactables" unique_id=1461729585]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_constants/line_spacing = -6
+theme_override_fonts/font = ExtResource("3_mk1qm")
+theme_override_font_sizes/font_size = 13
+horizontal_alignment = 1
+vertical_alignment = 1
+justification_flags = 161
+
+[node name="Resources" type="Label" parent="Terrain/Labels/Interactables" unique_id=772600614]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_constants/line_spacing = -6
+theme_override_fonts/font = ExtResource("3_mk1qm")
+horizontal_alignment = 1
+vertical_alignment = 1

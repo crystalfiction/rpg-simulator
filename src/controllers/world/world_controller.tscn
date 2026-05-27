@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://do7g2cf1e0wer"]
+
+[ext_resource type="Script" uid="uid://fuaqar77si58" path="res://src/controllers/world/world_controller.gd" id="1_p87no"]
+
+[node name="WorldController" type="Node2D" unique_id=200430282]
+process_mode = 3
+script = ExtResource("1_p87no")

@@ -1,0 +1,64 @@
+[gd_scene format=3 uid="uid://cmr8a4iqcvrgb"]
+
+[ext_resource type="Script" uid="uid://ce6ie113viqdg" path="res://src/controllers/ui/ui_controller.gd" id="1_2yfeh"]
+[ext_resource type="FontFile" uid="uid://dvjb12pu7hof1" path="res://src/assets/JetBrainsMono-Medium.ttf" id="2_1mjrn"]
+
+[node name="UiController" type="Control" unique_id=694900400 node_paths=PackedStringArray("player_data_container", "player_exp_bar", "loading_scene")]
+top_level = true
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_2yfeh")
+player_data_container = NodePath("ScreenMargins/FoldableContainer/MarginContainer/VBoxContainer2/PlayerData")
+player_exp_bar = NodePath("ScreenMargins/FoldableContainer/MarginContainer/VBoxContainer2/ProgressBar")
+loading_scene = NodePath("")
+
+[node name="ScreenMargins" type="MarginContainer" parent="." unique_id=1299388828]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -40.0
+offset_top = -40.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="FoldableContainer" type="FoldableContainer" parent="ScreenMargins" unique_id=1048321919]
+layout_mode = 2
+focus_mode = 0
+
+[node name="MarginContainer" type="MarginContainer" parent="ScreenMargins/FoldableContainer" unique_id=77118495]
+layout_mode = 2
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="ScreenMargins/FoldableContainer/MarginContainer" unique_id=82054486]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="PlayerTitle" type="Label" parent="ScreenMargins/FoldableContainer/MarginContainer/VBoxContainer2" unique_id=890504088]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_1mjrn")
+theme_override_font_sizes/font_size = 18
+text = "Player"
+
+[node name="HSeparator" type="HSeparator" parent="ScreenMargins/FoldableContainer/MarginContainer/VBoxContainer2" unique_id=1206222374]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="ProgressBar" type="ProgressBar" parent="ScreenMargins/FoldableContainer/MarginContainer/VBoxContainer2" unique_id=1855685755]
+layout_mode = 2
+show_percentage = false
+
+[node name="PlayerData" type="GridContainer" parent="ScreenMargins/FoldableContainer/MarginContainer/VBoxContainer2" unique_id=460919521]
+layout_mode = 2
+theme_override_constants/h_separation = 0
+theme_override_constants/v_separation = 0
+columns = 2
