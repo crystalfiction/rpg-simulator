@@ -39,7 +39,7 @@ func _init_ui():
 ## Player Controllers
 
 # initializes the player system controller script as object
-func _init_player():
+func _init_player_controller():
 	var new_player_controller = self.player_controller_script.new()
 	new_player_controller.name = "PlayerController"
 	new_player_controller.world = self.world
@@ -56,7 +56,7 @@ func _init_player():
 ## World System Controllers
 
 # initializes the time system controller script as object
-func _init_time():
+func _init_time_controller():
 	var new_time_controller = self.time_controller_scene.instantiate()
 	new_time_controller.name = "TimeController"
 	new_time_controller.world = self.world
@@ -71,7 +71,7 @@ func _init_time():
 
 
 # initializes the terrain system controller script as object
-func _init_terrain():
+func _init_terrain_controller():
 	var new_terrain_controller = self.terrain_controller_script.new()
 	new_terrain_controller.name = "TerrainController"
 	new_terrain_controller.world = self.world
@@ -85,8 +85,8 @@ func _init_terrain():
 	return result
 
 
-# initializes the world, grid, tile scenes
-func _init_world():
+# initializes the world entity as scene
+func _init_world_entity():
 	# create new world obj
 	var new_world = self.world_scene.instantiate()
 	new_world.name = "World"
@@ -120,10 +120,10 @@ func _init_controllers():
 	
 	# init functions array
 	var init_controllers = [
-		_init_world(),
-		_init_terrain(),
-		_init_player(),
-		# _init_time(),
+		_init_world_entity(),
+		_init_terrain_controller(),
+		_init_player_controller(),
+		# _init_time_controller(),
 	]
 	# run init scrips
 	for s in range(init_controllers.size()):

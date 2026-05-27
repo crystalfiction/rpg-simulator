@@ -10,14 +10,15 @@ var data = {
 	"controller": "",
 	"grid_idx": Vector2i(0, 0),
 	"stats": {
-		"level": 1,
+		"level": 0,
 		"exp": 0,
-		"exp_cap": 20,
+		"exp_cap": 0,
 		## TODO: classes
 	},
 	"actions": {
-		"action": null,
-		"last_action": null,
+		"controller": "",
+		"action": "",
+		"last_action": "",
 		## TODO: abilities
 	},
 	## TODO: resources
