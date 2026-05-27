@@ -19,7 +19,7 @@ func get_action_type():
 	return curr_type
 
 
-# returns the current ACtion's ACtionType string
+# returns the current Action's ActionType string
 func get_action_string():
 	var curr_type = self.Type
 	var key = self.ActionType.find_key(curr_type)

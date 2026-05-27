@@ -26,6 +26,7 @@ func _init_ui():
 	var new_ui = ui_scene.instantiate()
 	new_ui.name = "UiController"
 	new_ui.world = self.world
+	new_ui.parent = self
 	self.ui_controller = new_ui
 	add_child(new_ui)
 
@@ -43,6 +44,7 @@ func _init_player_controller():
 	var new_player_controller = self.player_controller_script.new()
 	new_player_controller.name = "PlayerController"
 	new_player_controller.world = self.world
+	new_player_controller.parent = self
 	self.player_controller = new_player_controller
 	add_child(new_player_controller)
 	
@@ -60,6 +62,7 @@ func _init_time_controller():
 	var new_time_controller = self.time_controller_scene.instantiate()
 	new_time_controller.name = "TimeController"
 	new_time_controller.world = self.world
+	new_time_controller.parent = self
 	self.time_controller = new_time_controller
 	add_child(new_time_controller)
 	
@@ -78,6 +81,7 @@ func _init_terrain_controller():
 	var new_terrain_controller = self.terrain_controller_script.new()
 	new_terrain_controller.name = "TerrainController"
 	new_terrain_controller.world = self.world
+	new_terrain_controller.parent = self
 	self.terrain_controller = new_terrain_controller
 	add_child(new_terrain_controller)
 	

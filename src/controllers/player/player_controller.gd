@@ -60,11 +60,29 @@ func _process_cycle_rewards(action: Action):
 
 # determines and processes player logic for a single time cycle
 func process_cycle():
+	## TODO: account for multiple players here, loop players array?
+	# define cycle flag
+	var cycle = true
+
 	## General player cycle logic
-	## TODO: get player action
-	## TODO: if valid, assign to player
-	## TODO: if player valid, cycle complete
-	self.cycle_complete = true
+	# get player action
+	var new_action = self.player.data.actions.controller.get_action()
+	# if no valid action, invalidate cycle
+	if !new_action:
+		cycle = "Error getting player action."
+	
+	# evaluate player action
+	var last_action = self.player.data.actions.controller.evaluate_action()
+	if !last_action:
+		cycle = "Error evaluating player action."
+	
+	## TODO: if cycle valid, cycle complete
+	if cycle == true:
+		# complete cycle
+		self.cycle_complete = true
+	else:
+		# log error if invalid
+		print(cycle)
 
 
 ## initializes a new actions controller for a given player

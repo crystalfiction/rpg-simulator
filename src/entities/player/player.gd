@@ -17,8 +17,8 @@ var data = {
 	},
 	"actions": {
 		"controller": "",
-		"action": "",
-		"last_action": "",
+		"action": null,
+		"last_action": null,
 		## TODO: abilities
 	},
 	## TODO: resources
