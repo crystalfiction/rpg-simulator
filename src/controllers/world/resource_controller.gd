@@ -1,14 +1,14 @@
 extends Controller
 
 # components
-var resource_map: Array
+var resources = {
+	"tile_map": [],
+	"count": 0
+}
 var resource_iterations: int
 var resources_optimized = null
-# resources
-var food_count = 0
-var stone_count = 0
+
 var food_factor = 0.11 # chance to generate resource on a given tile
-var resources = []
 
 
 # evaluates resource generation given a world's tile conditions
@@ -27,8 +27,7 @@ func _evaluate_resources(tile: Tile):
 			) else false
 			if food_conditions:
 				tile.data.resources.food = true
-				self.resources.append(tile)
-				self.food_count += 1
+				self.resources.count += 1
 	
 	# return the tile with updated data
 	return tile
@@ -80,7 +79,7 @@ func _evaluate_terrain(tile_map: Array):
 			metrics_v += " | "
 	print(metrics_v)
 	print(
-		"resources_generated: " + str(food_count) + " food"
+		"resources_generated: " + str(self.resources.count)
 	)
 	
 	# return metrics if valid
@@ -93,26 +92,24 @@ func _evaluate_terrain(tile_map: Array):
 func _init_controller(tile_map: Array):
 	# evaluate the current terrain map and place resources
 	var new_tile_map = _evaluate_terrain(tile_map)
-	return new_tile_map
+	# validate result
+	if new_tile_map:
+		return new_tile_map
+	return ERR_INVALID_DATA
 
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	# check if prior controllers have been properly initialized
-	var world_controller = self.world.data.controller
 	# initialize resource system
-	if (world_controller.terrain_controller.terrain_optimized) && (
-		world_controller.weather_controller.weather_optimized
-	):
-		var new_tile_map = _init_controller(self.world.data.terrain.tile_map)
-		if new_tile_map:
-			# update world refs
-			self.world.data.terrain.tile_map = new_tile_map
-			self.world.data.resources = self.resources
-			## TODO: make this actually true
-			self.resources_optimized = true
-	
-	print("Weather unable to initialize.")
+	var new_tile_map = _init_controller(self.resources.tile_map)
+	## TODO: make this actually true
+	self.resources_optimized = true
+	# if resources optimized,
+	if self.resources_optimized:
+		# update resource map
+		self.resources.tile_map = new_tile_map
+		# add to terrain data
+		self.parent.terrain.resources = self.resources
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.

@@ -1,5 +1,6 @@
 class_name Player extends Entity
 
+# refs
 var world: World
 
 # components

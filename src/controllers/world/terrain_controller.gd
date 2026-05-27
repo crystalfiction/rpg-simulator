@@ -2,17 +2,37 @@ extends Controller
 
 # refs
 var tile_scene = preload("res://src/entities/world/tile.tscn")
-# grid
+var weather_controller_script = preload("res://src/controllers/world/weather_controller.gd")
+var resource_controller_script = preload("res://src/controllers/world/resource_controller.gd")
+var encounter_controller_script = preload("res://src/controllers/world/encounter_controller.gd")
+
+# controllers
+var weather_controller: Controller
+var resource_controller: Controller
+var encounter_controller: Controller
+
+# components
 var grid_dimensions: Vector2i
 var grid_scale = Vector2i(36, 36)
-# terrain
+
 var terrain = {
 	"grid": [],
 	"tile_map": [],
+	"weather": {
+		"tile_map": []
+	},
+	"resources": {
+		"tile_map": [],
+		"count": 0
+	},
+	"encounters": {
+		"tile_map": [],
+		"count": 0
+	},
 }
 var terrain_iterations: int
 var terrain_optimized = null
-# soil
+
 var soil_density_min = 0.11
 var soil_density_max = 1.00
 var soil_variance = 0.66
@@ -286,7 +306,58 @@ func _init_grid(scale: Vector2i):
 	return result
 
 
-# initializes the world terrain_map with init terrain data
+# initializes the encounters system controller script as object
+func _init_encounters():
+	var new_encounter_controller = self.encounter_controller_script.new()
+	new_encounter_controller.name = "EncounterController"
+	new_encounter_controller.world = self.world
+	new_encounter_controller.parent = self
+	new_encounter_controller.encounters.tile_map = self.terrain.tile_map
+	self.encounter_controller = new_encounter_controller
+	add_child(new_encounter_controller)
+	
+	# validate result
+	var result = true
+	if ! self.encounter_controller:
+		result = ERR_DOES_NOT_EXIST
+	return result
+
+
+# initializes the world resources system controller script as object
+func _init_resources():
+	var new_resource_controller = self.resource_controller_script.new()
+	new_resource_controller.name = "ResourceController"
+	new_resource_controller.world = self.world
+	new_resource_controller.parent = self
+	new_resource_controller.resources.tile_map = self.terrain.tile_map
+	self.resource_controller = new_resource_controller
+	add_child(new_resource_controller)
+	
+	# validate result
+	var result = true
+	if ! self.resource_controller:
+		result = ERR_DOES_NOT_EXIST
+	return result
+
+
+# initializes the weather system controller script as object
+func _init_weather():
+	var new_weather_controller = self.weather_controller_script.new()
+	new_weather_controller.name = "WeatherController"
+	new_weather_controller.world = self.world
+	new_weather_controller.parent = self
+	new_weather_controller.weather.tile_map = self.terrain.tile_map
+	self.weather_controller = new_weather_controller
+	add_child(new_weather_controller)
+	
+	# validate result
+	var result = true
+	if ! self.weather_controller:
+		result = ERR_DOES_NOT_EXIST
+	return result
+
+
+# initializes the world terrain with init terrain data
 func _init_controller():
 	# initialize world grid
 	var new_grid = _init_grid(self.grid_scale)
@@ -301,6 +372,7 @@ func _init_controller():
 	self.terrain.tile_map = new_terrain_map
 
 
+## TODO: initialize controller dependencies: weather, resources, encounters
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	# initialize terrain system
@@ -309,7 +381,42 @@ func _ready() -> void:
 	# try to optimize terrain
 	_optimize_terrain(self.terrain.tile_map)
 
+	# move to dependent controllers...
+	# controllers dependent on terrain_controller
+	var init_scripts = [
+		_init_weather(),
+		_init_resources(),
+		_init_encounters()
+	]
+	var keys = [
+		"weather",
+		"resources",
+		"encounters"
+	]
 	# if terrain optimized,
 	if self.terrain_optimized:
-		# update world data
+		# run dependent scrips
+		for s in range(init_scripts.size()):
+			var result = init_scripts[s]
+			# if error initializing...
+			if result is Error:
+				# print error & pause tree
+				print(error_string(result) + " at script " + str(s))
+				self.get_tree().paused = true
+			# if no errors...
+			else:
+				# initialization process was valid,
+				# for each controller data key,
+				for k in keys:
+					# if controller terrain data is valid,
+					if self.terrain[k] != null:
+						# update tile_map to controller tile_map
+						self.terrain.tile_map = self.terrain[k].tile_map
+
+		# update world data to new terrain map after
 		self.world.data.terrain = self.terrain
+
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(delta: float) -> void:
+	pass

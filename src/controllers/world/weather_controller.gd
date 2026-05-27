@@ -1,21 +1,21 @@
 extends Controller
 
 # components
+var weather = {
+	"tile_map": []
+}
 var weather_optimized = null
 var erosion_complete = null
 var erosion_cycle = 0
 var weather_iterations = 0
-var weather = {
-	"tile_map": []
-}
-# water
+
 var rainfall_min = 0.22
 var rainfall_max = 1.00
 var drainage_min = 0.00
 var drainage_max = 1.00
 var rainfall: float
 var soil_density_factor = 0.66
-# erosion
+
 var erosion_factor = 0.11
 
 
@@ -167,11 +167,11 @@ func _init_controller(terrain: Array):
 	## loop through tile entities and create init weather data
 	for x in range(len(terrain)):
 		for y in range(len(terrain[x])):
-			var e = terrain[x][y]
+			var t = terrain[x][y]
 			# initialize weather data
-			var drainage = 1 - e.data.terrain.density # invert density
+			var drainage = 1 - t.data.terrain.density # invert density
 			drainage = clamp(drainage, drainage_min, drainage_max)
-			e.data.weather = {
+			t.data.weather = {
 				"rainfall": rainfall,
 				"drainage": drainage,
 				"water": 0.0,
@@ -184,13 +184,18 @@ func _init_controller(terrain: Array):
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	# get world controller
-	var world_controller = self.world.data.controller
-	# make sure terrain optimized
-	if world_controller.terrain_controller.terrain_optimized:
-		# initialize weather controller
-		_init_controller(self.world.data.terrain.tile_map)
-		# optimize weather
-		var new_tile_map = _optimize_weather(self.world.data.terrain.tile_map)
-		if weather_optimized:
-			self.world.data.terrain.tile_map = new_tile_map
+	# initialize controller with terrain given on initialization
+	_init_controller(self.weather.tile_map)
+	# optimize weather
+	var new_tile_map = _optimize_weather(self.weather.tile_map)
+	# if weather optimized
+	if weather_optimized:
+		# add the new weather map to weather data
+		self.weather.tile_map = new_tile_map
+		# update terrain.weather with new weather data
+		self.parent.terrain.weather = self.weather
+
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(delta: float) -> void:
+	pass

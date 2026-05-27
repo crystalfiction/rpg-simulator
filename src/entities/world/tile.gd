@@ -1,13 +1,13 @@
 class_name Tile extends Entity
 
-# references
+# refs
 var soil_10yr = preload("res://src/assets/world/tile/soil_10YR.tres")
 var soil_5yr = preload("res://src/assets/world/tile/soil_5YR.tres")
 var soil_10r = preload("res://src/assets/world/tile/soil_10R.tres")
 
 var world: World
 
-# ui components
+# components
 @export var label_density: Label
 @export var label_water: Label
 @export var label_erosion: Label
@@ -21,7 +21,7 @@ var world: World
 var data = {
 	"uid": 0,
 	"grid_idx": Vector2i(0, 0),
-	"terrain": {},
+	# "terrain": {},
 	# "weather": {},
 	# "encounters": {},
 }
