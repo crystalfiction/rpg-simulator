@@ -60,19 +60,14 @@ func _process_cycle_rewards(action: Action):
 
 # determines and processes player logic for a single time cycle
 func process_cycle():
-	## General cycle logic
+	## General player cycle logic
 	## TODO: get player action
 	## TODO: if valid, assign to player
 	## TODO: if player valid, cycle complete
 	self.cycle_complete = true
 
 
-## TODO: initializes a new movement controller for a given player
-func _init_movement_controller(p: Player):
-	pass
-
-
-## TODO: initializes a new actions controller for a given player
+## initializes a new actions controller for a given player
 func _init_actions_controller(p: Player):
 	# create new action controller for p
 	var new_actions_controller = self.actions_controller_script.new()

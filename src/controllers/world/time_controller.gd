@@ -6,10 +6,10 @@ var player_controller: Controller
 var frames = 0
 var frame_rate = 15
 var double_speed = false
-var cycles = 0
-# state processing
+
 var dependencies = []
 var processing_array = []
+var cycles = 0
 var cycling = null
 var cycle_complete = null
 

@@ -63,6 +63,9 @@ func _init_time_controller():
 	self.time_controller = new_time_controller
 	add_child(new_time_controller)
 	
+	# pause time controller tree until world initialized
+	self.time_controller.get_tree().paused = true
+	
 	# validate result
 	var result = true
 	if ! self.time_controller:
@@ -133,10 +136,6 @@ func _init_controllers():
 			# print error & pause tree
 			print(error_string(result) + " at script " + str(s))
 			self.get_tree().paused = true
-		# if no errors...
-		else:
-			# initialization process was valid, continue
-			pass
 
 
 # Called when the node enters the scene tree for the first time.
@@ -147,6 +146,11 @@ func _ready() -> void:
 	_init_controllers()
 	
 	print("World initialized.")
+
+	# initialization process was valid,
+	# start time system
+	print("Starting time system...")
+	self.time_controller.get_tree().paused = false
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
