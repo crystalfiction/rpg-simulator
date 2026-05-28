@@ -21,7 +21,9 @@ var data = {
 		"last_action": null,
 		## TODO: abilities
 	},
-	## TODO: resources
+	"resources": {
+		"count": 0
+	},
 	## TODO: encounters
 	## TODO: items
 }

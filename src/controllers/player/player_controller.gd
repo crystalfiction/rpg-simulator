@@ -65,16 +65,8 @@ func process_cycle():
 	var cycle = true
 
 	## General player cycle logic
-	# get player action
-	var new_action = self.player.data.actions.controller.get_action()
-	# if no valid action, invalidate cycle
-	if !new_action:
-		cycle = "Error getting player action."
+	## TODO: add logic
 	
-	# evaluate player action
-	var last_action = self.player.data.actions.controller.evaluate_action()
-	if !last_action:
-		cycle = "Error evaluating player action."
 	
 	## TODO: if cycle valid, cycle complete
 	if cycle is bool:

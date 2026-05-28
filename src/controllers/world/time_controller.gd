@@ -4,7 +4,7 @@ extends Controller
 var player_controller: Controller
 # components
 var frames = 0
-var frame_rate = 30
+var frame_rate = 60
 var double_speed = false
 
 var dependencies = []
@@ -44,14 +44,25 @@ func _unhandled_input(event: InputEvent) -> void:
 func _check_cycle_completion():
 	# check conditions
 	var all_done = false
-	for c in processing_array:
-		if c.cycle_complete:
-			all_done = true
-		# cycle should be complete,
-		else:
-			# a controller was not fully processed...
-			# don't start next cycle until thread is resolved
-			print("Loose controller thread detected...")
+	# if still cycling but nothing in processing,
+	if self.cycling && self.processing_array.size() == 0:
+		# cycle should be complete in this case
+		self.cycle_complete = true
+		# flag all_done true as there are no controllers in processing
+		all_done = true
+	
+	# if processing as expected,
+	if self.cycling && self.processing_array.size() > 0:
+		# check controller cycles
+		for c in processing_array:
+			# if controller cycle complete,
+			if c.cycle_complete:
+				all_done = true
+			# controller cycle should be complete,
+			else:
+				# a controller thread was not fully processed...
+				# don't start next cycle until thread is resolved
+				print("Loose controller thread detected...")
 
 	# if all controller cycles complete...
 	if all_done:
