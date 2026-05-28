@@ -64,10 +64,6 @@ func process_cycle():
 	# define cycle flag
 	var cycle = true
 
-	## General player cycle logic
-	## TODO: add logic
-	
-	
 	## TODO: if cycle valid, cycle complete
 	if cycle is bool:
 		# complete cycle

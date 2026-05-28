@@ -4,7 +4,7 @@ extends Controller
 var player_controller: Controller
 # components
 var frames = 0
-var frame_rate = 60
+var frame_rate = 50
 var double_speed = false
 
 var dependencies = []
@@ -62,10 +62,12 @@ func _check_cycle_completion():
 			else:
 				# a controller thread was not fully processed...
 				# don't start next cycle until thread is resolved
-				print("Loose controller thread detected...")
+				print("Loose controller thread detected at " + c.name)
 
 	# if all controller cycles complete...
 	if all_done:
+		# flag cycle complete
+		self.cycle_complete = true
 		# reset cycle
 		_reset_time_cycle()
 
@@ -87,9 +89,11 @@ func _reset_time_cycle():
 
 
 ## main entry point of the time system
+## cycling -> a dependency controller is in processing
+## not cycling -> time is ready to process next cycle
 func _process_time_cycle():
-	# if time still processing last cycle,
-	# that is, if a dependency controller is not done cycling
+	# if time still processing,is not done processing last cycle 
+	# and is therefor loose
 	if self.cycling && ! self.cycle_complete:
 		# do not start another cycle until current complete
 		# check for cycle completion and break
@@ -98,10 +102,10 @@ func _process_time_cycle():
 
 	print("Starting time cycle" + " " + str(self.cycles) + ".")
 	
-	# check controllers for time cycle processing
+	## Primary Loop Cycle
+	# check controllers for time cycle processing,
 	for d in self.dependencies:
-		## primary time cycle
-		# if controller has cycle function...
+		# if controller has cycle function,
 		if d.has_method("process_cycle"):
 			# append to processing array, if missing
 			if d not in self.processing_array:
@@ -143,10 +147,10 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	# only process specific things if tree is paused
 	if !get_tree().paused:
-		# update frames
+		# update frames if not paused
 		frames += 1
 		
-		# check for frame interval
+		# if frame interval,
 		if self.frames % self.frame_rate == 0:
 			# update cycle count
 			self.cycles += 1

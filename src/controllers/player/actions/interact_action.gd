@@ -6,6 +6,9 @@ enum InteractTarget {
     RESOURCE,
 }
 
+var has_resources = false
+var did_encounter = false
+
 
 # initializes action as type
 func _init() -> void:

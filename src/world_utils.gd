@@ -2,56 +2,22 @@ extends Node
 
 
 # lambda functions returning grid offsets for cardinal positions
-func nw(idx: Vector2i, i: int = 1): return idx + Vector2i(-i, -i)
-func n(idx: Vector2i, i: int = 1): return idx + Vector2i(0, -i)
-func ne(idx: Vector2i, i: int = 1): return idx + Vector2i(i, -i)
-func w(idx: Vector2i, i: int = 1): return idx + Vector2i(-i, 0)
-func e(idx: Vector2i, i: int = 1): return idx + Vector2i(i, 0)
-func sw(idx: Vector2i, i: int = 1): return idx + Vector2i(-i, i)
-func s(idx: Vector2i, i: int = 1): return idx + Vector2i(0, i)
-func se(idx: Vector2i, i: int = 1): return idx + Vector2i(i, i)
-
-
-# gets and saves 8-D neighbors for a given entity
-func get_k_neighbors(entity: Entity, entities: Array, k: int = 1):
-	# source position
-	var source = entity.data.grid_idx
-	# define grid bounds
-	var grid_bounds = Vector2i(len(entities), len(entities[0]))
-	var n_constrained = []
-	# do k times,
-	for i in range(k):
-		# get directions from source as grid_idxs
-		# where direction magnitude is k
-		var directions = [
-			nw(source, i),
-			n(source, i),
-			ne(source, i),
-			w(source, i),
-			e(source, i),
-			sw(source, i),
-			s(source, i),
-			se(source, i)
-		]
-		for d in directions:
-			# if within grid_bounds
-			if (d.x >= 0 && d.x <= grid_bounds.x) && (
-				d.y >= 0 && d.y <= grid_bounds.y):
-				# append entity object to n_constrained
-				var obj = get_object_by_grid(d, entities)
-				if !obj == null:
-					n_constrained.append(obj)
-	
-	# return the constrained neighbors array
-	return n_constrained
+func nw(idx: Vector2i): return idx + Vector2i(-1, -1)
+func n(idx: Vector2i): return idx + Vector2i(0, -1)
+func ne(idx: Vector2i): return idx + Vector2i(1, -1)
+func w(idx: Vector2i): return idx + Vector2i(-1, 0)
+func e(idx: Vector2i): return idx + Vector2i(1, 0)
+func sw(idx: Vector2i): return idx + Vector2i(-1, 1)
+func s(idx: Vector2i): return idx + Vector2i(0, 1)
+func se(idx: Vector2i): return idx + Vector2i(1, 1)
 
 
 # gets and saves 8-D neighbors for a given entity
 func get_neighbors(entity: Entity, entities: Array):
 	# define neighbors array
 	## populate with results of cardinal direction functions for 'entity'
-	var neighbors = [
-		nw(entity.data.grid_idx),
+	var directions = [
+		nw(entity.data.grid_idx), # value = result = grid_idx
 		n(entity.data.grid_idx),
 		ne(entity.data.grid_idx),
 		w(entity.data.grid_idx),
@@ -65,14 +31,16 @@ func get_neighbors(entity: Entity, entities: Array):
 	var n_constrained = []
 	var grid_bounds = Vector2i(len(entities), len(entities[0]))
 	# for each neighbor
-	for idx in neighbors:
+	for idx in directions:
 		# if within grid_bounds
 		if (idx.x >= 0 && idx.x <= grid_bounds.x) && (
 			idx.y >= 0 && idx.y <= grid_bounds.y):
 			# append entity object to n_constrained
-			var obj = get_object_by_grid(idx, entities)
-			if !obj == null:
-				n_constrained.append(obj)
+			var n_tile = get_object_by_grid(idx, entities)
+			# if tile within grid bounds,
+			if n_tile != null:
+				# add to results
+				n_constrained.append(n_tile)
 	
 	# return the constrained neighbors array
 	return n_constrained
