@@ -4,7 +4,7 @@ extends Controller
 var player_controller: Controller
 # components
 var frames = 0
-var frame_rate = 15
+var frame_rate = 30
 var double_speed = false
 
 var dependencies = []
@@ -34,10 +34,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		self.double_speed = ! self.double_speed
 		if self.double_speed:
 			print("1.5x speed")
-			self.frame_rate = 10
+			self.frame_rate = 18
 		else:
 			print("1x speed")
-			self.frame_rate = 15
+			self.frame_rate = 30
 
 
 # checks if controllers in processing_array are done cycling

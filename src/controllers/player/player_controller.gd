@@ -77,7 +77,7 @@ func process_cycle():
 		cycle = "Error evaluating player action."
 	
 	## TODO: if cycle valid, cycle complete
-	if cycle == true:
+	if cycle is bool:
 		# complete cycle
 		self.cycle_complete = true
 	else:
