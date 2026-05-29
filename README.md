@@ -4,7 +4,18 @@
 
 ## Dev
 
-### Structure
+### TODO
+
+#### Working
+
+- [ ] check that no errors appear after restructuring utils
+- [ ] check that all resolvable TODO comments are resolved
+- [ ] ensure all existing controller functions are using strict typing
+
+#### Done
+
+
+### Reference
 
 World Controller Init Flow
 ```mermaid
@@ -27,6 +38,7 @@ flowchart
 
     Entity.World -.-> Controller.Terrain
     Entity.World -.-> Controller.Time
+    Entity.World -.-> Controller.Player
 
     subgraph controllers
         Controller.Terrain
@@ -40,25 +52,6 @@ flowchart
         Controller.Terrain -.-> Controller.Resources
         Controller.Terrain -.-> Controller.Encounters
 
-    end
-
-```
-
-Player Controller Dependencies
-```mermaid
-flowchart
-    subgraph entities
-        Entity.Player
-
-    end
-
-    Entity.Player -.-> Controller.Player
-
-    subgraph controllers
-        Controller.Player
-        Controller.Actions
-
-        Controller.Player -.-> Controller.Actions
     end
 
 ```
