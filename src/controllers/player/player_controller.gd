@@ -58,19 +58,45 @@ func _process_cycle_rewards(action: Action):
 		print(action.src.name + " is now level " + str(action.src.data.actions.level))
 
 
+# returns an array of world resources
+func _get_resources() -> Array:
+	var array = []
+	var tile_map = self.world.data.terrain.tile_map
+	for x in range(tile_map.size()):
+		for y in range(tile_map[x].size()):
+			var t = tile_map[x][y]
+			if t.data.resources.food:
+				array.append(t)
+	return array
+
+
 # determines and processes player logic for a single time cycle
 func process_cycle():
 	## TODO: account for multiple players here, loop players array?
-	# define cycle flag
-	var cycle = true
+	## General player cycle logic
+	# if resources in world,
+	if self.world.data.terrain.resources.count > 0:
+		# get a random world resource tile
+		var resources = _get_resources()
+		var r_resource = resources.pick_random()
+		# move player to tile
+		self.player.global_position = r_resource.global_position
+		# update grid_idx
+		var world_controller = self.world.data.controller
+		var grid_scale = world_controller.terrain_controller.grid_scale
+		self.player.data.grid_idx = world_controller.utils.world_to_grid(
+			self.player.global_position, grid_scale
+		)
+		# TODO: interact with tile
+		# TODO: process encounter if encountered
 
-	## TODO: if cycle valid, cycle complete
-	if cycle is bool:
-		# complete cycle
-		self.cycle_complete = true
+	# if no resources in world,
 	else:
-		# log error if invalid
-		print(cycle)
+		# do something
+		pass
+	
+	# complete cycle
+	self.cycle_complete = false
 
 
 ## initializes a new actions controller for a given player

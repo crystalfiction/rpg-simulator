@@ -87,6 +87,9 @@ func _reset_time_cycle():
 	self.cycling = false
 	self.cycle_complete = false
 
+	# unpause tree
+	get_tree().paused = false
+
 
 ## main entry point of the time system
 ## cycling -> a dependency controller is in processing
@@ -116,8 +119,8 @@ func _process_time_cycle():
 			# process controller cycle
 			d.process_cycle()
 
-	# watch for completion at end of cycle
-	_check_cycle_completion()
+	# pause tree until controllers done processing
+	get_tree().paused = true
 
 
 # initializes controller dependencies
@@ -145,15 +148,21 @@ func _ready() -> void:
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
-	# only process specific things if tree is paused
-	if !get_tree().paused:
-		# update frames if not paused
-		frames += 1
-		
-		# if frame interval,
-		if self.frames % self.frame_rate == 0:
+	# update frames
+	frames += 1
+	
+	# if frame interval,
+	if self.frames % self.frame_rate == 0:
+		# only process cycle if tree !paused
+		if !get_tree().paused:
 			# update cycle count
 			self.cycles += 1
-			
+				
 			# process controllers
 			_process_time_cycle()
+		
+		# tree paused,
+		else:
+			# do something
+			# check for cycle completion
+			_check_cycle_completion()

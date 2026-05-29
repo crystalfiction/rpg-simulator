@@ -26,7 +26,6 @@ func _init_ui():
 	var new_ui = ui_scene.instantiate()
 	new_ui.name = "UiController"
 	new_ui.world = self.world
-	new_ui.parent = self
 	self.ui_controller = new_ui
 	add_child(new_ui)
 
@@ -131,6 +130,7 @@ func _init_controllers():
 		_init_terrain_controller(),
 		_init_player_controller(),
 		_init_time_controller(),
+		_init_ui(),
 	]
 	# run init scrips
 	for s in range(init_controllers.size()):
