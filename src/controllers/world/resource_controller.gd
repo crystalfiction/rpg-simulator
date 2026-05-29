@@ -12,7 +12,7 @@ var food_factor = 0.22 # chance to generate resource on a given tile
 
 
 # evaluates resource generation given a world's tile conditions
-func _evaluate_resources(tile: Tile):
+func _evaluate_resources(tile: Tile) -> Tile:
 	# init resources as bool
 	tile.data.resources = {"food": false}
 	for k in tile.data.resources.keys():
@@ -34,7 +34,7 @@ func _evaluate_resources(tile: Tile):
 
 
 # evaluates current terrain for resource conditions
-func _evaluate_terrain(tile_map: Array):
+func _evaluate_terrain(tile_map: Array) -> Array:
 	# loop through terrain
 	var count = 0
 	var avg_density = 0.0
@@ -82,14 +82,15 @@ func _evaluate_terrain(tile_map: Array):
 		"resources_generated: " + str(self.resources.count)
 	)
 	
-	# return metrics if valid
-	if tile_map:
-		return tile_map
-	return ERR_INVALID_DATA
+	# validate
+	var result = OK
+	if !tile_map:
+		result = ERR_INVALID_DATA
+	return [result, tile_map]
 
 
 # generates resources on the passed tile_map
-func generate_resources(tile_map: Array):
+func generate_resources(tile_map: Array) -> void:
 	# initialize resource system
 	var new_tile_map = _init_controller(tile_map)
 	## TODO: make this actually true
@@ -103,27 +104,34 @@ func generate_resources(tile_map: Array):
 
 
 # initializes world resource system
-func _init_controller(tile_map: Array):
+func _init_controller(tile_map: Array) -> Array:
 	# evaluate the current terrain map and place resources
-	var new_tile_map = _evaluate_terrain(tile_map)
+	var results = _evaluate_terrain(tile_map)
+	var is_OK = results[0]
+	var new_tile_map = results[1]
+	
 	# validate result
-	if new_tile_map:
-		return new_tile_map
-	return ERR_INVALID_DATA
+	var result = is_OK
+	if result != OK:
+		result = ERR_SCRIPT_FAILED
+	return [result, new_tile_map]
 
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	# initialize resource system
-	var new_tile_map = _init_controller(self.resources.tile_map)
-	## TODO: make this actually true
-	self.resources_optimized = true
-	# if resources optimized,
-	if self.resources_optimized:
-		# update resource map
-		self.resources.tile_map = new_tile_map
-		# add to terrain data
-		self.parent.terrain.resources = self.resources
+	var results = _init_controller(self.resources.tile_map)
+	var is_OK = results[0]
+	var new_tile_map = results[1]
+	if is_OK == OK:
+		## TODO: make this actually true
+		self.resources_optimized = true
+		# if resources optimized,
+		if self.resources_optimized:
+			# update resource map
+			self.resources.tile_map = new_tile_map
+			# add to terrain data
+			self.parent.terrain.resources = self.resources
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.

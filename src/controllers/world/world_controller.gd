@@ -116,12 +116,15 @@ func _init_world_entity() -> Error:
 	# create new world obj
 	var new_world = self.world_scene.instantiate()
 	new_world.name = "World"
-	new_world.data.controller = self
 	var screen_size = get_tree().root.size
 	new_world.texture.width = screen_size.x
 	new_world.texture.height = screen_size.y
 	self.world = new_world
 	add_child(new_world)
+	
+	# set data after entity enters scene to overwrite
+	# init data
+	new_world.data.controller = self
 	
 	# validate result
 	var result = OK

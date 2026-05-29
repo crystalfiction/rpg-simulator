@@ -44,6 +44,56 @@ var soil_variance = 0.66
 var soil_texture_factor = 0.44
 
 
+# calculates new soil values for the passed tile, factoring in 
+# neighbor data from the passed tile map
+# returns array of passed tile and its metrics
+func _calculate_soil(tile: Tile, terrain_map: Array) -> Array:
+	# define metrics
+	var n_avg_dist = 0
+	var n_textures = []
+	var n_avg_density = 0
+	var n_count = 0
+	var neighbors = self.world.data.controller.utils.get_neighbors(tile, terrain_map)
+	var s = tile.data.terrain.density
+	# get neighbor data
+	for n in neighbors:
+		# get distance to neighbor
+		var n_distance = n.data.terrain.density - s
+		# update metrics
+		n_avg_dist += n_distance
+		n_avg_density += n.data.terrain.density
+		n_count += 1
+		n_textures.append(n.data.terrain.texture)
+		
+	# calculate neighbor avg
+	n_avg_density /= n_count
+	n_avg_dist /= n_count
+	var avg_texture = self.world.data.controller.utils.common_string(n_textures)
+	
+	# lerp soil value towards total avg distance to each neighbor
+	var d_scalar = n_avg_dist
+	var t_scalar = tile.data.terrain[avg_texture] - s
+	
+	## apply d_scalar to soil density
+	## representing tendency towards neighboring soil densities
+	var new_s_neighbors = clamp(
+		lerp(
+			(s), (s + d_scalar), (1 - soil_variance)
+		), soil_density_min, soil_density_max
+	)
+	## apply t_scalar to soil density
+	## representing tendency towards soil texture classification
+	new_s_neighbors = clamp(
+		lerp(
+			(new_s_neighbors), (new_s_neighbors + t_scalar), soil_texture_factor * (1 - soil_variance)
+		), soil_density_min, soil_density_max
+	)
+	tile.data.terrain.density = new_s_neighbors
+		
+	# return the passed entity with updated soil value
+	return [tile, n_avg_density, n_avg_dist, avg_texture]
+
+
 # normalize soil values to soil_density_min, soil_density_max
 func _normalize_soil(
 	new_terrain: Array,
@@ -74,55 +124,6 @@ func _normalize_soil(
 	
 	avg = avg / count
 	return [new_terrain, avg]
-
-# calculates new soil values for the passed tile, factoring in 
-# neighbor data from the passed tile map
-# returns array of passed tile and its metrics
-func _calculate_soil(tile: Tile, terrain_map: Array) -> Array:
-	# define metrics
-	var n_avg_dist = 0
-	var n_textures = []
-	var n_avg_density = 0
-	var n_count = 0
-	var neighbors = self.world.data.controller.utils.world.get_neighbors(tile, terrain_map)
-	var s = tile.data.terrain.density
-	# get neighbor data
-	for n in neighbors:
-		# get distance to neighbor
-		var n_distance = n.data.terrain.density - s
-		# update metrics
-		n_avg_dist += n_distance
-		n_avg_density += n.data.terrain.density
-		n_count += 1
-		n_textures.append(n.data.terrain.texture)
-		
-	# calculate neighbor avg
-	n_avg_density /= n_count
-	n_avg_dist /= n_count
-	var avg_texture = self.world.data.controller.utils.terrain.common_string(n_textures)
-	
-	# lerp soil value towards total avg distance to each neighbor
-	var d_scalar = n_avg_dist
-	var t_scalar = tile.data.terrain[avg_texture] - s
-	
-	## apply d_scalar to soil density
-	## representing tendency towards neighboring soil densities
-	var new_s_neighbors = clamp(
-		lerp(
-			(s), (s + d_scalar), (1 - soil_variance)
-		), soil_density_min, soil_density_max
-	)
-	## apply t_scalar to soil density
-	## representing tendency towards soil texture classification
-	new_s_neighbors = clamp(
-		lerp(
-			(new_s_neighbors), (new_s_neighbors + t_scalar), soil_texture_factor * (1 - soil_variance)
-		), soil_density_min, soil_density_max
-	)
-	tile.data.terrain.density = new_s_neighbors
-		
-	# return the passed entity with updated soil value
-	return [tile, n_avg_density, n_avg_dist, avg_texture]
 
 
 # optimizes soil data in the world tile map,
@@ -226,13 +227,19 @@ func _init_terrain(tile_map: Array) -> Array:
 				"density": density / s_types
 			}
 			# get verbose soil texture
-			t.data.terrain.texture = self.world.data.controller.utils.terrain.get_soil_texture(t)
+			t.data.terrain.texture = self.world.data.controller.utils.get_soil_texture(t)
 	
-	return tile_map
+	# validate result if tile_map valid
+	var result = OK
+	if !tile_map:
+		result = ERR_SCRIPT_FAILED
+	
+	# return result
+	return [result, tile_map]
 	
 
 # initializes a single tile given a position and world grid index
-func _init_grid_tile(pos: Vector2i, grid_idx: Vector2i) -> Array:
+func _init_grid_tile(pos: Vector2i, grid_idx: Vector2i) -> Tile:
 	var uid_ref = self.world.data.controller.uid_ref
 	var new_tile = tile_scene.instantiate()
 	# set tile data
@@ -240,7 +247,7 @@ func _init_grid_tile(pos: Vector2i, grid_idx: Vector2i) -> Array:
 	new_tile.data.uid = uid_ref
 	new_tile.data.grid_idx = grid_idx
 	new_tile.name = "tile_" + str(new_tile.data.uid)
-	new_tile.position = self.world.data.controller.utils.world.grid_to_world(
+	new_tile.position = self.world.data.controller.utils.grid_to_world(
 		pos, self.grid_scale)
 	
 	# set the texture dimensions according to grid scale
@@ -250,13 +257,7 @@ func _init_grid_tile(pos: Vector2i, grid_idx: Vector2i) -> Array:
 	# increment the uid_ref
 	uid_ref += 1
 	
-	# validate result if tiles valid
-	var result = OK
-	if !new_tile:
-		result = ERR_SCRIPT_FAILED
-	
-	# return result
-	return [result, new_tile]
+	return new_tile
 
 
 # initializes the world tiles using the passed grid array
@@ -268,23 +269,17 @@ func _init_grid_tiles(grid: Array) -> Array:
 		new_tiles.append([])
 		for y in range(grid[x].size()):
 			# create a new tile with the given position
-			var new_tile_results = _init_grid_tile(
+			var new_tile = _init_grid_tile(
 				Vector2i(grid[x][y].x, grid[x][y].y),
 				Vector2i(x, y))
-			var is_OK = new_tile_results[0]
-			var new_tile = new_tile_results[1]
-			if is_OK:
-				# add new tile object as child of world object
-				self.world.add_child(new_tile)
-				# push new tile to array
-				new_tiles[x].append(new_tile)
-			else:
-				# flag error for new_tile
-				new_tiles = ERR_SCRIPT_FAILED
+			# add new tile object as child of world object
+			self.world.add_child(new_tile)
+			# push new tile to array
+			new_tiles[x].append(new_tile)
 	
 	# validate result if tiles valid
 	var result = OK
-	if new_tiles is Error:
+	if !new_tiles:
 		result = new_tiles
 	
 	# return result and flag
@@ -407,22 +402,22 @@ func _init_controller() -> Error:
 	# initialize world grid
 	var new_grid_results = _init_grid(self.grid_scale)
 	var is_OK = new_grid_results[0]
-	var new_grid = new_grid_results[1]
-	if is_OK:
+	if is_OK == OK:
+		var new_grid = new_grid_results[1]
 		self.terrain.grid = new_grid
 	
 	# initialize world tiles
 	var new_tiles_results = _init_grid_tiles(self.terrain.grid)
 	is_OK = new_tiles_results[0]
-	var new_tiles = new_tiles_results[1]
-	if is_OK:
+	if is_OK == OK:
+		var new_tiles = new_tiles_results[1]
 		self.terrain.tile_map = new_tiles
 	
 	# initialize terrain data in tile_map
 	var new_terrain_results = _init_terrain(self.terrain.tile_map)
 	is_OK = new_terrain_results[0]
-	var new_terrain = new_terrain_results[1]
-	if is_OK:
+	if is_OK == OK:
+		var new_terrain = new_terrain_results[1]
 		self.terrain.tile_map = new_terrain
 
 	# check dependency objects for errors

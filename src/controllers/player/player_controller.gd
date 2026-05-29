@@ -98,7 +98,7 @@ func process_cycle() -> bool:
 		# update grid_idx
 		var world_controller = self.world.data.controller
 		var grid_scale = world_controller.terrain_controller.grid_scale
-		self.player.data.grid_idx = world_controller.utils.world.world_to_grid(
+		self.player.data.grid_idx = world_controller.utils.world_to_grid(
 			self.player.global_position, grid_scale
 		)
 		

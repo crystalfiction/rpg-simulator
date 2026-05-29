@@ -20,7 +20,7 @@ var erosion_factor = 0.11
 
 
 # applies erosion to the current weather_map given the paramaters
-func _apply_erosion(tile_map: Array):
+func _apply_erosion(tile_map: Array) -> Array:
 	var avg_erosion = 0.0
 	var count = 0
 	for x in range(tile_map.size()):
@@ -48,7 +48,7 @@ func _apply_erosion(tile_map: Array):
 
 
 # calculates erosion values per tile given water values
-func _calculate_erosion(tile_map: Array):
+func _calculate_erosion(tile_map: Array) -> Dictionary:
 	var avg_erosion = 0.0
 	var avg_soil_density = 0.0
 	var count = 0
@@ -79,7 +79,7 @@ func _calculate_erosion(tile_map: Array):
 
 
 # calculates water values per tile given rainfall, drainage
-func _calculate_water(tile_map: Array):
+func _calculate_water(tile_map: Array) -> Dictionary:
 	var avg_rainfall = 0.0
 	var avg_drainage = 0.0
 	var avg_water = 0.0
@@ -117,7 +117,7 @@ func _calculate_water(tile_map: Array):
 
 
 # processes weather for the current weather_map
-func _optimize_weather(tile_map: Array):
+func _optimize_weather(tile_map: Array) -> Array:
 	print("Optimizing weather...")
 	
 	# calculate features
@@ -160,7 +160,7 @@ func _optimize_weather(tile_map: Array):
 
 
 # generates a new weather map given a terrain tile_map
-func generate_weather(tile_map: Array):
+func generate_weather(tile_map: Array) -> void:
 	# initialize controller with current terrain
 	_init_controller(tile_map)
 	# optimize weather
@@ -174,7 +174,7 @@ func generate_weather(tile_map: Array):
 
 
 # initializes the weather system controller
-func _init_controller(terrain: Array):
+func _init_controller(terrain: Array) -> void:
 	# init features
 	rainfall = randf_range(rainfall_min, rainfall_max)
 	
