@@ -18,8 +18,7 @@ var world: World
 
 @export var tile_color: ColorRect
 
-var data: Dictionary
-var init_data = {
+var data = {
 	"uid": 0,
 	"grid_idx": Vector2i(0, 0),
 	"terrain": {},
@@ -103,9 +102,6 @@ func _update_label_text(tile_data: Dictionary):
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	# init entity data structure
-	self.data = self.init_data
-	
 	# init color
 	_update_color(self.data)
 	# init label text

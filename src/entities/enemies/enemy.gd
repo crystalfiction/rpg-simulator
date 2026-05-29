@@ -1,8 +1,7 @@
 class_name Enemy extends Entity
 
 # components
-var data: Dictionary
-var init_data = {
+var data = {
 	"uid": 0,
 	"eid": 0,
 	"controller": "",
@@ -25,5 +24,4 @@ var init_data = {
 
 # when this enemy is ready,
 func _ready() -> void:
-	# initialize data structure
-	self.data = self.init_data
+	pass
