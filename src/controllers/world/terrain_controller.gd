@@ -435,7 +435,6 @@ func _init_controller() -> Error:
 # processes the controller's time cycle
 func process_cycle() -> bool:
 	## General terrain cycle logic
-	## TODO: do terrain logic...
 	# check if map_complete
 	if self.world.data.terrain.map_complete:
 		# initialize a new terrain

@@ -83,7 +83,6 @@ func get_soil_texture(entity: Entity) -> String:
 	
 	return new_texture
 
-## TODO: figure out if this is universal, return to utils if so
 # gets the most common string in an array and returns
 func common_string(arr: Array) -> String:
 	if arr.is_empty():

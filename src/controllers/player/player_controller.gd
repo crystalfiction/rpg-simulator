@@ -82,7 +82,7 @@ func process_cycle() -> bool:
 
 	# if resources in world,
 	if self.world.data.terrain.resources.count > 0:
-		# get closest world resource tile
+		## get closest world resource tile
 		var resources = _get_resources()
 		var n_resources = resources
 		# sort resources by distance to player
@@ -90,7 +90,7 @@ func process_cycle() -> bool:
 				self.player.global_position.distance_squared_to(a.global_position) <
 				self.player.global_position.distance_squared_to(b.global_position)))
 		var n_resource = n_resources.front()
-		# move player to tile
+		## move player to tile
 		self.player.global_position = lerp(
 			self.player.global_position, n_resource.global_position,
 			1
@@ -102,7 +102,7 @@ func process_cycle() -> bool:
 			self.player.global_position, grid_scale
 		)
 		
-		# TODO: interact with tile
+		## interact with tile
 		# get current tile
 		var current_tile = world_controller.utils.get_object_by_grid(
 			self.player.data.grid_idx, self.world.data.terrain.tile_map)
@@ -119,7 +119,7 @@ func process_cycle() -> bool:
 			var encounter_controller = world_controller.terrain_controller.encounter_controller
 			encounter_controller.process_encounter(self.player, current_tile)
 
-		# flag cycle complete
+		## flag cycle complete
 		self.cycle_complete = true
 
 	# if no resources in world,

@@ -35,7 +35,7 @@ func _get_random_tiles(tiles: Array, r: int) -> Array:
 func process_encounter(p: Player, t: Tile) -> void:
 	## encounter start
 	print("Something encountered!")
-	# TODO: spawn n enemies
+	# spawn enemies
 	var world_controller = self.world.data.controller
 	# spawn enemies according to map count
 	var map_count = self.world.data.terrain.map_count
