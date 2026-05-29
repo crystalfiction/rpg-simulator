@@ -23,7 +23,9 @@ var data = {
 	"grid_idx": Vector2i(0, 0),
 	# "terrain": {},
 	# "weather": {},
-	# "resources": {},
+	# "resources": {
+	# 	"food": false,
+	# },
 	# "encounters": {},
 }
 

@@ -4,6 +4,7 @@ extends Control
 var world: World
 
 # components
+@export var world_data_container: GridContainer
 @export var player_data_container: GridContainer
 @export var player_exp_bar: ProgressBar
 @export var loading_scene: CenterContainer

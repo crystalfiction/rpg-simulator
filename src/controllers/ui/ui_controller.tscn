@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://ce6ie113viqdg" path="res://src/controllers/ui/ui_controller.gd" id="1_2yfeh"]
 [ext_resource type="FontFile" uid="uid://dvjb12pu7hof1" path="res://src/assets/JetBrainsMono-Medium.ttf" id="2_1mjrn"]
 
-[node name="UiController" type="Control" unique_id=694900400 node_paths=PackedStringArray("player_data_container", "player_exp_bar", "loading_scene")]
+[node name="UiController" type="Control" unique_id=694900400 node_paths=PackedStringArray("world_data_container", "player_data_container", "player_exp_bar")]
 top_level = true
 layout_mode = 3
 anchors_preset = 15
@@ -12,9 +12,9 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_2yfeh")
+world_data_container = NodePath("")
 player_data_container = NodePath("ScreenMargins/FoldableContainer/MarginContainer/VBoxContainer2/PlayerData")
 player_exp_bar = NodePath("ScreenMargins/FoldableContainer/MarginContainer/VBoxContainer2/ProgressBar")
-loading_scene = NodePath("")
 
 [node name="ScreenMargins" type="MarginContainer" parent="." unique_id=1299388828]
 layout_mode = 1
