@@ -7,6 +7,7 @@ var utils
 # references
 var terrain_controller_script = preload("res://src/controllers/world/terrain_controller.gd")
 var player_controller_script = preload("res://src/controllers/player/player_controller.gd")
+var enemy_controller_script = preload("res://src/controllers/enemy/enemy_controller.gd")
 # entities
 var ui_scene = preload("res://src/controllers/ui/ui_controller.tscn")
 var world_scene = preload("res://src/entities/world/world.tscn")
@@ -16,6 +17,7 @@ var ui_controller
 var terrain_controller: Controller
 var time_controller: Node2D
 var player_controller: Controller
+var enemy_controller: Controller
 # components
 var uid_ref = 0
 
@@ -32,6 +34,24 @@ func _init_ui():
 	# validate result
 	var result = true
 	if ! self.ui_controller:
+		result = ERR_DOES_NOT_EXIST
+	return result
+
+
+## Enemy Controllers
+
+# initializes the enemy system controller script as object
+func _init_enemy_controller():
+	var new_enemy_controller = self.enemy_controller_script.new()
+	new_enemy_controller.name = "EnemyController"
+	new_enemy_controller.world = self.world
+	new_enemy_controller.parent = self
+	self.enemy_controller = new_enemy_controller
+	add_child(new_enemy_controller)
+	
+	# validate result
+	var result = true
+	if ! self.enemy_controller:
 		result = ERR_DOES_NOT_EXIST
 	return result
 
@@ -129,8 +149,9 @@ func _init_controllers():
 		_init_world_entity(),
 		_init_terrain_controller(),
 		_init_player_controller(),
+		_init_enemy_controller(),
 		_init_time_controller(),
-		_init_ui(),
+		# _init_ui(),
 	]
 	# run init scrips
 	for s in range(init_controllers.size()):

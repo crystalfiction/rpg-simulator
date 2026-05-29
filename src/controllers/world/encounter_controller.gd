@@ -34,12 +34,20 @@ func _get_random_tiles(tiles: Array, r: int):
 
 # handles encounter-level data processing
 func process_encounter(p: Player, t: Tile):
-	print("Processing encounter...")
+	## encounter start
+	print("Something encountered!")
+	# TODO: spawn n enemies
+	var world_controller = self.world.data.controller
+	# spawn enemies according to map count
+	var map_count = self.world.data.terrain.map_count
+	world_controller.enemy_controller.spawn_enemies(t, map_count)
+	
+	# TODO: process interaction between player + enemies
+	var enemies = t.data.enemies.ready
 
 	## after encounter
 	# add encounter to player encounters array
 	p.data.encounters.done += 1
-	p.data.actions.action.encountered = true
 	
 	# move encounter to done array
 	## TODO: consider a solution for multiple encounters on the same tile

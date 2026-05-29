@@ -159,6 +159,20 @@ func _optimize_weather(tile_map: Array):
 	return final
 
 
+# generates a new weather map given a terrain tile_map
+func generate_weather(tile_map: Array):
+	# initialize controller with current terrain
+	_init_controller(tile_map)
+	# optimize weather
+	var new_tile_map = _optimize_weather(tile_map)
+	# if weather optimized
+	if weather_optimized:
+		# add the new weather map to weather data
+		self.weather.tile_map = new_tile_map
+		# update terrain.weather with new weather data
+		self.parent.terrain.weather = self.weather
+
+
 # initializes the weather system controller
 func _init_controller(terrain: Array):
 	# init features

@@ -18,6 +18,8 @@ var grid_scale = Vector2i(36, 36)
 var terrain = {
 	"grid": [],
 	"tile_map": [],
+	"map_complete": false,
+	"map_count": 0,
 	"weather": {
 		"tile_map": []
 	},
@@ -32,6 +34,7 @@ var terrain = {
 }
 var terrain_iterations: int
 var terrain_optimized = null
+var cycle_complete = false
 
 var soil_density_min = 0.11
 var soil_density_max = 1.00
@@ -357,6 +360,38 @@ func _init_weather():
 	return result
 
 
+# generates new terrain on the current tile_map
+func _generate_terrain():
+	# initialize terrain data in tile_map
+	var new_terrain_map = _init_terrain(self.terrain.tile_map)
+	self.terrain.tile_map = new_terrain_map
+
+	# try to optimize terrain
+	_optimize_terrain(self.terrain.tile_map)
+
+	# generate weather on terrain
+	self.weather_controller.generate_weather(self.terrain.tile_map)
+	if self.terrain["weather"] != null:
+		self.terrain.tile_map = self.terrain["weather"].tile_map
+	# generate resources after weather
+	self.resource_controller.generate_resources(self.terrain.weather.tile_map)
+	if self.terrain["resources"] != null:
+		self.terrain.tile_map = self.terrain["resources"].tile_map
+	# generate encounters on terrain
+	self.encounter_controller._generate_encounters(self.terrain.resources.tile_map)
+	if self.terrain["encounters"] != null:
+		self.terrain.tile_map = self.terrain["encounters"].tile_map
+	
+	# increment terrain count
+	self.terrain.map_count += 1
+
+	# unflag map_complete
+	self.terrain.map_complete = false
+
+	# update world data to new terrain map after
+	self.world.data.terrain = self.terrain
+
+
 # initializes the world terrain with init terrain data
 func _init_controller():
 	# initialize world grid
@@ -370,6 +405,20 @@ func _init_controller():
 	# initialize terrain data in tile_map
 	var new_terrain_map = _init_terrain(self.terrain.tile_map)
 	self.terrain.tile_map = new_terrain_map
+
+
+# processes the controller's time cycle
+func process_cycle() -> bool:
+	## General terrain cycle logic
+	## TODO: do terrain logic...
+	# check if map_complete
+	if self.world.data.terrain.map_complete:
+		# initialize a new terrain
+		_generate_terrain()
+		self.cycle_complete = true
+	else:
+		cycle_complete = true
+	return self.cycle_complete
 
 
 ## TODO: initialize controller dependencies: weather, resources, encounters

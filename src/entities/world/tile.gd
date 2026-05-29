@@ -26,7 +26,14 @@ var data = {
 	# "resources": {
 	# 	"food": false,
 	# },
-	# "encounters": {},
+	# "encounters": {
+	# 	"ready": [],
+	# 	"done": []
+	# },
+	# "enemies": {
+	# 	"ready": [],
+	# 	"done": []
+	# }
 }
 
 

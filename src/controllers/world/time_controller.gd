@@ -1,7 +1,9 @@
 extends Controller
 
 # references
+var terrain_controller: Controller
 var player_controller: Controller
+var enemy_controller: Controller
 # components
 var frames = 0
 var frame_rate = 50
@@ -62,7 +64,7 @@ func _check_cycle_completion():
 			else:
 				# a controller thread was not fully processed...
 				# don't start next cycle until thread is resolved
-				print("Loose controller thread detected at " + c.name)
+				print(c.name + " still processing... Add timer.")
 
 	# if all controller cycles complete...
 	if all_done:
@@ -127,10 +129,14 @@ func _process_time_cycle():
 func _init_controller():
 	# initialize controller references
 	## ORDERING MATTERS
+	terrain_controller = world.data.controller.terrain_controller
 	player_controller = world.data.controller.player_controller
+	enemy_controller = world.data.controller.enemy_controller
 	# append to dependencies array
 	dependencies.append_array([
+		terrain_controller,
 		player_controller,
+		enemy_controller,
 	])
 	
 	# initialize time system

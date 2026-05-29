@@ -13,6 +13,7 @@ var data = {
 		"level": 0,
 		"exp": 0,
 		"exp_cap": 0,
+		"health": 100,
 		## TODO: classes
 	},
 	"actions": {
@@ -22,8 +23,10 @@ var data = {
 		## TODO: abilities
 	},
 	"resources": {
-		"count": 0
+		"food": 0
 	},
-	## TODO: encounters
+	"encounters": {
+		"done": 0
+	}
 	## TODO: items
 }

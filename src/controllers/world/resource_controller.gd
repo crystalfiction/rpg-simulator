@@ -8,7 +8,7 @@ var resources = {
 var resource_iterations: int
 var resources_optimized = null
 
-var food_factor = 0.11 # chance to generate resource on a given tile
+var food_factor = 0.22 # chance to generate resource on a given tile
 
 
 # evaluates resource generation given a world's tile conditions
@@ -33,7 +33,7 @@ func _evaluate_resources(tile: Tile):
 	return tile
 
 
-## evaluates current terrain for resource conditions
+# evaluates current terrain for resource conditions
 func _evaluate_terrain(tile_map: Array):
 	# loop through terrain
 	var count = 0
@@ -86,6 +86,20 @@ func _evaluate_terrain(tile_map: Array):
 	if tile_map:
 		return tile_map
 	return ERR_INVALID_DATA
+
+
+# generates resources on the passed tile_map
+func generate_resources(tile_map: Array):
+	# initialize resource system
+	var new_tile_map = _init_controller(tile_map)
+	## TODO: make this actually true
+	self.resources_optimized = true
+	# if resources optimized,
+	if self.resources_optimized:
+		# update resource map
+		self.resources.tile_map = new_tile_map
+		# add to terrain data
+		self.parent.terrain.resources = self.resources
 
 
 # initializes world resource system
