@@ -1,7 +1,8 @@
 class_name Enemy extends Entity
 
 # components
-var data = {
+var data: Dictionary
+var init_data = {
 	"uid": 0,
 	"eid": 0,
 	"controller": "",
@@ -22,11 +23,7 @@ var data = {
 	## TODO: items
 }
 
-# Called when the node enters the scene tree for the first time.
+# when this enemy is ready,
 func _ready() -> void:
-	pass # Replace with function body.
-
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
-	pass
+	# initialize data structure
+	self.data = self.init_data

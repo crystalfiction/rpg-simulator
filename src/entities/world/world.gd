@@ -1,7 +1,8 @@
 class_name World extends Entity
 
 # components
-var data = {
+var data: Dictionary
+var init_data = {
 	"uid": 0,
 	"controller": "",
 	"terrain": {
@@ -20,3 +21,8 @@ var data = {
 		}
 	},
 }
+
+# when World ready,
+func _ready() -> void:
+	# init entity data structure to avoid null errors on dependents
+	self.data = self.init_data

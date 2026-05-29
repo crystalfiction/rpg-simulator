@@ -4,7 +4,8 @@ class_name Player extends Entity
 var world: World
 
 # components
-var data = {
+var data: Dictionary
+var init_data = {
 	"uid": 0,
 	"pid": 0,
 	"controller": "",
@@ -30,3 +31,8 @@ var data = {
 	}
 	## TODO: items
 }
+
+# when this player ready,
+func _ready() -> void:
+	# initialize data structure
+	self.data = self.init_data

@@ -1,3 +1,4 @@
+## Initializes and controls world.data.terrain and its dependencies
 extends Controller
 
 # refs
@@ -15,7 +16,8 @@ var encounter_controller: Controller
 var grid_dimensions: Vector2i
 var grid_scale = Vector2i(36, 36)
 
-var terrain = {
+var terrain: Dictionary
+var init_terrain = {
 	"grid": [],
 	"tile_map": [],
 	"map_complete": false,
@@ -47,7 +49,7 @@ func _normalize_soil(
 	new_terrain: Array,
 	sd_min: float = soil_density_min,
 	sd_max: float = soil_density_max
-):
+) -> Array:
 	var min_s = INF
 	var max_s = - INF
 	for x in range(new_terrain.size()):
@@ -75,13 +77,14 @@ func _normalize_soil(
 
 # calculates new soil values for the passed tile, factoring in 
 # neighbor data from the passed tile map
-func _calculate_soil(tile: Tile, terrain_map: Array):
+# returns array of passed tile and its metrics
+func _calculate_soil(tile: Tile, terrain_map: Array) -> Array:
 	# define metrics
 	var n_avg_dist = 0
 	var n_textures = []
 	var n_avg_density = 0
 	var n_count = 0
-	var neighbors = self.world.data.controller.utils.get_neighbors(tile, terrain_map)
+	var neighbors = self.world.data.controller.utils.world.get_neighbors(tile, terrain_map)
 	var s = tile.data.terrain.density
 	# get neighbor data
 	for n in neighbors:
@@ -96,7 +99,7 @@ func _calculate_soil(tile: Tile, terrain_map: Array):
 	# calculate neighbor avg
 	n_avg_density /= n_count
 	n_avg_dist /= n_count
-	var avg_texture = self.world.data.controller.utils.common_string(n_textures)
+	var avg_texture = self.world.data.controller.utils.terrain.common_string(n_textures)
 	
 	# lerp soil value towards total avg distance to each neighbor
 	var d_scalar = n_avg_dist
@@ -122,8 +125,9 @@ func _calculate_soil(tile: Tile, terrain_map: Array):
 	return [tile, n_avg_density, n_avg_dist, avg_texture]
 
 
-# optimizes soil data in the world tile map
-func _optimize_soil(terrain_map: Array):
+# optimizes soil data in the world tile map,
+# returns bool result flag
+func _optimize_soil(terrain_map: Array) -> bool:
 	# loop through terrain map
 	var avg_density = 0
 	var avg_dist_sq = 0
@@ -150,7 +154,7 @@ func _optimize_soil(terrain_map: Array):
 	terrain_iterations += 1
 	avg_density = new_terrain[1]
 	avg_dist_sq = avg_dist_sq * 100 / count
-	var total_avg_texture = self.world.data.controller.utils.common_string(avg_textures)
+	# var total_avg_texture = self.world.data..terrain.common_string(avg_textures)
 
 	# define completion threshold
 	var threshold = soil_variance / 1.5
@@ -181,7 +185,7 @@ func _optimize_soil(terrain_map: Array):
 
 
 # optimizes terrain in the world tile map
-func _optimize_terrain(terrain_map: Array):
+func _optimize_terrain(terrain_map: Array) -> bool:
 	print("Optimizing terrain...")
 	
 	# run terrain optimization cycle
@@ -205,7 +209,7 @@ func _optimize_terrain(terrain_map: Array):
 
 
 # accepts a tile_map and returns an array mapped with terrain values
-func _init_terrain(tile_map: Array):
+func _init_terrain(tile_map: Array) -> Array:
 	for x in range(tile_map.size()):
 		for y in range(tile_map[x].size()):
 			var t = tile_map[x][y]
@@ -222,13 +226,13 @@ func _init_terrain(tile_map: Array):
 				"density": density / s_types
 			}
 			# get verbose soil texture
-			t.data.terrain.texture = self.world.data.controller.utils.get_soil_texture(t)
+			t.data.terrain.texture = self.world.data.controller.utils.terrain.get_soil_texture(t)
 	
 	return tile_map
 	
 
 # initializes a single tile given a position and world grid index
-func _init_grid_tile(pos: Vector2i, grid_idx: Vector2i):
+func _init_grid_tile(pos: Vector2i, grid_idx: Vector2i) -> Array:
 	var uid_ref = self.world.data.controller.uid_ref
 	var new_tile = tile_scene.instantiate()
 	# set tile data
@@ -236,7 +240,7 @@ func _init_grid_tile(pos: Vector2i, grid_idx: Vector2i):
 	new_tile.data.uid = uid_ref
 	new_tile.data.grid_idx = grid_idx
 	new_tile.name = "tile_" + str(new_tile.data.uid)
-	new_tile.position = self.world.data.controller.utils.grid_to_world(
+	new_tile.position = self.world.data.controller.utils.world.grid_to_world(
 		pos, self.grid_scale)
 	
 	# set the texture dimensions according to grid scale
@@ -247,43 +251,49 @@ func _init_grid_tile(pos: Vector2i, grid_idx: Vector2i):
 	uid_ref += 1
 	
 	# validate result if tiles valid
-	var result = false
-	if new_tile:
-		result = new_tile
+	var result = OK
+	if !new_tile:
+		result = ERR_SCRIPT_FAILED
 	
 	# return result
-	return result
+	return [result, new_tile]
 
 
 # initializes the world tiles using the passed grid array
 # returns nested array of new tiles according to grid index
-func _init_grid_tiles(grid: Array):
+func _init_grid_tiles(grid: Array) -> Array:
 	# loop through world grid and create tile at each step
 	var new_tiles = []
 	for x in range(grid.size()):
 		new_tiles.append([])
 		for y in range(grid[x].size()):
 			# create a new tile with the given position
-			var new_tile = _init_grid_tile(
+			var new_tile_results = _init_grid_tile(
 				Vector2i(grid[x][y].x, grid[x][y].y),
 				Vector2i(x, y))
-			# add new tile object as child of world object
-			self.world.add_child(new_tile)
-			# push new tile to array
-			new_tiles[x].append(new_tile)
+			var is_OK = new_tile_results[0]
+			var new_tile = new_tile_results[1]
+			if is_OK:
+				# add new tile object as child of world object
+				self.world.add_child(new_tile)
+				# push new tile to array
+				new_tiles[x].append(new_tile)
+			else:
+				# flag error for new_tile
+				new_tiles = ERR_SCRIPT_FAILED
 	
 	# validate result if tiles valid
-	var result = new_tiles
-	if !new_tiles:
-		result = false
+	var result = OK
+	if new_tiles is Error:
+		result = new_tiles
 	
-	# return result
-	return result
+	# return result and flag
+	return [result, new_tiles]
 
 
 # initializes the world grid and returns a nested array of 
 # screen positions organized by grid steps, grid scale
-func _init_grid(scale: Vector2i):
+func _init_grid(scale: Vector2i) -> Array:
 	# get screen dimensions
 	var screen_size = get_tree().root.get_viewport().size
 	# Calculate how many tiles fit on the screen
@@ -301,16 +311,16 @@ func _init_grid(scale: Vector2i):
 			new_grid[x].append(Vector2i(x, y))
 	
 	# validate result if grid valid
-	var result = new_grid
+	var result = OK
 	if !new_grid:
-		result = false
+		result = ERR_SCRIPT_FAILED
 	
-	# return result
-	return result
+	# return result and flag
+	return [result, new_grid]
 
 
 # initializes the encounters system controller script as object
-func _init_encounters():
+func _init_encounters() -> Error:
 	var new_encounter_controller = self.encounter_controller_script.new()
 	new_encounter_controller.name = "EncounterController"
 	new_encounter_controller.world = self.world
@@ -320,14 +330,14 @@ func _init_encounters():
 	add_child(new_encounter_controller)
 	
 	# validate result
-	var result = true
+	var result = OK
 	if ! self.encounter_controller:
 		result = ERR_DOES_NOT_EXIST
 	return result
 
 
 # initializes the world resources system controller script as object
-func _init_resources():
+func _init_resources() -> Error:
 	var new_resource_controller = self.resource_controller_script.new()
 	new_resource_controller.name = "ResourceController"
 	new_resource_controller.world = self.world
@@ -337,14 +347,14 @@ func _init_resources():
 	add_child(new_resource_controller)
 	
 	# validate result
-	var result = true
+	var result = OK
 	if ! self.resource_controller:
 		result = ERR_DOES_NOT_EXIST
 	return result
 
 
 # initializes the weather system controller script as object
-func _init_weather():
+func _init_weather() -> Error:
 	var new_weather_controller = self.weather_controller_script.new()
 	new_weather_controller.name = "WeatherController"
 	new_weather_controller.world = self.world
@@ -354,7 +364,7 @@ func _init_weather():
 	add_child(new_weather_controller)
 	
 	# validate result
-	var result = true
+	var result = OK
 	if ! self.weather_controller:
 		result = ERR_DOES_NOT_EXIST
 	return result
@@ -393,18 +403,38 @@ func _generate_terrain():
 
 
 # initializes the world terrain with init terrain data
-func _init_controller():
+func _init_controller() -> Error:
 	# initialize world grid
-	var new_grid = _init_grid(self.grid_scale)
-	self.terrain.grid = new_grid
+	var new_grid_results = _init_grid(self.grid_scale)
+	var is_OK = new_grid_results[0]
+	var new_grid = new_grid_results[1]
+	if is_OK:
+		self.terrain.grid = new_grid
 	
 	# initialize world tiles
-	var new_grid_tiles = _init_grid_tiles(self.terrain.grid)
-	self.terrain.tile_map = new_grid_tiles
+	var new_tiles_results = _init_grid_tiles(self.terrain.grid)
+	is_OK = new_tiles_results[0]
+	var new_tiles = new_tiles_results[1]
+	if is_OK:
+		self.terrain.tile_map = new_tiles
 	
 	# initialize terrain data in tile_map
-	var new_terrain_map = _init_terrain(self.terrain.tile_map)
-	self.terrain.tile_map = new_terrain_map
+	var new_terrain_results = _init_terrain(self.terrain.tile_map)
+	is_OK = new_terrain_results[0]
+	var new_terrain = new_terrain_results[1]
+	if is_OK:
+		self.terrain.tile_map = new_terrain
+
+	# check dependency objects for errors
+	var dependencies = [
+		self.terrain.grid,
+		self.terrain.tile_map
+	]
+	var result = OK
+	for d in dependencies:
+		if d == null:
+			result = ERR_SCRIPT_FAILED
+	return result
 
 
 # processes the controller's time cycle
@@ -421,9 +451,12 @@ func process_cycle() -> bool:
 	return self.cycle_complete
 
 
-## TODO: initialize controller dependencies: weather, resources, encounters
+## initializes controller dependencies: weather, resources, encounters
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
+	# initialize terrain data structure
+	self.terrain = self.init_terrain
+
 	# initialize terrain system
 	_init_controller()
 
@@ -448,7 +481,7 @@ func _ready() -> void:
 		for s in range(init_scripts.size()):
 			var result = init_scripts[s]
 			# if error initializing...
-			if result is Error:
+			if result != OK:
 				# print error & pause tree
 				print(error_string(result) + " at script " + str(s))
 				self.get_tree().paused = true
