@@ -12,47 +12,28 @@
 
 #### Done
 
-- [x] ~~check that no errors appear after restructuring utils~~ *not a great idea, requires script instantiation management -- not worth*
-- [x] ~~ensure all existing controller functions have return~~ types for easier error resolving
-- [x] ~~check that all resolvable FIXME comments are resolved~~
+- [x] scrap current encounters system
+    - [x] remove from time controller
+    - [x] revert player controller logic
+    - [x] revert enemy controller
+- [x] revert time controller
+- [x] time_controller only controls time system, not dependencies
+        - _routing dependency systems through time_controller results in too many states and sub-states to manage effectively_
+        - _instead of trying to rewrite the internal \_process system, utilize it_
+- [x] make dependency controllers call \_process directly
+- [x] validate dependency controllers at controller-level during processing
+
 
 ### Reference
 
-World Controller Init Flow
 ```mermaid
-flowchart
-    controller.World --instantiates--> entity.World
-    
-    controller.World --instantiates--> Controller
-    Controller --initializes--> Controller.data
-    Controller.data -.valid.-> entity.World
-    
-```
-
-World Controller Dependencies
-```mermaid
-flowchart
-    subgraph entities
-        Entity.World
-
-    end
-
-    Entity.World -.-> Controller.Terrain
-    Entity.World -.-> Controller.Time
-    Entity.World -.-> Controller.Player
-
-    subgraph controllers
-        Controller.Terrain
-        Controller.Weather
-        Controller.Resources
-        Controller.Encounters
-        Controller.Player
-        Controller.Time
-
-        Controller.Terrain -.-> Controller.Weather
-        Controller.Terrain -.-> Controller.Resources
-        Controller.Terrain -.-> Controller.Encounters
-
-    end
+sequenceDiagram
+    participant controller.World
+    create participant entity.World
+    controller.World->>entity.World: instantiates world entity
+    create participant controller.System
+    controller.World->>controller.System: instantiates system controller scripts
+    controller.System->>entity.World: initializes system data in World.data
+    controller.World<<->>entity.World: validate World.data
 
 ```
