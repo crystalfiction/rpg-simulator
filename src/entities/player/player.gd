@@ -13,7 +13,8 @@ var data = {
 		"level": 0,
 		"exp": 0,
 		"exp_cap": 0,
-		"health": 100,
+		"health": 100, # TODO: make this dynamic on entry
+		"attack": 10, # TODO: make this dynamic on entry
 		## TODO: classes
 	},
 	"actions": {
@@ -26,6 +27,7 @@ var data = {
 		"food": 0
 	},
 	"encounters": {
+		"active": false,
 		"done": 0
 	}
 	## TODO: items

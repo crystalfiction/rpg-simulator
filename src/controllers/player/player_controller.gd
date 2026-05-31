@@ -69,70 +69,6 @@ func _get_resources() -> Array:
 	return array
 
 
-# determines and processes player logic for a single time cycle
-func process_cycle() -> bool:
-	## TODO: account for multiple players here, loop players array?
-	## General player cycle logic
-	# if health 0 and not already queued to delete, 
-	if self.player.data.stats.health <= 0 && ! self.player.is_queued_for_deletion():
-		# queue to delete
-		self.player.queue_free()
-		self.cycle_complete = false
-		return self.cycle_complete
-
-	# if resources in world,
-	if self.world.data.terrain.resources.count > 0:
-		## get closest world resource tile
-		var resources = _get_resources()
-		var n_resources = resources
-		# sort resources by distance to player
-		n_resources.sort_custom(func(a, b): return (
-				self.player.global_position.distance_squared_to(a.global_position) <
-				self.player.global_position.distance_squared_to(b.global_position)))
-		var n_resource = n_resources.front()
-		## move player to tile
-		self.player.global_position = lerp(
-			self.player.global_position, n_resource.global_position,
-			1
-		)
-		# update grid_idx
-		var world_controller = self.world.data.controller
-		var grid_scale = world_controller.terrain_controller.grid_scale
-		self.player.data.grid_idx = world_controller.utils.world_to_grid(
-			self.player.global_position, grid_scale
-		)
-		
-		## interact with tile
-		# get current tile
-		var current_tile = world_controller.utils.get_object_by_grid(
-			self.player.data.grid_idx, self.world.data.terrain.tile_map)
-		# take resources from tile
-		current_tile.data.resources.food = false
-		# update world ref
-		self.world.data.terrain.resources.count -= 1
-		# give resources to player
-		self.player.data.resources.food += 1
-		print("Resource acquired.")
-		
-		# TODO: process encounter if encountered
-		if current_tile.data.encounters.ready.size() > 0:
-			var encounter_controller = world_controller.terrain_controller.encounter_controller
-			encounter_controller.process_encounter(self.player, current_tile)
-
-		## flag cycle complete
-		self.cycle_complete = true
-
-	# if no resources in world,
-	else:
-		# flag map complete on terrain
-		self.world.data.terrain.map_complete = true
-		# cycle incomplete until map available
-		self.cycle_complete = false
-
-	# return cycle flag
-	return self.cycle_complete
-
-
 ## initializes a new actions controller for a given player
 func _init_actions_controller(p: Player):
 	# create new action controller for p
@@ -186,5 +122,54 @@ func _ready() -> void:
 	if new_player:
 		# initialize the actions controller on player
 		new_player = _init_actions_controller(new_player)
-
 		print("Player initialized.")
+
+
+# determines and processes player logic for a single time cycle
+func _process_cycle():
+	# only process if time cycling,
+	var time_controller = world.data.controller.time_controller
+	if time_controller.cycling:
+		# if resources in world,
+		if self.world.data.terrain.resources.count > 0:
+			## get closest world resource tile
+			var resources = _get_resources()
+			var n_resources = resources
+			# sort resources by distance to player
+			n_resources.sort_custom(func(a, b): return (
+					self.player.global_position.distance_squared_to(a.global_position) <
+					self.player.global_position.distance_squared_to(b.global_position)))
+			var n_resource = n_resources.front()
+			## move player to tile
+			self.player.global_position = lerp(
+				self.player.global_position, n_resource.global_position,
+				1
+			)
+			# update grid_idx
+			var world_controller = self.world.data.controller
+			var grid_scale = world_controller.terrain_controller.grid_scale
+			self.player.data.grid_idx = world_controller.utils.world_to_grid(
+				self.player.global_position, grid_scale
+			)
+			
+			## interact with tile
+			# get current tile
+			var current_tile = world_controller.utils.get_object_by_grid(
+				self.player.data.grid_idx, self.world.data.terrain.tile_map)
+			# take resources from tile
+			current_tile.data.resources.food = false
+			# update world ref
+			self.world.data.terrain.resources.count -= 1
+			# give resources to player
+			self.player.data.resources.food += 1
+			print("Resource acquired.")
+
+		# if no resources in world,
+		elif self.world.data.terrain.resources.count == 0:
+			# flag map complete on terrain
+			self.world.data.terrain.map_complete = true
+
+
+func _process(delta: float) -> void:
+	# process cycle
+	_process_cycle()

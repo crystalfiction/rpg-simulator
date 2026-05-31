@@ -9,7 +9,8 @@ var data = {
 	"grid_idx": Vector2i(0, 0),
 	"stats": {
 		"level": 0,
-		"health": 100,
+		"health": 100, # TODO: make this dynamic on spawn
+		"attack": 10, # TODO: make this dynamic on spawn
 		## TODO: classes
 	},
 	"actions": {

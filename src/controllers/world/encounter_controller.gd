@@ -8,6 +8,8 @@ var encounters = {
 var encounter_ratio = 0.33
 var n_encounters = 0
 
+var cycle_complete = false
+
 # gets r random tiles and returns as an array of objects
 func _get_random_tiles(tiles: Array, r: int) -> Array:
 	# flatten terrain map
@@ -29,31 +31,6 @@ func _get_random_tiles(tiles: Array, r: int) -> Array:
 		# invalid resource data; resources don't exist
 		result = ERR_INVALID_PARAMETER
 	return [result, r_tiles]
-
-
-# handles encounter-level data processing
-func process_encounter(p: Player, t: Tile) -> void:
-	## encounter start
-	print("Something encountered!")
-	# spawn enemies
-	var world_controller = self.world.data.controller
-	# spawn enemies according to map count
-	var map_count = self.world.data.terrain.map_count
-	world_controller.enemy_controller.spawn_enemies(t, map_count)
-	
-	# TODO: process interaction between player + enemies
-	var enemies = t.data.enemies.ready
-
-	## after encounter
-	# add encounter to player encounters array
-	p.data.encounters.done += 1
-	
-	# move encounter to done array
-	## TODO: consider a solution for multiple encounters on the same tile
-	var first_encounter = t.data.encounters.ready.pop_front()
-	t.data.encounters.done.append(first_encounter)
-
-	print("Encounter complete.")
 
 
 # generates player encounters for the given terrain map
@@ -85,7 +62,7 @@ func _generate_encounters(tile_map: Array) -> Array:
 			if t in r_tiles:
 				# place encounter
 				## TODO: elaborate on encounter data
-				t.data.encounters.ready.append([ self ])
+				t.data.encounters.ready.append(self )
 				self.encounters.count += 1
 	
 	# log result
@@ -98,7 +75,6 @@ func _generate_encounters(tile_map: Array) -> Array:
 	if !tile_map:
 		result = ERR_INVALID_DATA
 	return [result, tile_map]
-
 
 # initializes controller dependencies
 func _init_controller() -> Array:
@@ -128,6 +104,11 @@ func _ready() -> void:
 	else:
 		# log results if error
 		print(results)
+
+
+# handles encounter-level data processing
+func process_cycle() -> bool:
+	return self.cycle_complete
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.

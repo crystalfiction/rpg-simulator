@@ -16,8 +16,7 @@ var encounter_controller: Controller
 var grid_dimensions: Vector2i
 var grid_scale = Vector2i(36, 36)
 
-var terrain: Dictionary
-var init_terrain = {
+var terrain = {
 	"grid": [],
 	"tile_map": [],
 	"map_complete": false,
@@ -209,6 +208,38 @@ func _optimize_terrain(terrain_map: Array) -> bool:
 	return optimized
 
 
+# generates new terrain on the current tile_map
+func _generate_terrain() -> void:
+	# initialize terrain data in tile_map
+	var new_terrain_map = _init_terrain(self.terrain.tile_map)
+	self.terrain.tile_map = new_terrain_map
+
+	# try to optimize terrain
+	_optimize_terrain(self.terrain.tile_map)
+
+	# generate weather on terrain
+	self.weather_controller.generate_weather(self.terrain.tile_map)
+	if self.terrain["weather"] != null:
+		self.terrain.tile_map = self.terrain["weather"].tile_map
+	# generate resources after weather
+	self.resource_controller.generate_resources(self.terrain.weather.tile_map)
+	if self.terrain["resources"] != null:
+		self.terrain.tile_map = self.terrain["resources"].tile_map
+	# generate encounters on terrain
+	self.encounter_controller._generate_encounters(self.terrain.resources.tile_map)
+	if self.terrain["encounters"] != null:
+		self.terrain.tile_map = self.terrain["encounters"].tile_map
+	
+	# increment terrain count
+	self.terrain.map_count += 1
+
+	# unflag map_complete
+	self.terrain.map_complete = false
+
+	# update world data to new terrain map after
+	self.world.data.terrain = self.terrain
+
+
 # accepts a tile_map and returns an array mapped with terrain values
 func _init_terrain(tile_map: Array) -> Array:
 	for x in range(tile_map.size()):
@@ -229,6 +260,9 @@ func _init_terrain(tile_map: Array) -> Array:
 			# get verbose soil texture
 			t.data.terrain.texture = self.world.data.controller.utils.get_soil_texture(t)
 	
+	# update terrain.map_count
+	self.terrain.map_count += 1
+
 	# validate result if tile_map valid
 	var result = OK
 	if !tile_map:
@@ -365,38 +399,6 @@ func _init_weather() -> Error:
 	return result
 
 
-# generates new terrain on the current tile_map
-func _generate_terrain():
-	# initialize terrain data in tile_map
-	var new_terrain_map = _init_terrain(self.terrain.tile_map)
-	self.terrain.tile_map = new_terrain_map
-
-	# try to optimize terrain
-	_optimize_terrain(self.terrain.tile_map)
-
-	# generate weather on terrain
-	self.weather_controller.generate_weather(self.terrain.tile_map)
-	if self.terrain["weather"] != null:
-		self.terrain.tile_map = self.terrain["weather"].tile_map
-	# generate resources after weather
-	self.resource_controller.generate_resources(self.terrain.weather.tile_map)
-	if self.terrain["resources"] != null:
-		self.terrain.tile_map = self.terrain["resources"].tile_map
-	# generate encounters on terrain
-	self.encounter_controller._generate_encounters(self.terrain.resources.tile_map)
-	if self.terrain["encounters"] != null:
-		self.terrain.tile_map = self.terrain["encounters"].tile_map
-	
-	# increment terrain count
-	self.terrain.map_count += 1
-
-	# unflag map_complete
-	self.terrain.map_complete = false
-
-	# update world data to new terrain map after
-	self.world.data.terrain = self.terrain
-
-
 # initializes the world terrain with init terrain data
 func _init_controller() -> Error:
 	# initialize world grid
@@ -432,25 +434,9 @@ func _init_controller() -> Error:
 	return result
 
 
-# processes the controller's time cycle
-func process_cycle() -> bool:
-	## General terrain cycle logic
-	# check if map_complete
-	if self.world.data.terrain.map_complete:
-		# initialize a new terrain
-		_generate_terrain()
-		self.cycle_complete = true
-	else:
-		cycle_complete = true
-	return self.cycle_complete
-
-
 ## initializes controller dependencies: weather, resources, encounters
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	# initialize terrain data structure
-	self.terrain = self.init_terrain
-
 	# initialize terrain system
 	_init_controller()
 
@@ -493,6 +479,16 @@ func _ready() -> void:
 		self.world.data.terrain = self.terrain
 
 
+# processes the controller's time cycle
+func _process_cycle():
+	## General terrain cycle logic
+	# check map completion regardless of time cycle state
+	if self.world.data.terrain.map_complete:
+		# initialize a new terrain
+		_generate_terrain()
+
+
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
-	pass
+	# process terrain cycle
+	_process_cycle()
