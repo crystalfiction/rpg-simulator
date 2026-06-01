@@ -64,6 +64,7 @@ func _init_player_controller() -> Error:
 	new_player_controller.name = "PlayerController"
 	new_player_controller.world = self.world
 	new_player_controller.parent = self
+	new_player_controller.process_mode = Node.PROCESS_MODE_PAUSABLE
 	self.player_controller = new_player_controller
 	add_child(new_player_controller)
 	
@@ -176,23 +177,19 @@ func _ready() -> void:
 
 ## accepts current world entity,
 ## validates world data and returns result flag
-func _process_cycle(current_world: Entity) -> Error:
-	var result = OK
+func _process_cycle(current_world: Entity):
 	# if time_controller is cycling,
 	if self.time_controller.cycling:
 		# result is OK unless otherwise specified,
 		if current_world:
 			# process conditions depending on World.data
-			pass
-		else:
-			result = ERR_INVALID_PARAMETER
-	return result
+			# if player dead,
+			if self.world.data.player == null:
+				# reload world
+				pass
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
 	# process cycle
-	var result = _process_cycle(self.world)
-	if result != OK:
-		# pause result if cycle failed
-		get_tree().paused = true
+	_process_cycle(self.world)

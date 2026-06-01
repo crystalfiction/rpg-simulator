@@ -10,11 +10,13 @@ var data = {
 	"controller": "",
 	"grid_idx": Vector2i(0, 0),
 	"stats": {
-		"level": 0,
+		"level": 1,
 		"exp": 0,
 		"exp_cap": 0,
-		"health": 100, # TODO: make this dynamic on entry
-		"attack": 10, # TODO: make this dynamic on entry
+		"health": 0,
+		"max_health": 100,
+		"attack": 10,
+		"hit_chance": 0.75,
 		## TODO: classes
 	},
 	"actions": {
@@ -28,11 +30,11 @@ var data = {
 	},
 	"encounters": {
 		"active": false,
-		"done": 0
+		"done": []
 	}
 	## TODO: items
 }
 
-# when this player ready,
+# when player enters tree,
 func _ready() -> void:
 	pass

@@ -26,14 +26,7 @@ var data = {
 	"resources": {
 		"food": false,
 	},
-	"encounters": {
-		"ready": [],
-		"done": []
-	},
-	"enemies": {
-		"ready": [],
-		"done": []
-	}
+	"encounters": {},
 }
 
 
@@ -43,7 +36,7 @@ func _update_color(tile_data: Dictionary):
 	var gradients = [soil_10r, soil_5yr, soil_10yr]
 	var new_color = Color()
 	if "terrain" in keys:
-		if "weather" in keys && "water" in tile_data.weather:
+		if "weather" in tile_data && "water" in tile_data.weather:
 			# define water gradient
 			var water = tile_data.weather.water
 			#self.weather.color = water_gradient.sample(water)
@@ -77,7 +70,6 @@ func _update_label_text(tile_data: Dictionary):
 		self.label_water,
 		self.label_erosion,
 		self.label_resources,
-		self.label_encounters,
 		self.label_grid_x,
 		self.label_grid_y
 	]
@@ -89,15 +81,6 @@ func _update_label_text(tile_data: Dictionary):
 				if tile_data.resources.food:
 					new_text = "+"
 				l.text = new_text
-		# update encounters labels
-		if "encounters" in keys:
-			if l == self.label_encounters:
-				# if tile has encounter, update label text
-				if self.data.encounters.ready.size() > 0:
-					var new_text = "!"
-					l.text = new_text
-				else:
-					l.text = ""
 
 
 # Called when the node enters the scene tree for the first time.

@@ -2,16 +2,21 @@ extends Controller
 
 # components
 var encounters = {
-	"tile_map": [],
-	"count": 0
+	"tile_map": []
 }
-var encounter_ratio = 0.33
+var init_encounter = {
+	"player": null,
+	"enemies": [],
+	"n_enemies": 0,
+}
+var encounter_chance: float = 0.5
 var n_encounters = 0
 
-var cycle_complete = false
+var encountering = false
+var encounter: Dictionary
 
-# gets r random tiles and returns as an array of objects
-func _get_random_tiles(tiles: Array, r: int) -> Array:
+## gets r random tiles and returns as an array of objects
+func _get_resource_tiles(tiles: Array) -> Array:
 	# flatten terrain map
 	var tiles_flattened = []
 	for x in range(tiles.size()):
@@ -21,9 +26,7 @@ func _get_random_tiles(tiles: Array, r: int) -> Array:
 	
 	# pick r random tiles with resources
 	var tiles_filtered = tiles_flattened.filter(func(t): return t.data.resources.food)
-	var r_tiles = []
-	for n in range(r):
-		r_tiles.append(tiles_filtered.pick_random())
+	var r_tiles = tiles_filtered
 	
 	# validate result
 	var result = OK
@@ -33,42 +36,43 @@ func _get_random_tiles(tiles: Array, r: int) -> Array:
 	return [result, r_tiles]
 
 
-# generates player encounters for the given terrain map
+## determines whether or not the parent tile spawns an encounter
+## returns an array of enemies, or empty if no encounter spawned
+func _spawn_encounter(p: Player, tile: Tile) -> Dictionary:
+	var enemy_controller = self.world.data.controller.enemy_controller
+	var new_enemies = []
+	var current_encounter = self.init_encounter # initialize encounter data
+	# if tile has resources,
+	if tile.data.resources.food:
+		# generate random number r
+		var r = randf_range(0, 1)
+		if r <= self.encounter_chance:
+			# encounter spawned,
+			var map_count = self.world.data.terrain.map_count
+			new_enemies = enemy_controller.spawn_enemies(map_count)
+			# prepare new encounter for processing
+			current_encounter.player = p
+			current_encounter.enemies = new_enemies
+			current_encounter.n_enemies = new_enemies.size()
+			self.encounter = current_encounter
+			self.encountering = true
+			print("Encounter spawned!")
+
+	return current_encounter
+
+
+## generates player encounters for the given terrain map
 func _generate_encounters(tile_map: Array) -> Array:
-	# get world resources
-	var r_available = self.parent.resource_controller.resources.count
-	# update n_encounters to 50% of resource count
-	self.n_encounters = floor(r_available * encounter_ratio)
-	# get n random tiles according to encounter count
-	var results = _get_random_tiles(tile_map, self.n_encounters)
-	var is_OK = results[0]
-	var r_tiles = results[1]
-	# break if could not find random tiles
-	if is_OK != OK:
-		print("Error finding encounter tiles")
-		# return error and current tile_map
-		return [is_OK, tile_map]
 	# loop through terrain and place encounters n_times
 	for x in range(tile_map.size()):
 		for y in range(tile_map[x].size()):
 			# get current tile
 			var t = tile_map[x][y]
-			# initialize encounters struct
+			# initialize encounters data in tile
 			t.data.encounters = {
-				"ready": [],
-				"done": []
+				# callable returns an array of enemies or empty array
+				"spawn": _spawn_encounter.bind(t)
 			}
-			# if the current tile is in r_tiles
-			if t in r_tiles:
-				# place encounter
-				## TODO: elaborate on encounter data
-				t.data.encounters.ready.append(self )
-				self.encounters.count += 1
-	
-	# log result
-	print(
-		"encounters_generated: " + str(self.encounters.count)
-	)
 
 	# validate
 	var result = OK
@@ -76,7 +80,8 @@ func _generate_encounters(tile_map: Array) -> Array:
 		result = ERR_INVALID_DATA
 	return [result, tile_map]
 
-# initializes controller dependencies
+
+## initializes controller dependencies
 func _init_controller() -> Array:
 	# generate player encounters in world tiles
 	var results = _generate_encounters(self.encounters.tile_map)
@@ -90,7 +95,7 @@ func _init_controller() -> Array:
 	return [result, new_tile_map]
 
 
-# Called when the node enters the scene tree for the first time.
+## Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	# initialize encounter system
 	var results = _init_controller()
@@ -106,11 +111,49 @@ func _ready() -> void:
 		print(results)
 
 
-# handles encounter-level data processing
-func process_cycle() -> bool:
-	return self.cycle_complete
+func _process_encounter(current_encounter: Dictionary):
+	print("Processing encounter...")
+	var enemies = current_encounter.enemies
+	var p = current_encounter.player
+	# for each player,
+	# for each enemy,
+	if enemies.size() > 1:
+		for e in enemies:
+			# if either entity is null, stop encounter and initialize data
+			if e == null || p == null:
+				# flag encounter done
+				self.encountering = false
+				current_encounter = self.init_encounter
+			# if both entities good,
+			else:
+				# evaluate combat
+				p.data.controller.evaluate_combat(p, e)
+				e.data.controller.evaluate_combat(e, p)
+	else:
+		# if either entity is null, stop encounter and initialize data
+		var e = enemies.front()
+		if e == null || p == null:
+			# flag encounter done
+			self.encountering = false
+			current_encounter = self.init_encounter
+		# if both entities good,
+		else:
+			# evaluate combat
+			p.data.controller.evaluate_combat(p, e)
+			e.data.controller.evaluate_combat(e, p)
+
+	# return updated encounter
+	return current_encounter
 
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
+## handles encounter-level data processing
+func _process_cycle():
+	var time_controller = self.world.data.controller.time_controller
+	if time_controller.cycling:
+		if self.encountering:
+			_process_encounter(self.encounter)
+
+
+## Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
-	pass
+	_process_cycle()

@@ -11,6 +11,7 @@ var data = {
 		"level": 0,
 		"health": 100, # TODO: make this dynamic on spawn
 		"attack": 10, # TODO: make this dynamic on spawn
+		"hit_chance": 0.75,
 		## TODO: classes
 	},
 	"actions": {

@@ -22,39 +22,41 @@ var exp_cap: int = floor(
 
 
 ## TODO: process rewards considering the cycle results, resources/encounters
-func _process_cycle_rewards(action: Action):
-	# add exp to src if acquired resource
-	if action.has_resource:
-		action.src.data.actions.exp += (self.exp_rate)
-	if action.encountered:
-		action.src.data.actions.exp += int((self.exp_rate) * 1.5)
+func _process_encounter_rewards(encounter: Dictionary):
+	# reward player exp based on number of enemies killed
+	self.player.data.stats.exp += (
+		self.exp_rate * (encounter.n_enemies)
+	)
 	
 	# check if level_up
 	var level_up = false
-	if action.src.data.actions.exp >= self.exp_cap:
+	if self.player.data.stats.exp >= self.exp_cap:
 		## calculate player experience variables
-		self.exp_step = (action.src.data.actions.level)
+		self.exp_step = (self.player.data.stats.level)
 		self.exp_rate = floor((self.exp_step) + (PI * 10))
 		self.exp_cap = floor((self.exp_step) * (self.exp_rate) * (PI * 10))
 		# reset experience value
-		action.src.data.actions.exp = 0
+		self.player.data.stats.exp = 0
 		# increment level
-		action.src.data.actions.level += 1
+		self.player.data.stats.level += 1
 		level_up = true
 	
 	# update exp_cap reference
-	action.src.data.actions.exp_cap = self.exp_cap
+	self.player.data.stats.exp_cap = self.exp_cap
+	
+	# reset player health to max post-encounter
+	self.player.data.stats.health = self.player.data.stats.max_health
 	
 	print(
-		"src_lvl: " + str(action.src.data.actions.level) + " | ",
-		"src_exp: " + str(action.src.data.actions.exp) + " | ",
+		"src_lvl: " + str(self.player.data.stats.level) + " | ",
+		"src_exp: " + str(self.player.data.stats.exp) + " | ",
 		"exp_rate: " + str(self.exp_rate) + " | ",
 		"exp_cap: " + str(self.exp_cap),
 	)
 	
 	# log if level up
 	if level_up:
-		print(action.src.name + " is now level " + str(action.src.data.actions.level))
+		print(self.player.name + " is now level " + str(self.player.data.stats.level))
 
 
 # returns an array of world resources
@@ -67,6 +69,33 @@ func _get_resources() -> Array:
 			if t.data.resources.food:
 				array.append(t)
 	return array
+
+# evaluates combat during an encounter
+func evaluate_combat(p: Player, e: Enemy):
+	var p_health = p.data.stats.health
+	var e_attack = e.data.stats.attack
+	var e_hit = e.data.stats.hit_chance
+	# evaluate if enemy attack is hit
+	var r = randf_range(0, 1)
+	# if random number r is below hit threshold
+	if r <= e_hit:
+		# attack is a hit
+		p_health -= e_attack
+		p.data.stats.health = p_health
+	# if miss,
+	else:
+		# attack is 0 this turn
+		e_attack = 0
+
+	# log results
+	print(
+		e.name + " hits " + p.name + " for " +
+		str(e_attack) + " dmg.", "\n",
+		p.name + " health: " + str(p_health)
+	)
+
+	# check player state after combat
+	_check_player(self.player)
 
 
 ## initializes a new actions controller for a given player
@@ -103,6 +132,7 @@ func _init_player_entity():
 	new_player.data.stats.level = 1
 	new_player.data.stats.exp = self.exp_rate
 	new_player.data.stats.exp_cap = self.exp_cap
+	new_player.data.stats.health = new_player.data.stats.max_health
 
 	self.player = new_player
 	self.add_child(new_player)
@@ -123,15 +153,30 @@ func _ready() -> void:
 		# initialize the actions controller on player
 		new_player = _init_actions_controller(new_player)
 		print("Player initialized.")
+		self.world.data.player = self.player
+
+
+func _check_player(p: Player):
+	# if enemy health is 0 or below
+	if p.data.stats.health <= 0:
+		# if enemy isn't already queued for deletion,
+		if !p.is_queued_for_deletion():
+			# queue for deletion
+			p.queue_free()
 
 
 # determines and processes player logic for a single time cycle
 func _process_cycle():
 	# only process if time cycling,
 	var time_controller = world.data.controller.time_controller
-	if time_controller.cycling:
+	if time_controller.cycling && self.world:
+		# check player health,
+		_check_player(self.player)
+
 		# if resources in world,
-		if self.world.data.terrain.resources.count > 0:
+		if self.world.data.terrain.resources.count > 0 && (
+			! self.player.data.encounters.active
+		):
 			## get closest world resource tile
 			var resources = _get_resources()
 			var n_resources = resources
@@ -140,7 +185,7 @@ func _process_cycle():
 					self.player.global_position.distance_squared_to(a.global_position) <
 					self.player.global_position.distance_squared_to(b.global_position)))
 			var n_resource = n_resources.front()
-			## move player to tile
+			# move player to tile
 			self.player.global_position = lerp(
 				self.player.global_position, n_resource.global_position,
 				1
@@ -156,13 +201,45 @@ func _process_cycle():
 			# get current tile
 			var current_tile = world_controller.utils.get_object_by_grid(
 				self.player.data.grid_idx, self.world.data.terrain.tile_map)
-			# take resources from tile
-			current_tile.data.resources.food = false
-			# update world ref
-			self.world.data.terrain.resources.count -= 1
-			# give resources to player
-			self.player.data.resources.food += 1
-			print("Resource acquired.")
+			# check if encounter
+			var encounter = current_tile.data.encounters["spawn"].call(self.player)
+			# if encounter spawned,
+			if !encounter.enemies.is_empty():
+				# set player to encountering
+				self.player.data.encounters.active = encounter
+			else:
+				# take resources from tile
+				current_tile.data.resources.food = false
+				# update world ref 
+				self.world.data.terrain.resources.count -= 1
+				# give resources to player
+				self.player.data.resources.food += 1
+				print("Resource acquired.")
+
+		# if player encountering,
+		elif self.world.data.terrain.resources.count > 0 && (
+			self.player.data.encounters.active
+		):
+			var world_controller = self.world.data.controller
+			# get encounter controller,
+			var encounter_controller = world_controller.terrain_controller.encounter_controller
+			# check if encounter done,
+			if !encounter_controller.encountering:
+				# set player to done encountering if so
+				self.player.data.encounters.done.append(self.player.data.encounters.active)
+				self.player.data.encounters.active = false
+				# get player rewards
+				_process_encounter_rewards(self.player.data.encounters.done.back())
+				# get current tile
+				var current_tile = world_controller.utils.get_object_by_grid(
+					self.player.data.grid_idx, self.world.data.terrain.tile_map)
+				# take resources from tile
+				current_tile.data.resources.food = false
+				# update world ref 
+				self.world.data.terrain.resources.count -= 1
+				# give resources to player
+				self.player.data.resources.food += 1
+				print("Resource acquired.")
 
 		# if no resources in world,
 		elif self.world.data.terrain.resources.count == 0:

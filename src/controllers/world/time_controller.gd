@@ -7,8 +7,8 @@ var enemy_controller: Controller
 var encounter_controller: Controller
 # components
 var frames = 0
-var frame_rate = 50
-var double_speed = false
+var frame_rate = 60
+var double_speed = true # TODO: debugging
 
 var dependencies = []
 var processing_array = []
@@ -35,11 +35,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		# double the frame rate
 		self.double_speed = ! self.double_speed
 		if self.double_speed:
-			print("1.5x speed")
-			self.frame_rate = 18
+			print("2x speed")
+			self.frame_rate = 30
 		else:
 			print("1x speed")
-			self.frame_rate = 30
+			self.frame_rate = 60
 
 
 # initializes controller dependencies
@@ -55,12 +55,13 @@ func _ready() -> void:
 	print("Time initialized.")
 
 
+# process time-level data for cycle
 func _process_cycle():
 	# update frames
 	frames += 1
 	
 	# only process cycle if tree !paused
-	if !get_tree().paused:
+	if !get_tree().paused || self.world:
 		# if frame interval,
 		if self.frames % self.frame_rate == 0:
 			# update cycle count
@@ -68,6 +69,7 @@ func _process_cycle():
 			# flag time as cycling
 			self.cycling = true
 			# TODO: do time processing
+			print("Starting cycle " + str(self.cycles))
 		# if not frame interval,
 		else:
 			# not cycling
