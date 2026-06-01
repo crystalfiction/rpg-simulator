@@ -4,10 +4,11 @@ extends Controller
 # utils
 var utils_script = preload("res://src/controllers/utils/utils.gd")
 var utils
+var FileLogger
 # script references
 var terrain_controller_script = preload("res://src/controllers/world/terrain_controller.gd")
-var player_controller_script = preload("res://src/controllers/player/player_controller.gd")
-var enemy_controller_script = preload("res://src/controllers/enemy/enemy_controller.gd")
+var player_controller_script = preload("res://src/controllers/entities/player/player_controller.gd")
+var enemy_controller_script = preload("res://src/controllers/entities/enemy/enemy_controller.gd")
 # scene references
 var world_scene = preload("res://src/entities/world/world.tscn")
 var time_controller_scene = preload("res://src/controllers/world/time_controller.tscn")
@@ -140,11 +141,11 @@ func reload_world() -> void:
 # initializes controller dependencies
 func _init_controllers() -> void:
 	# init controller utils script
-	var new_utils = utils_script.new()
+	var new_utils = self.utils_script.new()
 	if new_utils:
 		self.utils = new_utils
 	else:
-		print("World utils error.")
+		FileLogger.log_message("Failed to intiialize utils.")
 	
 	# init functions array
 	var init_controllers = [
@@ -161,18 +162,19 @@ func _init_controllers() -> void:
 		# if error initializing...
 		if result != OK:
 			# print error & pause tree
-			print(error_string(result) + " at script " + str(s))
+			FileLogger.log_message(error_string(result) + " at script " + str(s))
 			self.get_tree().paused = true
 
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	print("Initializing world...")
+	self.FileLogger = $"/root/FileLogger"
+	FileLogger.log_message("Initializing world...")
 	
 	# initialize controller dependencies
 	_init_controllers()
-	
-	print("World initialized.")
+
+	FileLogger.log_message("World initialized.")
 
 
 ## accepts current world entity,
@@ -185,8 +187,10 @@ func _process_cycle(current_world: Entity):
 			# process conditions depending on World.data
 			# if player dead,
 			if self.world.data.player == null:
+				# game is over,
+				FileLogger.log_message("Game over.")
 				# reload world
-				pass
+				reload_world()
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.

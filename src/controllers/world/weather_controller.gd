@@ -1,5 +1,8 @@
 extends Controller
 
+# refs
+var FileLogger
+
 # components
 var weather = {
 	"tile_map": []
@@ -118,7 +121,7 @@ func _calculate_water(tile_map: Array) -> Dictionary:
 
 # processes weather for the current weather_map
 func _optimize_weather(tile_map: Array) -> Array:
-	print("Optimizing weather...")
+	FileLogger.log_message("Optimizing weather...")
 	
 	# calculate features
 	var new_metrics: Dictionary
@@ -138,13 +141,11 @@ func _optimize_weather(tile_map: Array) -> Array:
 		var result = _apply_erosion(tile_map)
 		erosion_cycle += 1
 		# log metrics if complete
-		print(
-			"avg_rainfall: " + str(snapped(new_metrics.avg_rainfall, 0.001)) + " | ",
-			"avg_drainage: " + str(snapped(new_metrics.avg_drainage, 0.001)) + " | ",
-			"avg_water: " + str(snapped(new_metrics.avg_water, 0.001)) + " | ",
-			"avg_erosion: " + str(snapped(new_metrics.avg_erosion * erosion_cycle, 0.001)) + " | ",
-			"erosion_cycles: " + str(snapped(erosion_cycle, 0.001)),
-		)
+		FileLogger.log_message("avg_rainfall: " + str(snapped(new_metrics.avg_rainfall, 0.001)))
+		FileLogger.log_message("avg_drainage: " + str(snapped(new_metrics.avg_drainage, 0.001)))
+		FileLogger.log_message("avg_water: " + str(snapped(new_metrics.avg_water, 0.001)))
+		FileLogger.log_message("avg_erosion: " + str(snapped(new_metrics.avg_erosion * erosion_cycle, 0.001)))
+		FileLogger.log_message("erosion_cycles: " + str(snapped(erosion_cycle, 0.001)))
 		# test result
 		if result:
 			## TODO: elaborate on optimization
@@ -198,6 +199,9 @@ func _init_controller(terrain: Array) -> void:
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
+	# get FileLogger
+	self.FileLogger = $"/root/FileLogger"
+
 	# initialize controller with terrain given on initialization
 	_init_controller(self.weather.tile_map)
 	# optimize weather

@@ -1,5 +1,8 @@
 extends Controller
 
+# refs
+var FileLogger
+
 # components
 var resources = {
 	"tile_map": [],
@@ -77,8 +80,8 @@ func _evaluate_terrain(tile_map: Array) -> Array:
 		metrics_v += keys[m] + ": " + str(snapped(metrics[keys[m]], 0.001))
 		if m < keys.size() - 1:
 			metrics_v += " | "
-	print(metrics_v)
-	print(
+	FileLogger.log_message(metrics_v)
+	FileLogger.log_message(
 		"resources_generated: " + str(self.resources.count)
 	)
 	
@@ -119,6 +122,9 @@ func _init_controller(tile_map: Array) -> Array:
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
+	# get FileLogger
+	self.FileLogger = $"/root/FileLogger"
+
 	# initialize resource system
 	var results = _init_controller(self.resources.tile_map)
 	var is_OK = results[0]

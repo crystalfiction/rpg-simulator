@@ -1,8 +1,9 @@
 extends Controller
 
 # references
+var FileLogger
 var enemy_scene = preload("res://src/entities/enemies/enemy.tscn")
-var actions_controller_script = preload("res://src/controllers/enemy/actions_controller.gd")
+var actions_controller_script = preload("res://src/controllers/entities/actions_controller.gd")
 
 var actions_controller: Controller
 
@@ -60,11 +61,11 @@ func evaluate_combat(e: Enemy, p: Player):
 		# attack is 0 this turn
 		p_attack = 0
 	
-	print(
+	FileLogger.log_message((
 		p.name + " hits " + e.name + " for " +
-		str(p_attack) + " dmg.", "\n",
-		e.name + " health: " + str(e_health)
-	)
+		str(p_attack) + " dmg."
+	))
+	FileLogger.log_message(e.name + " health: " + str(e_health))
 
 	# check enemy state after combat
 	_check_enemies(self.enemies)
@@ -85,7 +86,8 @@ func _check_enemies(enemy_array: Array):
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	pass
+	# get FileLogger
+	self.FileLogger = $"/root/FileLogger"
 
 
 # determines and processes enemy logic for a single time cycle

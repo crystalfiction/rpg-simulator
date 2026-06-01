@@ -18,6 +18,10 @@ config/name="RpgSimulator"
 run/main_scene="uid://do7g2cf1e0wer"
 config/features=PackedStringArray("4.6", "Forward Plus")
 
+[autoload]
+
+FileLogger="*uid://qlpf7wb35p58"
+
 [editor_plugins]
 
 enabled=PackedStringArray()

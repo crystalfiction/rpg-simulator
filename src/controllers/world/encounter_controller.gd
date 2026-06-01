@@ -1,5 +1,8 @@
 extends Controller
 
+# refs
+var FileLogger
+
 # components
 var encounters = {
 	"tile_map": []
@@ -9,7 +12,7 @@ var init_encounter = {
 	"enemies": [],
 	"n_enemies": 0,
 }
-var encounter_chance: float = 0.5
+var encounter_chance: float = 0.33
 var n_encounters = 0
 
 var encountering = false
@@ -56,7 +59,7 @@ func _spawn_encounter(p: Player, tile: Tile) -> Dictionary:
 			current_encounter.n_enemies = new_enemies.size()
 			self.encounter = current_encounter
 			self.encountering = true
-			print("Encounter spawned!")
+			FileLogger.log_message("Encounter spawned!")
 
 	return current_encounter
 
@@ -97,6 +100,8 @@ func _init_controller() -> Array:
 
 ## Called when the node enters the scene tree for the first time.
 func _ready() -> void:
+	# get FileLogger
+	self.FileLogger = $"/root/FileLogger"
 	# initialize encounter system
 	var results = _init_controller()
 	var is_OK = results[0]
@@ -108,11 +113,11 @@ func _ready() -> void:
 		self.parent.terrain.encounters = self.encounters
 	else:
 		# log results if error
-		print(results)
+		FileLogger.log_message(results)
 
 
 func _process_encounter(current_encounter: Dictionary):
-	print("Processing encounter...")
+	FileLogger.log_message("Processing encounter...")
 	var enemies = current_encounter.enemies
 	var p = current_encounter.player
 	# for each player,

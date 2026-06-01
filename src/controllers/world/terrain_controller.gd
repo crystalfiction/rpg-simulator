@@ -2,6 +2,7 @@
 extends Controller
 
 # refs
+var FileLogger
 var tile_scene = preload("res://src/entities/world/tile.tscn")
 var weather_controller_script = preload("res://src/controllers/world/weather_controller.gd")
 var resource_controller_script = preload("res://src/controllers/world/resource_controller.gd")
@@ -165,13 +166,11 @@ func _optimize_soil(terrain_map: Array) -> bool:
 	if condition:
 		# conditions met
 		# only print last iteration
-		print(
-			"iterations: " + str(terrain_iterations) + " | ",
-			"tiles: " + str(count) + " | ",
-			"avg_density: " + str(snapped(avg_density, 0.0001)) + " | ",
-			"avg_dist_sq " + str(snapped(avg_dist_sq, 0.0001)) + " | ",
-			"threshold " + str(snapped(threshold, 0.0001))
-		)
+		FileLogger.log_message("iterations: " + str(terrain_iterations))
+		FileLogger.log_message("tiles: " + str(count))
+		FileLogger.log_message("avg_density: " + str(snapped(avg_density, 0.0001)))
+		FileLogger.log_message("avg_dist_sq " + str(snapped(avg_dist_sq, 0.0001)))
+		FileLogger.log_message("threshold " + str(snapped(threshold, 0.0001)))
 		# flag result
 		result = true
 	
@@ -186,7 +185,7 @@ func _optimize_soil(terrain_map: Array) -> bool:
 
 # optimizes terrain in the world tile map
 func _optimize_terrain(terrain_map: Array) -> bool:
-	print("Optimizing terrain...")
+	FileLogger.log_message("Optimizing terrain...")
 	
 	# run terrain optimization cycle
 	var optimized = false
@@ -437,6 +436,9 @@ func _init_controller() -> Error:
 ## initializes controller dependencies: weather, resources, encounters
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
+	# get FileLogger
+	self.FileLogger = $"/root/FileLogger"
+
 	# initialize terrain system
 	_init_controller()
 
@@ -463,7 +465,7 @@ func _ready() -> void:
 			# if error initializing...
 			if result != OK:
 				# print error & pause tree
-				print(error_string(result) + " at script " + str(s))
+				FileLogger.log_message(error_string(result) + " at script " + str(s))
 				self.get_tree().paused = true
 			# if no errors...
 			else:
@@ -482,10 +484,10 @@ func _ready() -> void:
 # processes the controller's time cycle
 func _process_cycle():
 	## General terrain cycle logic
-	# check map completion regardless of time cycle state
-	if self.world.data.terrain.map_complete:
-		# initialize a new terrain
-		_generate_terrain()
+		# check map completion regardless of time cycle state
+		if self.world.data.terrain.map_complete:
+			# initialize a new terrain
+			_generate_terrain()
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.

@@ -1,8 +1,9 @@
 extends Controller
 
 # references
+var FileLogger
 var player_scene = preload("res://src/entities/player/player.tscn")
-var actions_controller_script = preload("res://src/controllers/player/actions_controller.gd")
+var actions_controller_script = preload("res://src/controllers/entities/actions_controller.gd")
 
 var actions_controller: Controller
 
@@ -47,16 +48,14 @@ func _process_encounter_rewards(encounter: Dictionary):
 	# reset player health to max post-encounter
 	self.player.data.stats.health = self.player.data.stats.max_health
 	
-	print(
-		"src_lvl: " + str(self.player.data.stats.level) + " | ",
-		"src_exp: " + str(self.player.data.stats.exp) + " | ",
-		"exp_rate: " + str(self.exp_rate) + " | ",
-		"exp_cap: " + str(self.exp_cap),
-	)
+	FileLogger.log_message("src_lvl: " + str(self.player.data.stats.level))
+	FileLogger.log_message("src_exp: " + str(self.player.data.stats.exp))
+	FileLogger.log_message("exp_rate: " + str(self.exp_rate))
+	FileLogger.log_message("exp_cap: " + str(self.exp_cap))
 	
 	# log if level up
 	if level_up:
-		print(self.player.name + " is now level " + str(self.player.data.stats.level))
+		FileLogger.log_message(self.player.name + " is now level " + str(self.player.data.stats.level))
 
 
 # returns an array of world resources
@@ -88,11 +87,9 @@ func evaluate_combat(p: Player, e: Enemy):
 		e_attack = 0
 
 	# log results
-	print(
-		e.name + " hits " + p.name + " for " +
-		str(e_attack) + " dmg.", "\n",
-		p.name + " health: " + str(p_health)
-	)
+	FileLogger.log_message((e.name + " hits " + p.name + " for "
+		+ str(e_attack) + " dmg."))
+	FileLogger.log_message(p.name + " health: " + str(p_health))
 
 	# check player state after combat
 	_check_player(self.player)
@@ -146,13 +143,15 @@ func _init_player_entity():
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
+	# get FileLogger
+	self.FileLogger = $"/root/FileLogger"
 	## TODO: account for multiple players
 	# initialize the player entity as scene
 	var new_player = _init_player_entity()
 	if new_player:
 		# initialize the actions controller on player
 		new_player = _init_actions_controller(new_player)
-		print("Player initialized.")
+		FileLogger.log_message("Player initialized.")
 		self.world.data.player = self.player
 
 
@@ -169,7 +168,7 @@ func _check_player(p: Player):
 func _process_cycle():
 	# only process if time cycling,
 	var time_controller = world.data.controller.time_controller
-	if time_controller.cycling && self.world:
+	if time_controller.cycling && self.player:
 		# check player health,
 		_check_player(self.player)
 
@@ -214,7 +213,7 @@ func _process_cycle():
 				self.world.data.terrain.resources.count -= 1
 				# give resources to player
 				self.player.data.resources.food += 1
-				print("Resource acquired.")
+				FileLogger.log_message("Resource acquired.")
 
 		# if player encountering,
 		elif self.world.data.terrain.resources.count > 0 && (
@@ -239,7 +238,7 @@ func _process_cycle():
 				self.world.data.terrain.resources.count -= 1
 				# give resources to player
 				self.player.data.resources.food += 1
-				print("Resource acquired.")
+				FileLogger.log_message("Resource acquired.")
 
 		# if no resources in world,
 		elif self.world.data.terrain.resources.count == 0:

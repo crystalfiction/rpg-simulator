@@ -1,6 +1,7 @@
 extends Controller
 
 # references
+var FileLogger
 var terrain_controller: Controller
 var player_controller: Controller
 var enemy_controller: Controller
@@ -50,9 +51,12 @@ func _init_controller():
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
+	# get FileLogger
+	self.FileLogger = $"/root/FileLogger"
+
 	# initialize the controller
 	_init_controller()
-	print("Time initialized.")
+	FileLogger.log_message("Time initialized.")
 
 
 # process time-level data for cycle
@@ -69,7 +73,7 @@ func _process_cycle():
 			# flag time as cycling
 			self.cycling = true
 			# TODO: do time processing
-			print("Starting cycle " + str(self.cycles))
+			FileLogger.log_message("Starting cycle " + str(self.cycles))
 		# if not frame interval,
 		else:
 			# not cycling
