@@ -8,12 +8,8 @@
 
 #### Working
 
-- [ ] rework encounter system
-    - [x] remove current _encounter_ data in tiles
-    - [x] every resource has _r_ chance to spawn an enemy encounter before the resource is collected
-    - [ ] on _encounter_, encounter controller makes calls to involved entity controllers until an entity is defeated
-- [ ] ensure entity controllers are checking for defeat conditions at all times
 - [ ] re-implement actions controller on player/enemy entities
+    - [x] implement fundamental systems: resource collection, encounters, player stat progression
     - [ ] implement timed actions, including player find/movement actions
         - _I have considered how to implement time in this game, and I believe the best model is this:_
             - _the time controller asserts when time cycles occur and how long they are_
@@ -34,6 +30,12 @@
         - _instead of trying to rewrite the internal \_process system, utilize it_
 - [x] make dependency controllers call \_process directly
 - [x] validate dependency controllers at controller-level during processing
+- [x] rework encounter system
+    - [x] remove current _encounter_ data in tiles
+    - [x] every resource has _r_ chance to spawn an enemy encounter before the resource is collected
+    - [x] on _encounter_, encounter controller makes calls to involved entity controllers until an entity is defeated
+- [x] ensure entity controllers are checking for defeat conditions at all times
+- [x] implement logging to log file per game
 
 
 ### Reference
