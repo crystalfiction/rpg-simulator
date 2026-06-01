@@ -9,8 +9,8 @@
 #### Working
 
 - [ ] rework encounter system
-    - [ ] remove current _encounter_ data in tiles
-    - [ ] every resource has _r_ chance to spawn an enemy encounter before the resource is collected
+    - [x] remove current _encounter_ data in tiles
+    - [x] every resource has _r_ chance to spawn an enemy encounter before the resource is collected
     - [ ] on _encounter_, encounter controller makes calls to involved entity controllers until an entity is defeated
 - [ ] ensure entity controllers are checking for defeat conditions at all times
 - [ ] re-implement actions controller on player/enemy entities
