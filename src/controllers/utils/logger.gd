@@ -8,8 +8,15 @@ func _ready() -> void:
         file.store_string("[%s] --- Logger Initialized ---\n" % _get_timestamp())
         file.close()
 
-static func log_message(message: String, level: String = "INFO") -> void:
+static func log_message(
+    caller: Variant,
+    message: String,
+    level: String = "INFO"
+) -> void:
     var timestamp = _get_timestamp()
+    # append caller to beginning of message
+    message = str(caller.name) + ": " + message
+    # format message
     var formatted_message = "[%s] [%s] %s\n" % [timestamp, level.to_upper(), message]
     print(formatted_message.strip_edges())
 
