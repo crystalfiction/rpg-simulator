@@ -23,23 +23,20 @@ var exp_cap: int = floor(
 
 
 ## TODO: process rewards considering the cycle results, resources/encounters
-func _process_encounter_rewards(encounter: Dictionary):
+func _process_rewards(encounter: Dictionary):
 	# reward player exp based on number of enemies killed
 	self.player.data.stats.exp += (
 		self.exp_rate * (encounter.n_enemies)
+	)
+	FileLogger.log_message(
+		str(self.exp_rate * (encounter.n_enemies)) + " exp rewarded."
 	)
 	
 	# check if level_up
 	var level_up = false
 	if self.player.data.stats.exp >= self.exp_cap:
-		## calculate player experience variables
-		self.exp_step = (self.player.data.stats.level)
-		self.exp_rate = floor((self.exp_step) + (PI * 10))
-		self.exp_cap = floor((self.exp_step) * (self.exp_rate) * (PI * 10))
-		# reset experience value
-		self.player.data.stats.exp = 0
-		# increment level
-		self.player.data.stats.level += 1
+		# calculate player stats
+		self.player.data.stats = _calculate_stats(self.player.data.stats, false)
 		level_up = true
 	
 	# update exp_cap reference
@@ -68,6 +65,7 @@ func _get_resources() -> Array:
 			if t.data.resources.food:
 				array.append(t)
 	return array
+
 
 # evaluates combat during an encounter
 func evaluate_combat(p: Player, e: Enemy):
@@ -115,6 +113,39 @@ func _init_actions_controller(p: Player):
 	return result
 
 
+# calculates player stats and returns stats dict
+func _calculate_stats(stats: Dictionary, init: bool = true) -> Dictionary:
+	# if spawning,
+	if init:
+		stats.level = 1
+		stats.exp = self.exp_rate
+		stats.exp_cap = self.exp_cap
+		stats.health = stats.max_health
+	# if level increment,
+	else:
+		## calculate player experience variables
+		self.exp_step = (stats.level)
+		self.exp_rate = floor((self.exp_step) + (PI * 10))
+		self.exp_cap = floor((self.exp_step) * (self.exp_rate) * (PI * 10))
+		# reset experience value
+		stats.exp = 0
+		# increment level
+		stats.level += 1
+		# increment attributes
+		stats.resilience += 1
+		stats.strength += 1
+		stats.dexterity += 1
+		# stats.intelligence += 1
+		stats.max_health += floor(
+			(stats.resilience * PI) + (stats.strength * (PI / 2))
+		)
+		stats.attack = floor(
+			(stats.strength * PI) + (stats.dexterity * (PI / 2))
+		)
+
+	return stats
+
+
 # initializes player entity
 func _init_player_entity():
 	var world_controller = self.world.data.controller
@@ -123,13 +154,10 @@ func _init_player_entity():
 	new_player.data.uid = world_controller.uid_ref
 	new_player.data.pid = self.pid_ref
 	new_player.name = "player_" + str(new_player.data.pid)
-	new_player.data.world = self.world
+	new_player.world = self.world
 	new_player.data.controller = self
 	# stats
-	new_player.data.stats.level = 1
-	new_player.data.stats.exp = self.exp_rate
-	new_player.data.stats.exp_cap = self.exp_cap
-	new_player.data.stats.health = new_player.data.stats.max_health
+	new_player.data.stats = _calculate_stats(new_player.data.stats)
 
 	self.player = new_player
 	self.add_child(new_player)
@@ -225,10 +253,11 @@ func _process_cycle():
 			# check if encounter done,
 			if !encounter_controller.encountering:
 				# set player to done encountering if so
+				## FIXME: rewards being applied on every cycle once initialized
+				# get player rewards
 				self.player.data.encounters.done.append(self.player.data.encounters.active)
 				self.player.data.encounters.active = false
-				# get player rewards
-				_process_encounter_rewards(self.player.data.encounters.done.back())
+				_process_rewards(self.player.data.encounters.done.back())
 				# get current tile
 				var current_tile = world_controller.utils.get_object_by_grid(
 					self.player.data.grid_idx, self.world.data.terrain.tile_map)

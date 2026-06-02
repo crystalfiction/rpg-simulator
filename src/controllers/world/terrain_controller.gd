@@ -211,32 +211,26 @@ func _optimize_terrain(terrain_map: Array) -> bool:
 func _generate_terrain() -> void:
 	# initialize terrain data in tile_map
 	var new_terrain_map = _init_terrain(self.terrain.tile_map)
-	self.terrain.tile_map = new_terrain_map
+	self.terrain.tile_map = new_terrain_map[1]
 
 	# try to optimize terrain
 	_optimize_terrain(self.terrain.tile_map)
 
 	# generate weather on terrain
-	self.weather_controller.generate_weather(self.terrain.tile_map)
-	if self.terrain["weather"] != null:
-		self.terrain.tile_map = self.terrain["weather"].tile_map
+	self.weather_controller.init_controller(self.terrain.tile_map)
 	# generate resources after weather
-	self.resource_controller.generate_resources(self.terrain.weather.tile_map)
-	if self.terrain["resources"] != null:
-		self.terrain.tile_map = self.terrain["resources"].tile_map
+	self.resource_controller.init_controller(self.terrain.weather.tile_map)
 	# generate encounters on terrain
-	self.encounter_controller._generate_encounters(self.terrain.resources.tile_map)
-	if self.terrain["encounters"] != null:
-		self.terrain.tile_map = self.terrain["encounters"].tile_map
-	
-	# increment terrain count
-	self.terrain.map_count += 1
+	self.encounter_controller.init_controller()
 
 	# unflag map_complete
 	self.terrain.map_complete = false
 
 	# update world data to new terrain map after
 	self.world.data.terrain = self.terrain
+
+	# log update
+	FileLogger.log_message("Map " + str(self.terrain.map_count) + " generated.")
 
 
 # accepts a tile_map and returns an array mapped with terrain values
@@ -484,10 +478,11 @@ func _ready() -> void:
 # processes the controller's time cycle
 func _process_cycle():
 	## General terrain cycle logic
-		# check map completion regardless of time cycle state
-		if self.world.data.terrain.map_complete:
-			# initialize a new terrain
-			_generate_terrain()
+		if self.world:
+			# check map completion regardless of time cycle state
+			if self.world.data.terrain.map_complete:
+				# initialize a new terrain
+				_generate_terrain()
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.

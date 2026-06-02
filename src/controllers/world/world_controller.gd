@@ -154,7 +154,7 @@ func _init_controllers() -> void:
 		_init_player_controller(),
 		_init_enemy_controller(),
 		_init_time_controller(),
-		# _init_ui(),
+		_init_ui(),
 	]
 	# run init scrips
 	for s in range(init_controllers.size()):
@@ -188,9 +188,12 @@ func _process_cycle(current_world: Entity):
 			# if player dead,
 			if self.world.data.player == null:
 				# game is over,
-				FileLogger.log_message("Game over.")
+				FileLogger.log_message(
+					"Game over on Map " + str(self.world.data.terrain.map_count)
+				)
 				# reload world
-				reload_world()
+				get_tree().quit()
+				# reload_world()
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.

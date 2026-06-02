@@ -19,9 +19,25 @@ func spawn_enemies(n: int = 1) -> Array:
 	var new_enemies = []
 	for e in range(n):
 		var new_enemy = _init_enemy_entity()
+		new_enemy.data.stats = _calculate_stats(new_enemy.data.stats)
 		new_enemies.append(new_enemy)
 		self.enemies.append(new_enemy)
 	return new_enemies
+
+
+func _calculate_stats(stats: Dictionary) -> Dictionary:
+	var map_level = self.world.data.terrain.map_count
+	stats.level = map_level
+	stats.resilience = stats.level
+	stats.strength = stats.level
+	stats.dexterity = stats.level
+	stats.health += floor(
+		(stats.resilience * PI) + (stats.strength * (PI / 2))
+	)
+	stats.attack = floor(
+		(stats.strength * PI) + (stats.dexterity * (PI / 2))
+	)
+	return stats
 
 
 # initializes enemy entity

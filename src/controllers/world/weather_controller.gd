@@ -160,22 +160,8 @@ func _optimize_weather(tile_map: Array) -> Array:
 	return final
 
 
-# generates a new weather map given a terrain tile_map
-func generate_weather(tile_map: Array) -> void:
-	# initialize controller with current terrain
-	_init_controller(tile_map)
-	# optimize weather
-	var new_tile_map = _optimize_weather(tile_map)
-	# if weather optimized
-	if weather_optimized:
-		# add the new weather map to weather data
-		self.weather.tile_map = new_tile_map
-		# update terrain.weather with new weather data
-		self.parent.terrain.weather = self.weather
-
-
 # initializes the weather system controller
-func _init_controller(terrain: Array) -> void:
+func init_controller(terrain: Array) -> void:
 	# init features
 	rainfall = randf_range(rainfall_min, rainfall_max)
 	
@@ -203,7 +189,7 @@ func _ready() -> void:
 	self.FileLogger = $"/root/FileLogger"
 
 	# initialize controller with terrain given on initialization
-	_init_controller(self.weather.tile_map)
+	init_controller(self.weather.tile_map)
 	# optimize weather
 	var new_tile_map = _optimize_weather(self.weather.tile_map)
 	# if weather optimized

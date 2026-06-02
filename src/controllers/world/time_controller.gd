@@ -46,7 +46,8 @@ func _unhandled_input(event: InputEvent) -> void:
 # initializes controller dependencies
 func _init_controller():
 	# initialize time system
-	frames = 0
+	self.frames = 0
+	self.frame_rate = (self.frame_rate / 2) if (self.double_speed) else (self.framerate)
 
 
 # Called when the node enters the scene tree for the first time.
@@ -65,7 +66,7 @@ func _process_cycle():
 	frames += 1
 	
 	# only process cycle if tree !paused
-	if !get_tree().paused || self.world:
+	if !get_tree().paused && self.world:
 		# if frame interval,
 		if self.frames % self.frame_rate == 0:
 			# update cycle count

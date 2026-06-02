@@ -92,22 +92,8 @@ func _evaluate_terrain(tile_map: Array) -> Array:
 	return [result, tile_map]
 
 
-# generates resources on the passed tile_map
-func generate_resources(tile_map: Array) -> void:
-	# initialize resource system
-	var new_tile_map = _init_controller(tile_map)
-	## TODO: make this actually true
-	self.resources_optimized = true
-	# if resources optimized,
-	if self.resources_optimized:
-		# update resource map
-		self.resources.tile_map = new_tile_map
-		# add to terrain data
-		self.parent.terrain.resources = self.resources
-
-
 # initializes world resource system
-func _init_controller(tile_map: Array) -> Array:
+func init_controller(tile_map: Array) -> Array:
 	# evaluate the current terrain map and place resources
 	var results = _evaluate_terrain(tile_map)
 	var is_OK = results[0]
@@ -126,7 +112,7 @@ func _ready() -> void:
 	self.FileLogger = $"/root/FileLogger"
 
 	# initialize resource system
-	var results = _init_controller(self.resources.tile_map)
+	var results = init_controller(self.resources.tile_map)
 	var is_OK = results[0]
 	var new_tile_map = results[1]
 	if is_OK == OK:

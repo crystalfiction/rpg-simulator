@@ -85,7 +85,7 @@ func _generate_encounters(tile_map: Array) -> Array:
 
 
 ## initializes controller dependencies
-func _init_controller() -> Array:
+func init_controller() -> Array:
 	# generate player encounters in world tiles
 	var results = _generate_encounters(self.encounters.tile_map)
 	var is_OK = results[0]
@@ -103,7 +103,7 @@ func _ready() -> void:
 	# get FileLogger
 	self.FileLogger = $"/root/FileLogger"
 	# initialize encounter system
-	var results = _init_controller()
+	var results = init_controller()
 	var is_OK = results[0]
 	var new_tile_map = results[1]
 	if is_OK == OK:
@@ -117,27 +117,32 @@ func _ready() -> void:
 
 
 func _process_encounter(current_encounter: Dictionary):
-	FileLogger.log_message("Processing encounter...")
 	var enemies = current_encounter.enemies
 	var p = current_encounter.player
+	if enemies.any(func(e): return !is_instance_valid(e) || e == null) || (
+		!is_instance_valid(p)
+	):
+		# flag encounter done
+		self.encountering = false
+		current_encounter = self.init_encounter
+		return current_encounter
+		
+	FileLogger.log_message("Processing encounter...")
+	## FIXME: player currently attacks for every each enemy attack,
+	## but player should only attack once per cycle
 	# for each player,
 	# for each enemy,
 	if enemies.size() > 1:
 		for e in enemies:
-			# if either entity is null, stop encounter and initialize data
-			if e == null || p == null:
-				# flag encounter done
-				self.encountering = false
-				current_encounter = self.init_encounter
 			# if both entities good,
-			else:
 				# evaluate combat
-				p.data.controller.evaluate_combat(p, e)
-				e.data.controller.evaluate_combat(e, p)
+			p.data.controller.evaluate_combat(p, e)
+			e.data.controller.evaluate_combat(e, p)
+			current_encounter.n_enemies = enemies.size()
 	else:
 		# if either entity is null, stop encounter and initialize data
 		var e = enemies.front()
-		if e == null || p == null:
+		if e == null:
 			# flag encounter done
 			self.encountering = false
 			current_encounter = self.init_encounter
@@ -146,6 +151,7 @@ func _process_encounter(current_encounter: Dictionary):
 			# evaluate combat
 			p.data.controller.evaluate_combat(p, e)
 			e.data.controller.evaluate_combat(e, p)
+			current_encounter.n_enemies = enemies.size()
 
 	# return updated encounter
 	return current_encounter
@@ -154,7 +160,7 @@ func _process_encounter(current_encounter: Dictionary):
 ## handles encounter-level data processing
 func _process_cycle():
 	var time_controller = self.world.data.controller.time_controller
-	if time_controller.cycling:
+	if time_controller.cycling && self.world:
 		if self.encountering:
 			_process_encounter(self.encounter)
 
