@@ -8,7 +8,7 @@ var enemy_controller: Controller
 var encounter_controller: Controller
 # components
 var frames = 0
-var frame_rate = 60
+var frame_rate = 30
 var double_speed = true # TODO: debugging
 
 var dependencies = []
@@ -37,10 +37,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		self.double_speed = ! self.double_speed
 		if self.double_speed:
 			print("2x speed")
-			self.frame_rate = 30
+			self.frame_rate = 18
 		else:
 			print("1x speed")
-			self.frame_rate = 60
+			self.frame_rate = 30
 
 
 # initializes controller dependencies
@@ -57,7 +57,7 @@ func _ready() -> void:
 
 	# initialize the controller
 	_init_controller()
-	FileLogger.log_message("Time initialized.")
+	FileLogger.log_message(self , "Time initialized.")
 
 
 # process time-level data for cycle
@@ -74,7 +74,7 @@ func _process_cycle():
 			# flag time as cycling
 			self.cycling = true
 			# TODO: do time processing
-			FileLogger.log_message("Starting cycle " + str(self.cycles))
+			FileLogger.log_message(self , "Starting cycle " + str(self.cycles))
 		# if not frame interval,
 		else:
 			# not cycling

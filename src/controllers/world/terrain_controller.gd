@@ -166,11 +166,11 @@ func _optimize_soil(terrain_map: Array) -> bool:
 	if condition:
 		# conditions met
 		# only print last iteration
-		FileLogger.log_message("iterations: " + str(terrain_iterations))
-		FileLogger.log_message("tiles: " + str(count))
-		FileLogger.log_message("avg_density: " + str(snapped(avg_density, 0.0001)))
-		FileLogger.log_message("avg_dist_sq " + str(snapped(avg_dist_sq, 0.0001)))
-		FileLogger.log_message("threshold " + str(snapped(threshold, 0.0001)))
+		FileLogger.log_message(self , "iterations: " + str(terrain_iterations))
+		FileLogger.log_message(self , "tiles: " + str(count))
+		FileLogger.log_message(self , "avg_density: " + str(snapped(avg_density, 0.0001)))
+		FileLogger.log_message(self , "avg_dist_sq " + str(snapped(avg_dist_sq, 0.0001)))
+		FileLogger.log_message(self , "threshold " + str(snapped(threshold, 0.0001)))
 		# flag result
 		result = true
 	
@@ -185,7 +185,7 @@ func _optimize_soil(terrain_map: Array) -> bool:
 
 # optimizes terrain in the world tile map
 func _optimize_terrain(terrain_map: Array) -> bool:
-	FileLogger.log_message("Optimizing terrain...")
+	FileLogger.log_message(self , "Optimizing terrain...")
 	
 	# run terrain optimization cycle
 	var optimized = false
@@ -230,7 +230,7 @@ func _generate_terrain() -> void:
 	self.world.data.terrain = self.terrain
 
 	# log update
-	FileLogger.log_message("Map " + str(self.terrain.map_count) + " generated.")
+	FileLogger.log_message(self , "Map " + str(self.terrain.map_count) + " generated.")
 
 
 # accepts a tile_map and returns an array mapped with terrain values
@@ -459,7 +459,7 @@ func _ready() -> void:
 			# if error initializing...
 			if result != OK:
 				# print error & pause tree
-				FileLogger.log_message(error_string(result) + " at script " + str(s))
+				FileLogger.log_message(self , error_string(result) + " at script " + str(s))
 				self.get_tree().paused = true
 			# if no errors...
 			else:

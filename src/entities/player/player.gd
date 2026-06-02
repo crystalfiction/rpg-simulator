@@ -15,12 +15,10 @@ var data = {
 		"exp_cap": 0,
 		"health": 0,
 		"max_health": 100,
-		"resilience": 1,
-		"strength": 1,
-		"dexterity": 1,
-		# "intelligence": 1,
 		"attack": 10,
 		"hit_chance": 0.75,
+		"resilience": 1,
+		"strength": 1,
 		## TODO: classes
 	},
 	"actions": {

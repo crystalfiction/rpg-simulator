@@ -121,7 +121,7 @@ func _calculate_water(tile_map: Array) -> Dictionary:
 
 # processes weather for the current weather_map
 func _optimize_weather(tile_map: Array) -> Array:
-	FileLogger.log_message("Optimizing weather...")
+	FileLogger.log_message(self , "Optimizing weather...")
 	
 	# calculate features
 	var new_metrics: Dictionary
@@ -141,11 +141,11 @@ func _optimize_weather(tile_map: Array) -> Array:
 		var result = _apply_erosion(tile_map)
 		erosion_cycle += 1
 		# log metrics if complete
-		FileLogger.log_message("avg_rainfall: " + str(snapped(new_metrics.avg_rainfall, 0.001)))
-		FileLogger.log_message("avg_drainage: " + str(snapped(new_metrics.avg_drainage, 0.001)))
-		FileLogger.log_message("avg_water: " + str(snapped(new_metrics.avg_water, 0.001)))
-		FileLogger.log_message("avg_erosion: " + str(snapped(new_metrics.avg_erosion * erosion_cycle, 0.001)))
-		FileLogger.log_message("erosion_cycles: " + str(snapped(erosion_cycle, 0.001)))
+		FileLogger.log_message(self , "avg_rainfall: " + str(snapped(new_metrics.avg_rainfall, 0.001)))
+		FileLogger.log_message(self , "avg_drainage: " + str(snapped(new_metrics.avg_drainage, 0.001)))
+		FileLogger.log_message(self , "avg_water: " + str(snapped(new_metrics.avg_water, 0.001)))
+		FileLogger.log_message(self , "avg_erosion: " + str(snapped(new_metrics.avg_erosion * erosion_cycle, 0.001)))
+		FileLogger.log_message(self , "erosion_cycles: " + str(snapped(erosion_cycle, 0.001)))
 		# test result
 		if result:
 			## TODO: elaborate on optimization

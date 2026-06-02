@@ -30,12 +30,11 @@ func _calculate_stats(stats: Dictionary) -> Dictionary:
 	stats.level = map_level
 	stats.resilience = stats.level
 	stats.strength = stats.level
-	stats.dexterity = stats.level
 	stats.health += floor(
-		(stats.resilience * PI) + (stats.strength * (PI / 2))
+		(stats.resilience * PI)
 	)
 	stats.attack = floor(
-		(stats.strength * PI) + (stats.dexterity * (PI / 2))
+		(stats.strength * PI)
 	)
 	return stats
 
@@ -77,11 +76,14 @@ func evaluate_combat(e: Enemy, p: Player):
 		# attack is 0 this turn
 		p_attack = 0
 	
-	FileLogger.log_message((
+	FileLogger.log_message(self , (
 		p.name + " hits " + e.name + " for " +
-		str(p_attack) + " dmg."
-	))
-	FileLogger.log_message(e.name + " health: " + str(e_health))
+		str(p_attack) + " dmg."),
+		"COMBAT"
+	)
+	FileLogger.log_message(self , e.name + " health: " + str(e_health),
+		"COMBAT"
+	)
 
 	# check enemy state after combat
 	_check_enemies(self.enemies)

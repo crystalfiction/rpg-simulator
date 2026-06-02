@@ -16,43 +16,10 @@ var cycle_complete = false
 var player_speed = 1
 
 var exp_step: int = 1
-var exp_rate: int = floor(
-	(self.exp_step) + (PI * 10))
-var exp_cap: int = floor(
-	(self.exp_step) * (self.exp_rate) * (PI * 10))
+var exp_rate: int
+var exp_cap: int
 
-
-## TODO: process rewards considering the cycle results, resources/encounters
-func _process_rewards(encounter: Dictionary):
-	# reward player exp based on number of enemies killed
-	self.player.data.stats.exp += (
-		self.exp_rate * (encounter.n_enemies)
-	)
-	FileLogger.log_message(
-		str(self.exp_rate * (encounter.n_enemies)) + " exp rewarded."
-	)
-	
-	# check if level_up
-	var level_up = false
-	if self.player.data.stats.exp >= self.exp_cap:
-		# calculate player stats
-		self.player.data.stats = _calculate_stats(self.player.data.stats, false)
-		level_up = true
-	
-	# update exp_cap reference
-	self.player.data.stats.exp_cap = self.exp_cap
-	
-	# reset player health to max post-encounter
-	self.player.data.stats.health = self.player.data.stats.max_health
-	
-	FileLogger.log_message("src_lvl: " + str(self.player.data.stats.level))
-	FileLogger.log_message("src_exp: " + str(self.player.data.stats.exp))
-	FileLogger.log_message("exp_rate: " + str(self.exp_rate))
-	FileLogger.log_message("exp_cap: " + str(self.exp_cap))
-	
-	# log if level up
-	if level_up:
-		FileLogger.log_message(self.player.name + " is now level " + str(self.player.data.stats.level))
+var regen_rate: float = 0.10
 
 
 # returns an array of world resources
@@ -85,12 +52,83 @@ func evaluate_combat(p: Player, e: Enemy):
 		e_attack = 0
 
 	# log results
-	FileLogger.log_message((e.name + " hits " + p.name + " for "
-		+ str(e_attack) + " dmg."))
-	FileLogger.log_message(p.name + " health: " + str(p_health))
+	FileLogger.log_message(self , (e.name + " hits " + p.name + " for "
+		+ str(e_attack) + " dmg."),
+		"COMBAT"
+	)
+	FileLogger.log_message(self , p.name + " health: " + str(p_health),
+		"COMBAT"
+	)
 
 	# check player state after combat
 	_check_player(self.player)
+
+
+## TODO: process rewards considering the cycle results, resources/encounters
+func _process_rewards(encounter: Dictionary):
+	# reward player exp based on number of enemies killed
+	self.player.data.stats.exp += (
+		self.exp_rate * (encounter.n_enemies)
+	)
+	FileLogger.log_message(self ,
+		str(self.exp_rate * (encounter.n_enemies)) + " exp rewarded."
+	)
+	
+	# check if level_up
+	var level_up = false
+	if self.player.data.stats.exp >= self.exp_cap:
+		# calculate player stats
+		self.player.data.stats = _calculate_stats(self.player.data.stats, false)
+		level_up = true
+	
+		# update exp_cap reference
+		self.player.data.stats.exp_cap = self.exp_cap
+		
+		FileLogger.log_message(self , "src_lvl: " + str(self.player.data.stats.level))
+		FileLogger.log_message(self , "src_exp: " + str(self.player.data.stats.exp))
+		FileLogger.log_message(self , "exp_rate: " + str(self.exp_rate))
+		FileLogger.log_message(self , "exp_cap: " + str(self.exp_cap))
+
+
+	# log if level up
+	if level_up:
+		# reset player health to max if level up
+		self.player.data.stats.health = self.player.data.stats.max_health
+		FileLogger.log_message(self , self.player.name + " is now level " + str(self.player.data.stats.level))
+
+
+# calculates player stats and returns stats dict
+func _calculate_stats(stats: Dictionary, init: bool = true) -> Dictionary:
+	# if init call,
+	if init:
+		stats.level = 1
+		self.exp_rate = floor((self.exp_step) + (PI * 15))
+		self.exp_cap = floor(
+			(self.exp_step) * (self.exp_rate) * (PI * 5))
+		stats.exp_cap = self.exp_cap
+		stats.health = stats.max_health
+	# if level increment call,
+	else:
+		# increment level
+		stats.level += 1
+		## calculate player experience variables
+		self.exp_step = (stats.level)
+		self.exp_rate = floor((self.exp_step) + (PI * 15))
+		self.exp_cap = floor(
+			(self.exp_step) * (self.exp_rate) * (PI * 5))
+		# reset experience value
+		stats.exp = 0
+		# increment attributes
+		stats.resilience += 1
+		stats.strength += 1
+		stats.max_health += floor(
+			(stats.resilience * PI)
+		)
+		stats.attack += floor(
+			(stats.strength * PI)
+		)
+
+	return stats
 
 
 ## initializes a new actions controller for a given player
@@ -111,39 +149,6 @@ func _init_actions_controller(p: Player):
 	if !result:
 		result = ERR_INVALID_PARAMETER
 	return result
-
-
-# calculates player stats and returns stats dict
-func _calculate_stats(stats: Dictionary, init: bool = true) -> Dictionary:
-	# if spawning,
-	if init:
-		stats.level = 1
-		stats.exp = self.exp_rate
-		stats.exp_cap = self.exp_cap
-		stats.health = stats.max_health
-	# if level increment,
-	else:
-		## calculate player experience variables
-		self.exp_step = (stats.level)
-		self.exp_rate = floor((self.exp_step) + (PI * 10))
-		self.exp_cap = floor((self.exp_step) * (self.exp_rate) * (PI * 10))
-		# reset experience value
-		stats.exp = 0
-		# increment level
-		stats.level += 1
-		# increment attributes
-		stats.resilience += 1
-		stats.strength += 1
-		stats.dexterity += 1
-		# stats.intelligence += 1
-		stats.max_health += floor(
-			(stats.resilience * PI) + (stats.strength * (PI / 2))
-		)
-		stats.attack = floor(
-			(stats.strength * PI) + (stats.dexterity * (PI / 2))
-		)
-
-	return stats
 
 
 # initializes player entity
@@ -179,7 +184,7 @@ func _ready() -> void:
 	if new_player:
 		# initialize the actions controller on player
 		new_player = _init_actions_controller(new_player)
-		FileLogger.log_message("Player initialized.")
+		FileLogger.log_message(self , "Player initialized.")
 		self.world.data.player = self.player
 
 
@@ -229,11 +234,12 @@ func _process_cycle():
 			var current_tile = world_controller.utils.get_object_by_grid(
 				self.player.data.grid_idx, self.world.data.terrain.tile_map)
 			# check if encounter
-			var encounter = current_tile.data.encounters["spawn"].call(self.player)
+			var is_encounter = current_tile.data.encounters["spawn"].call(self.player)
 			# if encounter spawned,
-			if !encounter.enemies.is_empty():
+			if is_encounter:
 				# set player to encountering
-				self.player.data.encounters.active = encounter
+				self.player.data.encounters.active = is_encounter
+			# no encounter spawned,
 			else:
 				# take resources from tile
 				current_tile.data.resources.food = false
@@ -241,7 +247,11 @@ func _process_cycle():
 				self.world.data.terrain.resources.count -= 1
 				# give resources to player
 				self.player.data.resources.food += 1
-				FileLogger.log_message("Resource acquired.")
+				# increase player health by regen_rate if resource
+				var regen = self.player.data.stats.max_health * (self.regen_rate)
+				var new_health = clamp(self.player.data.stats.health + regen, 0, self.player.data.stats.max_health)
+				self.player.data.stats.health = new_health
+				FileLogger.log_message(self , "Resource acquired.")
 
 		# if player encountering,
 		elif self.world.data.terrain.resources.count > 0 && (
@@ -252,12 +262,12 @@ func _process_cycle():
 			var encounter_controller = world_controller.terrain_controller.encounter_controller
 			# check if encounter done,
 			if !encounter_controller.encountering:
-				# set player to done encountering if so
-				## FIXME: rewards being applied on every cycle once initialized
-				# get player rewards
-				self.player.data.encounters.done.append(self.player.data.encounters.active)
+				# get player rewards with active encounter
+				var current_encounter = encounter_controller.encounter
+				_process_rewards(current_encounter)
+				# move active encounter to done and set active null
+				self.player.data.encounters.done.append(current_encounter)
 				self.player.data.encounters.active = false
-				_process_rewards(self.player.data.encounters.done.back())
 				# get current tile
 				var current_tile = world_controller.utils.get_object_by_grid(
 					self.player.data.grid_idx, self.world.data.terrain.tile_map)
@@ -267,12 +277,18 @@ func _process_cycle():
 				self.world.data.terrain.resources.count -= 1
 				# give resources to player
 				self.player.data.resources.food += 1
-				FileLogger.log_message("Resource acquired.")
+				# increase player health by regen_rate if resource
+				var regen = self.player.data.stats.max_health * (self.regen_rate)
+				var new_health = clamp(self.player.data.stats.health + regen, 0, self.player.data.stats.max_health)
+				self.player.data.stats.health = new_health
+				FileLogger.log_message(self , "Resource acquired.")
 
 		# if no resources in world,
 		elif self.world.data.terrain.resources.count == 0:
 			# flag map complete on terrain
 			self.world.data.terrain.map_complete = true
+			# reset player health on new map
+			self.player.data.stats.health = self.player.data.stats.max_health
 
 
 func _process(delta: float) -> void:

@@ -10,12 +10,10 @@ var data = {
 	"stats": {
 		"level": 1,
 		"health": 50,
-		"resilience": 1,
-		"strength": 1,
-		"dexterity": 1,
-		# "intelligence": 1,
 		"attack": 5,
 		"hit_chance": 0.75,
+		"resilience": 1,
+		"strength": 1,
 		## TODO: classes
 	},
 	"actions": {

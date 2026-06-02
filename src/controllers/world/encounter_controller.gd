@@ -41,7 +41,7 @@ func _get_resource_tiles(tiles: Array) -> Array:
 
 ## determines whether or not the parent tile spawns an encounter
 ## returns an array of enemies, or empty if no encounter spawned
-func _spawn_encounter(p: Player, tile: Tile) -> Dictionary:
+func _spawn_encounter(p: Player, tile: Tile) -> bool:
 	var enemy_controller = self.world.data.controller.enemy_controller
 	var new_enemies = []
 	var current_encounter = self.init_encounter # initialize encounter data
@@ -59,9 +59,16 @@ func _spawn_encounter(p: Player, tile: Tile) -> Dictionary:
 			current_encounter.n_enemies = new_enemies.size()
 			self.encounter = current_encounter
 			self.encountering = true
-			FileLogger.log_message("Encounter spawned!")
+			var msg = (
+				str(current_encounter.n_enemies) + " enemies appear!"
+				if current_encounter.n_enemies > 1
+				else str(current_encounter.n_enemies) + " enemy appears!"
+			)
+			FileLogger.log_message(self ,
+				msg
+			)
 
-	return current_encounter
+	return self.encountering
 
 
 ## generates player encounters for the given terrain map
@@ -113,7 +120,7 @@ func _ready() -> void:
 		self.parent.terrain.encounters = self.encounters
 	else:
 		# log results if error
-		FileLogger.log_message(results)
+		FileLogger.log_message(self , results)
 
 
 func _process_encounter(current_encounter: Dictionary):
@@ -124,10 +131,9 @@ func _process_encounter(current_encounter: Dictionary):
 	):
 		# flag encounter done
 		self.encountering = false
-		current_encounter = self.init_encounter
-		return current_encounter
+		return
 		
-	FileLogger.log_message("Processing encounter...")
+	FileLogger.log_message(self , "Processing encounter...")
 	## FIXME: player currently attacks for every each enemy attack,
 	## but player should only attack once per cycle
 	# for each player,
@@ -152,9 +158,6 @@ func _process_encounter(current_encounter: Dictionary):
 			p.data.controller.evaluate_combat(p, e)
 			e.data.controller.evaluate_combat(e, p)
 			current_encounter.n_enemies = enemies.size()
-
-	# return updated encounter
-	return current_encounter
 
 
 ## handles encounter-level data processing

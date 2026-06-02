@@ -145,7 +145,7 @@ func _init_controllers() -> void:
 	if new_utils:
 		self.utils = new_utils
 	else:
-		FileLogger.log_message("Failed to intiialize utils.")
+		FileLogger.log_message(self , "Failed to intiialize utils.")
 	
 	# init functions array
 	var init_controllers = [
@@ -162,19 +162,19 @@ func _init_controllers() -> void:
 		# if error initializing...
 		if result != OK:
 			# print error & pause tree
-			FileLogger.log_message(error_string(result) + " at script " + str(s))
+			FileLogger.log_message(self , error_string(result) + " at script " + str(s))
 			self.get_tree().paused = true
 
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	self.FileLogger = $"/root/FileLogger"
-	FileLogger.log_message("Initializing world...")
+	FileLogger.log_message(self , "Initializing world...")
 	
 	# initialize controller dependencies
 	_init_controllers()
 
-	FileLogger.log_message("World initialized.")
+	FileLogger.log_message(self , "World initialized.")
 
 
 ## accepts current world entity,
@@ -188,7 +188,7 @@ func _process_cycle(current_world: Entity):
 			# if player dead,
 			if self.world.data.player == null:
 				# game is over,
-				FileLogger.log_message(
+				FileLogger.log_message(self ,
 					"Game over on Map " + str(self.world.data.terrain.map_count)
 				)
 				# reload world

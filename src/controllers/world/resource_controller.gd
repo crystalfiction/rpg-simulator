@@ -80,8 +80,8 @@ func _evaluate_terrain(tile_map: Array) -> Array:
 		metrics_v += keys[m] + ": " + str(snapped(metrics[keys[m]], 0.001))
 		if m < keys.size() - 1:
 			metrics_v += " | "
-	FileLogger.log_message(metrics_v)
-	FileLogger.log_message(
+	FileLogger.log_message(self , metrics_v)
+	FileLogger.log_message(self ,
 		"resources_generated: " + str(self.resources.count)
 	)
 	
