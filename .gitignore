@@ -3,3 +3,5 @@
 /android/
 
 **/*.tmp
+
+**/world_log.txt
