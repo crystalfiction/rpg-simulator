@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://ce6ie113viqdg" path="res://src/controllers/ui/ui_controller.gd" id="1_2yfeh"]
 [ext_resource type="FontFile" uid="uid://dvjb12pu7hof1" path="res://src/assets/JetBrainsMono-Medium.ttf" id="2_1mjrn"]
 
-[node name="UiController" type="Control" unique_id=694900400 node_paths=PackedStringArray("world_data_container", "player_data_container", "player_exp_bar")]
+[node name="UiController" type="Control" unique_id=694900400 node_paths=PackedStringArray("world_data_container", "player_data_container", "player_exp_bar", "enemy_content", "enemy_data_container")]
 top_level = true
 layout_mode = 3
 anchors_preset = 15
@@ -12,9 +12,11 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_2yfeh")
-world_data_container = NodePath("")
-player_data_container = NodePath("ScreenMargins/FoldableContainer/MarginContainer/VBoxContainer2/PlayerData")
-player_exp_bar = NodePath("ScreenMargins/FoldableContainer/MarginContainer/VBoxContainer2/ProgressBar")
+world_data_container = NodePath("ScreenMargins/VBoxContainer/WorldContainer/MarginContainer/VBoxContainer2/WorldData")
+player_data_container = NodePath("ScreenMargins/VBoxContainer/PlayerContainer/MarginContainer/VBoxContainer2/PlayerData")
+player_exp_bar = NodePath("ScreenMargins/VBoxContainer/PlayerContainer/MarginContainer/VBoxContainer2/ProgressBar")
+enemy_content = NodePath("")
+enemy_data_container = NodePath("")
 
 [node name="ScreenMargins" type="MarginContainer" parent="." unique_id=1299388828]
 layout_mode = 1
@@ -32,33 +34,61 @@ theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 4
 theme_override_constants/margin_bottom = 4
 
-[node name="FoldableContainer" type="FoldableContainer" parent="ScreenMargins" unique_id=1048321919]
+[node name="VBoxContainer" type="VBoxContainer" parent="ScreenMargins" unique_id=1910130805]
+layout_mode = 2
+
+[node name="PlayerContainer" type="FoldableContainer" parent="ScreenMargins/VBoxContainer" unique_id=1048321919]
 layout_mode = 2
 focus_mode = 0
 
-[node name="MarginContainer" type="MarginContainer" parent="ScreenMargins/FoldableContainer" unique_id=77118495]
+[node name="MarginContainer" type="MarginContainer" parent="ScreenMargins/VBoxContainer/PlayerContainer" unique_id=77118495]
 layout_mode = 2
 
-[node name="VBoxContainer2" type="VBoxContainer" parent="ScreenMargins/FoldableContainer/MarginContainer" unique_id=82054486]
+[node name="VBoxContainer2" type="VBoxContainer" parent="ScreenMargins/VBoxContainer/PlayerContainer/MarginContainer" unique_id=82054486]
 layout_mode = 2
 theme_override_constants/separation = 0
 
-[node name="PlayerTitle" type="Label" parent="ScreenMargins/FoldableContainer/MarginContainer/VBoxContainer2" unique_id=890504088]
+[node name="Title" type="Label" parent="ScreenMargins/VBoxContainer/PlayerContainer/MarginContainer/VBoxContainer2" unique_id=890504088]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_1mjrn")
 theme_override_font_sizes/font_size = 18
 text = "Player"
 
-[node name="HSeparator" type="HSeparator" parent="ScreenMargins/FoldableContainer/MarginContainer/VBoxContainer2" unique_id=1206222374]
+[node name="HSeparator" type="HSeparator" parent="ScreenMargins/VBoxContainer/PlayerContainer/MarginContainer/VBoxContainer2" unique_id=1206222374]
 layout_mode = 2
 theme_override_constants/separation = 4
 
-[node name="ProgressBar" type="ProgressBar" parent="ScreenMargins/FoldableContainer/MarginContainer/VBoxContainer2" unique_id=1855685755]
+[node name="ProgressBar" type="ProgressBar" parent="ScreenMargins/VBoxContainer/PlayerContainer/MarginContainer/VBoxContainer2" unique_id=1855685755]
 layout_mode = 2
 show_percentage = false
 
-[node name="PlayerData" type="GridContainer" parent="ScreenMargins/FoldableContainer/MarginContainer/VBoxContainer2" unique_id=460919521]
+[node name="PlayerData" type="GridContainer" parent="ScreenMargins/VBoxContainer/PlayerContainer/MarginContainer/VBoxContainer2" unique_id=460919521]
 layout_mode = 2
-theme_override_constants/h_separation = 0
+theme_override_constants/v_separation = 0
+columns = 2
+
+[node name="WorldContainer" type="FoldableContainer" parent="ScreenMargins/VBoxContainer" unique_id=1742112134]
+layout_mode = 2
+focus_mode = 0
+
+[node name="MarginContainer" type="MarginContainer" parent="ScreenMargins/VBoxContainer/WorldContainer" unique_id=606821382]
+layout_mode = 2
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="ScreenMargins/VBoxContainer/WorldContainer/MarginContainer" unique_id=1211036120]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="Title" type="Label" parent="ScreenMargins/VBoxContainer/WorldContainer/MarginContainer/VBoxContainer2" unique_id=1858623842]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_1mjrn")
+theme_override_font_sizes/font_size = 18
+text = "World"
+
+[node name="HSeparator" type="HSeparator" parent="ScreenMargins/VBoxContainer/WorldContainer/MarginContainer/VBoxContainer2" unique_id=2015001464]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="WorldData" type="GridContainer" parent="ScreenMargins/VBoxContainer/WorldContainer/MarginContainer/VBoxContainer2" unique_id=1456096322]
+layout_mode = 2
 theme_override_constants/v_separation = 0
 columns = 2
