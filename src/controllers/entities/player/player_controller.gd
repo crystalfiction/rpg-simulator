@@ -1,14 +1,9 @@
-extends Controller
+extends EntityController
 
 # references
 var FileLogger
 var player_scene = preload("res://src/entities/player/player.tscn")
-var actions_controller_script = preload("res://src/controllers/entities/actions_controller.gd")
-
-var actions_controller: Controller
-
 var player: Player
-
 # components
 var pid_ref = 0
 var cycle_complete = false
@@ -19,10 +14,12 @@ var exp_step: int = 1
 var exp_rate: int
 var exp_cap: int
 
-var regen_rate: float = 0.10
+var regen_rate: float = 0.5
 
 
-# returns an array of world resources
+# Player Actions
+
+## returns an array of world resources
 func _get_resources() -> Array:
 	var array = []
 	var tile_map = self.world.data.terrain.tile_map
@@ -33,40 +30,12 @@ func _get_resources() -> Array:
 				array.append(t)
 	return array
 
+# Player Stats
 
-# evaluates combat during an encounter
-func evaluate_combat(p: Player, e: Enemy):
-	var p_health = p.data.stats.health
-	var e_attack = e.data.stats.attack
-	var e_hit = e.data.stats.hit_chance
-	# evaluate if enemy attack is hit
-	var r = randf_range(0, 1)
-	# if random number r is below hit threshold
-	if r <= e_hit:
-		# attack is a hit
-		p_health -= e_attack
-		p.data.stats.health = p_health
-	# if miss,
-	else:
-		# attack is 0 this turn
-		e_attack = 0
-
-	# log results
-	FileLogger.log_message(self , (e.name + " hits " + p.name + " for "
-		+ str(e_attack) + " dmg."),
-		"COMBAT"
-	)
-	FileLogger.log_message(self , p.name + " health: " + str(p_health),
-		"COMBAT"
-	)
-
-	# check player state after combat
-	_check_player(self.player)
-
-
-## TODO: process rewards considering the cycle results, resources/encounters
+## process stat rewards considering the cycle's encounter
 func _process_rewards(encounter: Dictionary):
 	# reward player exp based on number of enemies killed
+	# var map_count = self.world.data.terrain.map_count
 	self.player.data.stats.exp += (
 		self.exp_rate * (encounter.n_enemies)
 	)
@@ -96,16 +65,18 @@ func _process_rewards(encounter: Dictionary):
 		self.player.data.stats.health = self.player.data.stats.max_health
 		FileLogger.log_message(self , self.player.name + " is now level " + str(self.player.data.stats.level))
 
-
-# calculates player stats and returns stats dict
+## calculates player stats and returns stats dict
 func _calculate_stats(stats: Dictionary, init: bool = true) -> Dictionary:
 	# if init call,
 	if init:
 		stats.level = 1
-		self.exp_rate = floor((self.exp_step) + (PI * 15))
-		self.exp_cap = floor(
-			(self.exp_step) * (self.exp_rate) * (PI * 5))
+		self.exp_step = (stats.level)
+		self.exp_rate = floor(self.exp_step) * (PI)
+		self.exp_cap = floor(self.exp_step) * (self.exp_rate) * (PI)
 		stats.exp_cap = self.exp_cap
+		# increment attributes
+		stats.max_health += stats.resilience * 10
+		stats.attack += stats.strength
 		stats.health = stats.max_health
 	# if level increment call,
 	else:
@@ -113,45 +84,21 @@ func _calculate_stats(stats: Dictionary, init: bool = true) -> Dictionary:
 		stats.level += 1
 		## calculate player experience variables
 		self.exp_step = (stats.level)
-		self.exp_rate = floor((self.exp_step) + (PI * 15))
-		self.exp_cap = floor(
-			(self.exp_step) * (self.exp_rate) * (PI * 5))
+		self.exp_rate = floor(self.exp_step) * (PI)
+		self.exp_cap = floor(self.exp_step) * (self.exp_rate) * (PI)
 		# reset experience value
 		stats.exp = 0
 		# increment attributes
 		stats.resilience += 1
 		stats.strength += 1
-		stats.max_health += floor(
-			(stats.resilience * PI)
-		)
-		stats.attack += floor(
-			(stats.strength * PI)
-		)
+		stats.max_health += stats.resilience * 10
+		stats.attack += stats.strength
 
 	return stats
 
+# Player Initialization
 
-## initializes a new actions controller for a given player
-func _init_actions_controller(p: Player):
-	# create new action controller for p
-	var new_actions_controller = self.actions_controller_script.new()
-	new_actions_controller.name = "ActionsController"
-	new_actions_controller.parent = self
-	new_actions_controller.world = self.world
-	new_actions_controller.player = p
-	# add ref to player.data.actions.controller
-	p.data.actions.controller = new_actions_controller
-	# add as child to player
-	p.add_child(new_actions_controller)
-	
-	# validate result
-	var result = p
-	if !result:
-		result = ERR_INVALID_PARAMETER
-	return result
-
-
-# initializes player entity
+## initializes a new player entity
 func _init_player_entity():
 	var world_controller = self.world.data.controller
 	var new_player = self.player_scene.instantiate()
@@ -173,43 +120,40 @@ func _init_player_entity():
 
 	return self.player
 
-
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	# get FileLogger
 	self.FileLogger = $"/root/FileLogger"
 	## TODO: account for multiple players
 	# initialize the player entity as scene
 	var new_player = _init_player_entity()
 	if new_player:
-		# initialize the actions controller on player
-		new_player = _init_actions_controller(new_player)
 		FileLogger.log_message(self , "Player initialized.")
 		self.world.data.player = self.player
 
+# Player Processing
 
+## checks player defeat conditions and deletes entity object if met
 func _check_player(p: Player):
-	# if enemy health is 0 or below
+	# if player health is 0 or below
 	if p.data.stats.health <= 0:
 		# if enemy isn't already queued for deletion,
 		if !p.is_queued_for_deletion():
 			# queue for deletion
 			p.queue_free()
 
-
-# determines and processes player logic for a single time cycle
+## determines and processes player logic for a time cycle
 func _process_cycle():
-	# only process if time cycling,
+	# if time cycling,
 	var time_controller = world.data.controller.time_controller
 	if time_controller.cycling && self.player:
 		# check player health,
 		_check_player(self.player)
 
-		# if resources in world,
+		# if resources exist and player encounter inactive,
 		if self.world.data.terrain.resources.count > 0 && (
 			! self.player.data.encounters.active
 		):
-			## get closest world resource tile
+			# get closest resource tile
 			var resources = _get_resources()
 			var n_resources = resources
 			# sort resources by distance to player
@@ -229,7 +173,7 @@ func _process_cycle():
 				self.player.global_position, grid_scale
 			)
 			
-			## interact with tile
+			# interact with tile
 			# get current tile
 			var current_tile = world_controller.utils.get_object_by_grid(
 				self.player.data.grid_idx, self.world.data.terrain.tile_map)
@@ -251,14 +195,15 @@ func _process_cycle():
 				var regen = self.player.data.stats.max_health * (self.regen_rate)
 				var new_health = clamp(self.player.data.stats.health + regen, 0, self.player.data.stats.max_health)
 				self.player.data.stats.health = new_health
+				# log resource acquisition
 				FileLogger.log_message(self , "Resource acquired.")
 
-		# if player encountering,
+		# if resources exist and player encounter active,
 		elif self.world.data.terrain.resources.count > 0 && (
 			self.player.data.encounters.active
 		):
-			var world_controller = self.world.data.controller
 			# get encounter controller,
+			var world_controller = self.world.data.controller
 			var encounter_controller = world_controller.terrain_controller.encounter_controller
 			# check if encounter done,
 			if !encounter_controller.encountering:
@@ -281,6 +226,7 @@ func _process_cycle():
 				var regen = self.player.data.stats.max_health * (self.regen_rate)
 				var new_health = clamp(self.player.data.stats.health + regen, 0, self.player.data.stats.max_health)
 				self.player.data.stats.health = new_health
+				# log resource acquisition
 				FileLogger.log_message(self , "Resource acquired.")
 
 		# if no resources in world,
@@ -290,7 +236,6 @@ func _process_cycle():
 			# reset player health on new map
 			self.player.data.stats.health = self.player.data.stats.max_health
 
-
 func _process(delta: float) -> void:
-	# process cycle
+	# process player cycle
 	_process_cycle()

@@ -5,8 +5,6 @@ var soil_10yr = preload("res://src/assets/world/tile/soil_10YR.tres")
 var soil_5yr = preload("res://src/assets/world/tile/soil_5YR.tres")
 var soil_10r = preload("res://src/assets/world/tile/soil_10R.tres")
 
-var world: World
-
 # components
 @export var label_density: Label
 @export var label_water: Label
@@ -18,9 +16,7 @@ var world: World
 
 @export var tile_color: ColorRect
 
-var data = {
-	"uid": 0,
-	"grid_idx": Vector2i(0, 0),
+var init_data = {
 	"terrain": {},
 	"weather": {},
 	"resources": {
@@ -60,7 +56,6 @@ func _update_color(tile_data: Dictionary):
 	# update color
 	self.tile_color.color = new_color
 
-
 # determines which label text to render given tile data
 func _update_label_text(tile_data: Dictionary):
 	# check for tile data to label in order of importance
@@ -82,6 +77,11 @@ func _update_label_text(tile_data: Dictionary):
 					new_text = "+"
 				l.text = new_text
 
+## define entity class data before instantiation
+func _init() -> void:
+	# add data to entity data dict
+	for k in self.init_data:
+		self.data[k] = self.init_data[k]
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -90,6 +90,7 @@ func _ready() -> void:
 	# init label text
 	_update_label_text(self.data)
 
+# Tile Processing
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:

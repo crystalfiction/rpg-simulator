@@ -1,7 +1,7 @@
 extends Controller
 
 # refs
-var player: Player
+var entity: Entity
 
 
 # Called when the node enters the scene tree for the first time.

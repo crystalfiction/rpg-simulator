@@ -17,7 +17,7 @@ var cycles = 0
 var cycling = null
 
 
-# check for inputs
+## handles user inputs depending on Input Map actions
 func _unhandled_input(event: InputEvent) -> void:
 	# shortcuts: t, space
 	if event.is_action_pressed("world_pause"):
@@ -37,18 +37,16 @@ func _unhandled_input(event: InputEvent) -> void:
 		self.double_speed = ! self.double_speed
 		if self.double_speed:
 			print("2x speed")
-			self.frame_rate = 18
+			self.frame_rate = 15
 		else:
 			print("1x speed")
 			self.frame_rate = 30
 
-
-# initializes controller dependencies
+## initializes controller dependencies
 func _init_controller():
 	# initialize time system
 	self.frames = 0
 	self.frame_rate = (self.frame_rate / 2) if (self.double_speed) else (self.framerate)
-
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -59,8 +57,7 @@ func _ready() -> void:
 	_init_controller()
 	FileLogger.log_message(self , "Time initialized.")
 
-
-# process time-level data for cycle
+## process time-level data for cycle
 func _process_cycle():
 	# update frames
 	frames += 1
@@ -79,7 +76,6 @@ func _process_cycle():
 		else:
 			# not cycling
 			self.cycling = false
-
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:

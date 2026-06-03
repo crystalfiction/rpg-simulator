@@ -1,17 +1,19 @@
 class_name Enemy extends Entity
 
 # components
-var data = {
-	"uid": 0,
+var init_data = {
+	# "uid": 0,
+	# "controller": "",
 	"eid": 0,
-	"controller": "",
 	"parent": "", # the parent entity to the enemy
 	"grid_idx": Vector2i(0, 0),
 	"stats": {
 		"level": 1,
-		"health": 50,
+		"health": 100,
 		"attack": 5,
-		"hit_chance": 0.75,
+		"hit_chance": 0.66,
+		"crit_chance": 0.33,
+		"crit_bonus": 1.50,
 		"resilience": 1,
 		"strength": 1,
 		## TODO: classes
@@ -26,6 +28,8 @@ var data = {
 	## TODO: items
 }
 
-# when this enemy is ready,
-func _ready() -> void:
-	pass
+## define entity class data before _ready
+func _init() -> void:
+	# add data to entity data dict
+	for k in self.init_data:
+		self.data[k] = self.init_data[k]

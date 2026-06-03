@@ -2,12 +2,15 @@ extends Node
 
 const LOG_FILE_PATH = "res://world_log.txt"
 
+## initializes the FileLogger
 func _ready() -> void:
     var file = FileAccess.open(LOG_FILE_PATH, FileAccess.WRITE)
     if file:
         file.store_string("[%s] --- Logger Initialized ---\n" % _get_timestamp())
         file.close()
 
+## logs the passed message to log file ./world_log.txt
+## according to timestamp, caller, and alert level
 static func log_message(
     caller: Variant,
     message: String,
@@ -35,7 +38,8 @@ static func log_message(
         file.flush() # force write immediately to prevent data loss
         file.close()
 
-
+## gets the current datetime and formats it
+## returns formatted datetime String
 static func _get_timestamp() -> String:
     var datetime = Time.get_datetime_dict_from_system()
     return "%04d-%02d-%02d %02d:%02d:%02d" % [

@@ -1,20 +1,33 @@
-extends Controller
+extends EntityController
 
 # references
 var FileLogger
 var enemy_scene = preload("res://src/entities/enemies/enemy.tscn")
-var actions_controller_script = preload("res://src/controllers/entities/actions_controller.gd")
-
-var actions_controller: Controller
-
+var enemies = []
 # components
 var eid_ref = 0
 var cycle_complete = false
 
-var enemies = []
+
+# Enemy Actions
 
 
-# spawns n enemies and returns them
+# Enemy Stats
+
+## calculates enemy stats on spawn
+func _calculate_stats(stats: Dictionary) -> Dictionary:
+	var map_level = self.world.data.terrain.map_count
+	stats.level = map_level
+	# increment attributes
+	stats.resilience = stats.level
+	stats.strength = stats.level
+	stats.health += stats.resilience * 10 * (stats.level * 0.5)
+	stats.attack += stats.strength * (stats.level * 0.5)
+	return stats
+
+# Enemy Initialization
+
+## spawns n enemy entities and returns them in an erray
 func spawn_enemies(n: int = 1) -> Array:
 	var new_enemies = []
 	for e in range(n):
@@ -24,22 +37,7 @@ func spawn_enemies(n: int = 1) -> Array:
 		self.enemies.append(new_enemy)
 	return new_enemies
 
-
-func _calculate_stats(stats: Dictionary) -> Dictionary:
-	var map_level = self.world.data.terrain.map_count
-	stats.level = map_level
-	stats.resilience = stats.level
-	stats.strength = stats.level
-	stats.health += floor(
-		(stats.resilience * PI)
-	)
-	stats.attack = floor(
-		(stats.strength * PI)
-	)
-	return stats
-
-
-# initializes enemy entity
+## initializes enemy entity
 func _init_enemy_entity():
 	var world_controller = self.world.data.controller
 	var new_enemy = self.enemy_scene.instantiate()
@@ -59,36 +57,13 @@ func _init_enemy_entity():
 
 	return e
 
+# Called when the node enters the scene tree for the first time.
+func _ready() -> void:
+	self.FileLogger = $"/root/FileLogger"
 
-func evaluate_combat(e: Enemy, p: Player):
-	var e_health = e.data.stats.health
-	var p_attack = p.data.stats.attack
-	var p_hit = p.data.stats.hit_chance
-	# evaluate if player attack is hit
-	var r = randf_range(0, 1)
-	# if random number r is below hit threshold
-	if r <= p_hit:
-		# attack is a hit
-		e_health -= p_attack
-		e.data.stats.health = e_health
-	# if miss,
-	else:
-		# attack is 0 this turn
-		p_attack = 0
-	
-	FileLogger.log_message(self , (
-		p.name + " hits " + e.name + " for " +
-		str(p_attack) + " dmg."),
-		"COMBAT"
-	)
-	FileLogger.log_message(self , e.name + " health: " + str(e_health),
-		"COMBAT"
-	)
+# Enemy Processing
 
-	# check enemy state after combat
-	_check_enemies(self.enemies)
-
-
+## checks enemy defeat conditions and deletes entity object if met
 func _check_enemies(enemy_array: Array):
 	# loop through enemies
 	for e in enemy_array:
@@ -101,20 +76,12 @@ func _check_enemies(enemy_array: Array):
 				# erase from array
 				enemy_array.erase(e)
 
-
-# Called when the node enters the scene tree for the first time.
-func _ready() -> void:
-	# get FileLogger
-	self.FileLogger = $"/root/FileLogger"
-
-
 # determines and processes enemy logic for a single time cycle
 func _process_cycle(enemy_array: Array):
 	# only evaluate if time cycling
 	var time_controller = self.world.data.controller.time_controller
 	if time_controller.cycling:
 		_check_enemies(enemy_array)
-
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:

@@ -11,10 +11,13 @@ var resources = {
 var resource_iterations: int
 var resources_optimized = null
 
-var food_factor = 0.11 # chance to generate resource on a given tile
+var food_factor = 0.22 # chance to generate food on a given tile
 
 
-# evaluates resource generation given a world's tile conditions
+# Resource Generation
+
+## evaluates resource generation given a world's tile conditions
+## returns the tile with resource flag
 func _evaluate_resources(tile: Tile) -> Tile:
 	# init resources as bool
 	tile.data.resources = {"food": false}
@@ -35,8 +38,8 @@ func _evaluate_resources(tile: Tile) -> Tile:
 	# return the tile with updated data
 	return tile
 
-
-# evaluates current terrain for resource conditions
+## evaluates current terrain for resource conditions
+## returns update tile_map
 func _evaluate_terrain(tile_map: Array) -> Array:
 	# loop through terrain
 	var count = 0
@@ -91,8 +94,9 @@ func _evaluate_terrain(tile_map: Array) -> Array:
 		result = ERR_INVALID_DATA
 	return [result, tile_map]
 
+# Resource Initialization
 
-# initializes world resource system
+## initializes world resource system
 func init_controller(tile_map: Array) -> Array:
 	# evaluate the current terrain map and place resources
 	var results = _evaluate_terrain(tile_map)
@@ -104,7 +108,6 @@ func init_controller(tile_map: Array) -> Array:
 	if result != OK:
 		result = ERR_SCRIPT_FAILED
 	return [result, new_tile_map]
-
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -125,6 +128,7 @@ func _ready() -> void:
 			# add to terrain data
 			self.parent.terrain.resources = self.resources
 
+# Resource Processing
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:

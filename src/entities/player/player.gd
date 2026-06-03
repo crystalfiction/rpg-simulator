@@ -1,22 +1,24 @@
 class_name Player extends Entity
 
 # refs
-var world: World
 
 # components
-var data = {
-	"uid": 0,
-	"pid": 0,
-	"controller": "",
+var init_data = {
+	# "uid": 0,
+	# "controller": "",
 	"grid_idx": Vector2i(0, 0),
+	"pid": 0,
 	"stats": {
 		"level": 1,
 		"exp": 0,
 		"exp_cap": 0,
 		"health": 0,
 		"max_health": 100,
-		"attack": 10,
-		"hit_chance": 0.75,
+		"attack": 5,
+		"last_hit": 0,
+		"hit_chance": 0.66,
+		"crit_chance": 0.33,
+		"crit_bonus": 1.50,
 		"resilience": 1,
 		"strength": 1,
 		## TODO: classes
@@ -37,6 +39,8 @@ var data = {
 	## TODO: items
 }
 
-# when player enters tree,
-func _ready() -> void:
-	pass
+## define entity class data before _ready
+func _init() -> void:
+	# add data to entity data dict
+	for k in self.init_data:
+		self.data[k] = self.init_data[k]

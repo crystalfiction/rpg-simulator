@@ -1,4 +1,3 @@
-## Initializes and controls world.data.terrain and its dependencies
 extends Controller
 
 # refs
@@ -44,9 +43,11 @@ var soil_variance = 0.66
 var soil_texture_factor = 0.44
 
 
-# calculates new soil values for the passed tile, factoring in 
-# neighbor data from the passed tile map
-# returns array of passed tile and its metrics
+# Terrain Simulation
+
+## calculates new soil values for the passed tile,  
+## factors in neighbor data from the passed tile map,
+## returns array of passed tile and its metrics
 func _calculate_soil(tile: Tile, terrain_map: Array) -> Array:
 	# define metrics
 	var n_avg_dist = 0
@@ -93,8 +94,8 @@ func _calculate_soil(tile: Tile, terrain_map: Array) -> Array:
 	# return the passed entity with updated soil value
 	return [tile, n_avg_density, n_avg_dist, avg_texture]
 
-
-# normalize soil values to soil_density_min, soil_density_max
+## normalizes soil values to soil_density_min, soil_density_max
+## returns normalized terrain tile_map
 func _normalize_soil(
 	new_terrain: Array,
 	sd_min: float = soil_density_min,
@@ -125,9 +126,8 @@ func _normalize_soil(
 	avg = avg / count
 	return [new_terrain, avg]
 
-
-# optimizes soil data in the world tile map,
-# returns bool result flag
+## optimizes soil data in the world tile map,
+## returns result flag
 func _optimize_soil(terrain_map: Array) -> bool:
 	# loop through terrain map
 	var avg_density = 0
@@ -182,8 +182,8 @@ func _optimize_soil(terrain_map: Array) -> bool:
 	# true if valid
 	return result
 
-
-# optimizes terrain in the world tile map
+## optimizes terrain in the world tile map
+## returns optimized flag
 func _optimize_terrain(terrain_map: Array) -> bool:
 	FileLogger.log_message(self , "Optimizing terrain...")
 	
@@ -206,8 +206,9 @@ func _optimize_terrain(terrain_map: Array) -> bool:
 	# return optimization results
 	return optimized
 
-
-# generates new terrain on the current tile_map
+## generates new terrain on the current tile_map,
+## initializes dependency controllers weather, resources, encounters
+## in new tile_map and updates World.data.terrain
 func _generate_terrain() -> void:
 	# initialize terrain data in tile_map
 	var new_terrain_map = _init_terrain(self.terrain.tile_map)
@@ -232,8 +233,10 @@ func _generate_terrain() -> void:
 	# log update
 	FileLogger.log_message(self , "Map " + str(self.terrain.map_count) + " generated.")
 
+# Terrain Initialization
 
-# accepts a tile_map and returns an array mapped with terrain values
+## accepts a tile_map
+## returns an array mapped with terrain values
 func _init_terrain(tile_map: Array) -> Array:
 	for x in range(tile_map.size()):
 		for y in range(tile_map[x].size()):
@@ -264,8 +267,8 @@ func _init_terrain(tile_map: Array) -> Array:
 	# return result
 	return [result, tile_map]
 	
-
-# initializes a single tile given a position and world grid index
+## initializes a single tile given a position and world grid index
+## returns the new tile object
 func _init_grid_tile(pos: Vector2i, grid_idx: Vector2i) -> Tile:
 	var uid_ref = self.world.data.controller.uid_ref
 	var new_tile = tile_scene.instantiate()
@@ -286,9 +289,8 @@ func _init_grid_tile(pos: Vector2i, grid_idx: Vector2i) -> Tile:
 	
 	return new_tile
 
-
-# initializes the world tiles using the passed grid array
-# returns nested array of new tiles according to grid index
+## initializes the world tiles using the passed grid array
+## returns nested array of new tiles according to grid index
 func _init_grid_tiles(grid: Array) -> Array:
 	# loop through world grid and create tile at each step
 	var new_tiles = []
@@ -312,9 +314,8 @@ func _init_grid_tiles(grid: Array) -> Array:
 	# return result and flag
 	return [result, new_tiles]
 
-
-# initializes the world grid and returns a nested array of 
-# screen positions organized by grid steps, grid scale
+## initializes the world grid and returns a nested array of 
+## screen positions organized by grid steps, grid scale
 func _init_grid(scale: Vector2i) -> Array:
 	# get screen dimensions
 	var screen_size = get_tree().root.get_viewport().size
@@ -340,8 +341,8 @@ func _init_grid(scale: Vector2i) -> Array:
 	# return result and flag
 	return [result, new_grid]
 
-
-# initializes the encounters system controller script as object
+## initializes the encounters system controller script as object,
+## returns error flag
 func _init_encounters() -> Error:
 	var new_encounter_controller = self.encounter_controller_script.new()
 	new_encounter_controller.name = "EncounterController"
@@ -357,8 +358,8 @@ func _init_encounters() -> Error:
 		result = ERR_DOES_NOT_EXIST
 	return result
 
-
-# initializes the world resources system controller script as object
+## initializes the world resources system controller script as object,
+## returns error flag
 func _init_resources() -> Error:
 	var new_resource_controller = self.resource_controller_script.new()
 	new_resource_controller.name = "ResourceController"
@@ -374,8 +375,8 @@ func _init_resources() -> Error:
 		result = ERR_DOES_NOT_EXIST
 	return result
 
-
-# initializes the weather system controller script as object
+## initializes the weather system controller script as object,
+## returns error flag
 func _init_weather() -> Error:
 	var new_weather_controller = self.weather_controller_script.new()
 	new_weather_controller.name = "WeatherController"
@@ -391,8 +392,8 @@ func _init_weather() -> Error:
 		result = ERR_DOES_NOT_EXIST
 	return result
 
-
-# initializes the world terrain with init terrain data
+## initializes the world terrain with init terrain data,
+## returns error flag
 func _init_controller() -> Error:
 	# initialize world grid
 	var new_grid_results = _init_grid(self.grid_scale)
@@ -426,8 +427,6 @@ func _init_controller() -> Error:
 			result = ERR_SCRIPT_FAILED
 	return result
 
-
-## initializes controller dependencies: weather, resources, encounters
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	# get FileLogger
@@ -474,8 +473,9 @@ func _ready() -> void:
 		# update world data to new terrain map after
 		self.world.data.terrain = self.terrain
 
+# Terrain Processing
 
-# processes the controller's time cycle
+## processes the controller's time cycle
 func _process_cycle():
 	## General terrain cycle logic
 		if self.world:
@@ -483,7 +483,6 @@ func _process_cycle():
 			if self.world.data.terrain.map_complete:
 				# initialize a new terrain
 				_generate_terrain()
-
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:

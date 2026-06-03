@@ -3,18 +3,18 @@ extends Node
 
 
 # lambda functions returning grid offsets for cardinal positions
-# used in get_neighbors
-func _nw(idx: Vector2i): return idx + Vector2i(-1, -1)
-func _n(idx: Vector2i): return idx + Vector2i(0, -1)
-func _ne(idx: Vector2i): return idx + Vector2i(1, -1)
-func _w(idx: Vector2i): return idx + Vector2i(-1, 0)
-func _e(idx: Vector2i): return idx + Vector2i(1, 0)
-func _sw(idx: Vector2i): return idx + Vector2i(-1, 1)
-func _s(idx: Vector2i): return idx + Vector2i(0, 1)
-func _se(idx: Vector2i): return idx + Vector2i(1, 1)
+func _nw(idx: Vector2i) -> Vector2i: return idx + Vector2i(-1, -1)
+func _n(idx: Vector2i) -> Vector2i: return idx + Vector2i(0, -1)
+func _ne(idx: Vector2i) -> Vector2i: return idx + Vector2i(1, -1)
+func _w(idx: Vector2i) -> Vector2i: return idx + Vector2i(-1, 0)
+func _e(idx: Vector2i) -> Vector2i: return idx + Vector2i(1, 0)
+func _sw(idx: Vector2i) -> Vector2i: return idx + Vector2i(-1, 1)
+func _s(idx: Vector2i) -> Vector2i: return idx + Vector2i(0, 1)
+func _se(idx: Vector2i) -> Vector2i: return idx + Vector2i(1, 1)
 
-# gets and saves 8-D tile neighbors for a given entity
-func get_neighbors(entity: Entity, entities: Array):
+## gets and saves 8-D tile neighbors for a given entity,
+## returns flattened neighbors array
+func get_neighbors(entity: Entity, entities: Array) -> Array:
 	# define neighbors array
 	## populate with results of cardinal direction functions for 'entity'
 	var directions = [
@@ -46,7 +46,7 @@ func get_neighbors(entity: Entity, entities: Array):
 	# return the constrained neighbors array
 	return n_constrained
 
-# gets an entity object given the passed grid index and entities array
+## gets and returns an entity object given the passed grid index and entities array
 func get_object_by_grid(grid_idx: Vector2i, entities: Array):
 	# loop through entities
 	for x in range(len(entities)):
@@ -55,16 +55,17 @@ func get_object_by_grid(grid_idx: Vector2i, entities: Array):
 			if entities[x][y].data.grid_idx == grid_idx:
 				return entities[x][y]
 
-# converts grid_idx to world position and returns as Vector2i
+## converts grid_idx to world position and returns as Vector2i
 func grid_to_world(grid_idx: Vector2i, grid_scale: Vector2i) -> Vector2i:
 	return floor(grid_idx * grid_scale)
 
-# converts world position to grid position and returns as Vector2i
+## converts world position to grid position and returns as Vector2i
 func world_to_grid(world_pos: Vector2i, grid_scale: Vector2i) -> Vector2i:
 	return floor(world_pos / grid_scale)
 
-# gets the most prominent soil texture in a tile given soil data
-# returns new texture as String
+## gets the most prominent soil texture in a tile's given soil data
+## according to total average soil density
+## returns new texture as String
 func get_soil_texture(entity: Entity) -> String:
 	var keys = entity.data.keys()
 	if "terrain" not in keys:
@@ -83,7 +84,7 @@ func get_soil_texture(entity: Entity) -> String:
 	
 	return new_texture
 
-# gets the most common string in an array and returns
+## gets the most common string in an array and returns as String
 func common_string(arr: Array) -> String:
 	if arr.is_empty():
 		return ""
@@ -103,7 +104,7 @@ func common_string(arr: Array) -> String:
 			
 	return most_common
 
-# Calculates the Z-score for a specific value based on an entire dataset
+## calculates the Z-score for a specific value based on an entire dataset
 func z_score_normalize(value: float, neighbors: Array) -> float:
 	if neighbors.size() == 0:
 		return 0.0

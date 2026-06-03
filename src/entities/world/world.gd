@@ -1,9 +1,9 @@
 class_name World extends Entity
 
-# components
-var data = {
-	"uid": 0,
-	"controller": "",
+# for reference
+var init_data = {
+	# "uid": 0,
+	# "controller": "",
 	"terrain": {
 		"grid": [], # [[ Vector2i(x, y) ]]
 		"tile_map": [], # [[ Tile<Sprite2D> ]]
@@ -21,6 +21,6 @@ var data = {
 	},
 }
 
-# when World ready,
-func _ready() -> void:
+## define entity class data before instantiation
+func _init() -> void:
 	pass

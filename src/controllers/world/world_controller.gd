@@ -1,4 +1,3 @@
-## Initializes and controls entity.world according to its dependencies
 extends Controller
 
 # utils
@@ -22,9 +21,10 @@ var enemy_controller: Controller
 # components
 var uid_ref = 0
 
-## Ui Controllers
 
-# initializes the ui controller scene
+# Ui Controllers
+
+## initializes the ui controller scene
 func _init_ui() -> Error:
 	var new_ui = ui_scene.instantiate()
 	new_ui.name = "UiController"
@@ -37,7 +37,6 @@ func _init_ui() -> Error:
 	if ! self.ui_controller:
 		result = ERR_DOES_NOT_EXIST
 	return result
-
 
 ## Enemy Controllers
 
@@ -56,10 +55,9 @@ func _init_enemy_controller() -> Error:
 		result = ERR_DOES_NOT_EXIST
 	return result
 
+# Player Controllers
 
-## Player Controllers
-
-# initializes the player system controller script as object
+## initializes the player system controller script as object
 func _init_player_controller() -> Error:
 	var new_player_controller = self.player_controller_script.new()
 	new_player_controller.name = "PlayerController"
@@ -75,10 +73,9 @@ func _init_player_controller() -> Error:
 		result = ERR_DOES_NOT_EXIST
 	return result
 
+# World Initialization
 
-## World System Controllers
-
-# initializes the time system controller script as object
+## initializes the time system controller script as object
 func _init_time_controller() -> Error:
 	var new_time_controller = self.time_controller_scene.instantiate()
 	new_time_controller.name = "TimeController"
@@ -93,8 +90,7 @@ func _init_time_controller() -> Error:
 		result = ERR_DOES_NOT_EXIST
 	return result
 
-
-# initializes the terrain system controller script as object
+## initializes the terrain system controller script as object
 func _init_terrain_controller() -> Error:
 	var new_terrain_controller = self.terrain_controller_script.new()
 	new_terrain_controller.name = "TerrainController"
@@ -109,8 +105,7 @@ func _init_terrain_controller() -> Error:
 		result = ERR_DOES_NOT_EXIST
 	return result
 
-
-# initializes the world entity as scene
+## initializes the world entity as scene
 func _init_world_entity() -> Error:
 	# create new world obj
 	var new_world = self.world_scene.instantiate()
@@ -131,14 +126,7 @@ func _init_world_entity() -> Error:
 		result = ERR_INVALID_PARAMETER
 	return result
 
-
-# fully reloads the current world_controller scene
-func reload_world() -> void:
-	## TODO: account for lingering null references to deleted objs
-	get_tree().reload_current_scene()
-
-
-# initializes controller dependencies
+## initializes controller dependencies
 func _init_controllers() -> void:
 	# init controller utils script
 	var new_utils = self.utils_script.new()
@@ -165,8 +153,7 @@ func _init_controllers() -> void:
 			FileLogger.log_message(self , error_string(result) + " at script " + str(s))
 			self.get_tree().paused = true
 
-
-# Called when the node enters the scene tree for the first time.
+## Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	self.FileLogger = $"/root/FileLogger"
 	FileLogger.log_message(self , "Initializing world...")
@@ -176,27 +163,34 @@ func _ready() -> void:
 
 	FileLogger.log_message(self , "World initialized.")
 
+# World Processing
 
 ## accepts current world entity,
 ## validates world data and returns result flag
 func _process_cycle(current_world: Entity):
-	# if time_controller is cycling,
+	# if time_controller is cycling (game is active),
 	if self.time_controller.cycling:
-		# result is OK unless otherwise specified,
-		if current_world:
-			# process conditions depending on World.data
-			# if player dead,
-			if self.world.data.player == null:
+		# if world is valid,
+		if current_world != null && is_instance_valid(current_world):
+			## process world state conditions
+			# Player
+			var player = self.world.data.player
+			if player == null || !is_instance_valid(player):
 				# game is over,
 				FileLogger.log_message(self ,
 					"Game over on Map " + str(self.world.data.terrain.map_count)
 				)
-				# reload world
-				get_tree().quit()
-				# reload_world()
+				# reload game
+				get_tree().reload_current_scene()
 
+		# if world invalid,
+		else:
+			# world is not valid,
+			FileLogger.log_message(self , "World is invalid, ending game.")
+			# quit game, world invalid
+			get_tree().quit()
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
+## Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
 	# process cycle
 	_process_cycle(self.world)

@@ -21,8 +21,9 @@ var soil_density_factor = 0.66
 
 var erosion_factor = 0.11
 
+# Weather Simulation
 
-# applies erosion to the current weather_map given the paramaters
+## applies erosion to the current weather_map given the paramaters
 func _apply_erosion(tile_map: Array) -> Array:
 	var avg_erosion = 0.0
 	var count = 0
@@ -49,8 +50,7 @@ func _apply_erosion(tile_map: Array) -> Array:
 	# return new map
 	return tile_map
 
-
-# calculates erosion values per tile given water values
+## calculates erosion values per tile given water values
 func _calculate_erosion(tile_map: Array) -> Dictionary:
 	var avg_erosion = 0.0
 	var avg_soil_density = 0.0
@@ -80,8 +80,7 @@ func _calculate_erosion(tile_map: Array) -> Dictionary:
 	# return metrics
 	return metrics
 
-
-# calculates water values per tile given rainfall, drainage
+## calculates water values per tile given rainfall, drainage
 func _calculate_water(tile_map: Array) -> Dictionary:
 	var avg_rainfall = 0.0
 	var avg_drainage = 0.0
@@ -118,8 +117,7 @@ func _calculate_water(tile_map: Array) -> Dictionary:
 	# return metrics
 	return metrics
 
-
-# processes weather for the current weather_map
+## processes weather for the current weather_map
 func _optimize_weather(tile_map: Array) -> Array:
 	FileLogger.log_message(self , "Optimizing weather...")
 	
@@ -159,8 +157,9 @@ func _optimize_weather(tile_map: Array) -> Array:
 
 	return final
 
+# Weather Initialization
 
-# initializes the weather system controller
+## initializes the weather system controller
 func init_controller(terrain: Array) -> void:
 	# init features
 	rainfall = randf_range(rainfall_min, rainfall_max)
@@ -182,7 +181,6 @@ func init_controller(terrain: Array) -> void:
 	# reset metrics
 	weather_iterations = 0
 
-
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	# get FileLogger
@@ -199,6 +197,7 @@ func _ready() -> void:
 		# update terrain.weather with new weather data
 		self.parent.terrain.weather = self.weather
 
+# Weather Processing
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:

@@ -18,6 +18,8 @@ var n_encounters = 0
 var encountering = false
 var encounter: Dictionary
 
+# Encounter Generation
+
 ## gets r random tiles and returns as an array of objects
 func _get_resource_tiles(tiles: Array) -> Array:
 	# flatten terrain map
@@ -38,7 +40,6 @@ func _get_resource_tiles(tiles: Array) -> Array:
 		result = ERR_INVALID_PARAMETER
 	return [result, r_tiles]
 
-
 ## determines whether or not the parent tile spawns an encounter
 ## returns an array of enemies, or empty if no encounter spawned
 func _spawn_encounter(p: Player, tile: Tile) -> bool:
@@ -51,8 +52,10 @@ func _spawn_encounter(p: Player, tile: Tile) -> bool:
 		var r = randf_range(0, 1)
 		if r <= self.encounter_chance:
 			# encounter spawned,
+			# spawn enemies,
 			var map_count = self.world.data.terrain.map_count
-			new_enemies = enemy_controller.spawn_enemies(map_count)
+			# var n_enemies = ceil(map_count / 2.5)
+			new_enemies = enemy_controller.spawn_enemies(1) # only spawn 1 enemy
 			# prepare new encounter for processing
 			current_encounter.player = p
 			current_encounter.enemies = new_enemies
@@ -69,7 +72,6 @@ func _spawn_encounter(p: Player, tile: Tile) -> bool:
 			)
 
 	return self.encountering
-
 
 ## generates player encounters for the given terrain map
 func _generate_encounters(tile_map: Array) -> Array:
@@ -90,8 +92,10 @@ func _generate_encounters(tile_map: Array) -> Array:
 		result = ERR_INVALID_DATA
 	return [result, tile_map]
 
+# Encounter Initialization
 
 ## initializes controller dependencies
+## returns result flag and tile_map
 func init_controller() -> Array:
 	# generate player encounters in world tiles
 	var results = _generate_encounters(self.encounters.tile_map)
@@ -103,7 +107,6 @@ func init_controller() -> Array:
 	if is_OK != OK:
 		result = ERR_INVALID_DATA
 	return [result, new_tile_map]
-
 
 ## Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -122,7 +125,9 @@ func _ready() -> void:
 		# log results if error
 		FileLogger.log_message(self , results)
 
+# Encounter Processing
 
+## processes the current encounter and evaluates state
 func _process_encounter(current_encounter: Dictionary):
 	var enemies = current_encounter.enemies
 	var p = current_encounter.player
@@ -134,14 +139,12 @@ func _process_encounter(current_encounter: Dictionary):
 		return
 		
 	FileLogger.log_message(self , "Processing encounter...")
-	## FIXME: player currently attacks for every each enemy attack,
-	## but player should only attack once per cycle
+	## FIXME: with multiple enemies, player attacks for every enemy attack per encounter
 	# for each player,
 	# for each enemy,
 	if enemies.size() > 1:
 		for e in enemies:
-			# if both entities good,
-				# evaluate combat
+			# evaluate combat
 			p.data.controller.evaluate_combat(p, e)
 			e.data.controller.evaluate_combat(e, p)
 			current_encounter.n_enemies = enemies.size()
@@ -159,14 +162,12 @@ func _process_encounter(current_encounter: Dictionary):
 			e.data.controller.evaluate_combat(e, p)
 			current_encounter.n_enemies = enemies.size()
 
-
 ## handles encounter-level data processing
 func _process_cycle():
 	var time_controller = self.world.data.controller.time_controller
 	if time_controller.cycling && self.world:
 		if self.encountering:
 			_process_encounter(self.encounter)
-
 
 ## Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
