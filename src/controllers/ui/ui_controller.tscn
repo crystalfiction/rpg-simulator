@@ -3,7 +3,10 @@
 [ext_resource type="Script" uid="uid://ce6ie113viqdg" path="res://src/controllers/ui/ui_controller.gd" id="1_2yfeh"]
 [ext_resource type="FontFile" uid="uid://dvjb12pu7hof1" path="res://src/assets/JetBrainsMono-Medium.ttf" id="2_1mjrn"]
 
-[node name="UiController" type="Control" unique_id=694900400 node_paths=PackedStringArray("world_data_container", "player_data_container", "player_exp_bar", "enemy_content", "enemy_data_container")]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1mjrn"]
+bg_color = Color(0.4392157, 0.5803922, 0.20784314, 1)
+
+[node name="UiController" type="Control" unique_id=694900400 node_paths=PackedStringArray("world_data_container", "player_data_container", "player_exp_bar", "player_health_bar", "enemy_data_container", "enemy_health_bar")]
 top_level = true
 layout_mode = 3
 anchors_preset = 15
@@ -12,11 +15,12 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_2yfeh")
-world_data_container = NodePath("ScreenMargins/VBoxContainer/WorldContainer/MarginContainer/VBoxContainer2/WorldData")
+world_data_container = NodePath("ScreenMargins/VBoxContainer/PlayerContainer/MarginContainer/VBoxContainer2/WorldData")
 player_data_container = NodePath("ScreenMargins/VBoxContainer/PlayerContainer/MarginContainer/VBoxContainer2/PlayerData")
-player_exp_bar = NodePath("ScreenMargins/VBoxContainer/PlayerContainer/MarginContainer/VBoxContainer2/ProgressBar")
-enemy_content = NodePath("")
-enemy_data_container = NodePath("")
+player_exp_bar = NodePath("ScreenMargins/VBoxContainer/PlayerContainer/MarginContainer/VBoxContainer2/ExpBar")
+player_health_bar = NodePath("ScreenMargins/VBoxContainer/PlayerContainer/MarginContainer/VBoxContainer2/HealthBar")
+enemy_data_container = NodePath("ScreenMargins/VBoxContainer/EnemyContainer/MarginContainer/VBoxContainer2/EnemyData")
+enemy_health_bar = NodePath("ScreenMargins/VBoxContainer/EnemyContainer/MarginContainer/VBoxContainer2/HealthBar")
 
 [node name="ScreenMargins" type="MarginContainer" parent="." unique_id=1299388828]
 layout_mode = 1
@@ -36,6 +40,38 @@ theme_override_constants/margin_bottom = 4
 
 [node name="VBoxContainer" type="VBoxContainer" parent="ScreenMargins" unique_id=1910130805]
 layout_mode = 2
+
+[node name="EnemyContainer" type="FoldableContainer" parent="ScreenMargins/VBoxContainer" unique_id=285824747]
+layout_mode = 2
+focus_mode = 0
+
+[node name="MarginContainer" type="MarginContainer" parent="ScreenMargins/VBoxContainer/EnemyContainer" unique_id=1417466194]
+layout_mode = 2
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="ScreenMargins/VBoxContainer/EnemyContainer/MarginContainer" unique_id=1070531297]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="Title" type="Label" parent="ScreenMargins/VBoxContainer/EnemyContainer/MarginContainer/VBoxContainer2" unique_id=1413830643]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_1mjrn")
+theme_override_font_sizes/font_size = 18
+text = "Enemy"
+
+[node name="HSeparator" type="HSeparator" parent="ScreenMargins/VBoxContainer/EnemyContainer/MarginContainer/VBoxContainer2" unique_id=582106400]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="HealthBar" type="ProgressBar" parent="ScreenMargins/VBoxContainer/EnemyContainer/MarginContainer/VBoxContainer2" unique_id=942419609]
+custom_minimum_size = Vector2(0, 6)
+layout_mode = 2
+theme_override_styles/fill = SubResource("StyleBoxFlat_1mjrn")
+show_percentage = false
+
+[node name="EnemyData" type="GridContainer" parent="ScreenMargins/VBoxContainer/EnemyContainer/MarginContainer/VBoxContainer2" unique_id=1588473823]
+layout_mode = 2
+theme_override_constants/v_separation = 0
+columns = 2
 
 [node name="PlayerContainer" type="FoldableContainer" parent="ScreenMargins/VBoxContainer" unique_id=1048321919]
 layout_mode = 2
@@ -58,7 +94,13 @@ text = "Player"
 layout_mode = 2
 theme_override_constants/separation = 4
 
-[node name="ProgressBar" type="ProgressBar" parent="ScreenMargins/VBoxContainer/PlayerContainer/MarginContainer/VBoxContainer2" unique_id=1855685755]
+[node name="HealthBar" type="ProgressBar" parent="ScreenMargins/VBoxContainer/PlayerContainer/MarginContainer/VBoxContainer2" unique_id=1136681796]
+custom_minimum_size = Vector2(0, 6)
+layout_mode = 2
+theme_override_styles/fill = SubResource("StyleBoxFlat_1mjrn")
+show_percentage = false
+
+[node name="ExpBar" type="ProgressBar" parent="ScreenMargins/VBoxContainer/PlayerContainer/MarginContainer/VBoxContainer2" unique_id=1855685755]
 layout_mode = 2
 show_percentage = false
 
@@ -67,28 +109,7 @@ layout_mode = 2
 theme_override_constants/v_separation = 0
 columns = 2
 
-[node name="WorldContainer" type="FoldableContainer" parent="ScreenMargins/VBoxContainer" unique_id=1742112134]
-layout_mode = 2
-focus_mode = 0
-
-[node name="MarginContainer" type="MarginContainer" parent="ScreenMargins/VBoxContainer/WorldContainer" unique_id=606821382]
-layout_mode = 2
-
-[node name="VBoxContainer2" type="VBoxContainer" parent="ScreenMargins/VBoxContainer/WorldContainer/MarginContainer" unique_id=1211036120]
-layout_mode = 2
-theme_override_constants/separation = 0
-
-[node name="Title" type="Label" parent="ScreenMargins/VBoxContainer/WorldContainer/MarginContainer/VBoxContainer2" unique_id=1858623842]
-layout_mode = 2
-theme_override_fonts/font = ExtResource("2_1mjrn")
-theme_override_font_sizes/font_size = 18
-text = "World"
-
-[node name="HSeparator" type="HSeparator" parent="ScreenMargins/VBoxContainer/WorldContainer/MarginContainer/VBoxContainer2" unique_id=2015001464]
-layout_mode = 2
-theme_override_constants/separation = 4
-
-[node name="WorldData" type="GridContainer" parent="ScreenMargins/VBoxContainer/WorldContainer/MarginContainer/VBoxContainer2" unique_id=1456096322]
+[node name="WorldData" type="GridContainer" parent="ScreenMargins/VBoxContainer/PlayerContainer/MarginContainer/VBoxContainer2" unique_id=1456096322]
 layout_mode = 2
 theme_override_constants/v_separation = 0
 columns = 2
