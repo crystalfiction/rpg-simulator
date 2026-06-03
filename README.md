@@ -9,14 +9,12 @@
 #### Working
 
 - [ ] re-implement actions controller on player/enemy entities
-    - [x] implement fundamental systems: resource collection, encounters, player stat progression
-    - [ ] implement timed actions, including player find/movement actions
-        - _I have considered how to implement time in this game, and I believe the best model is this:_
-            - _the time controller asserts when time cycles occur and how long they are_
-            - _entity actions have a certain duration consisting of time cycle integers_
-            - _entity actions are carried out until completion, but are only evaluated during time cycles_
-                - _since entity actions are whole integers, action completion will be determined by the number of time cycles, rather than the length of the events occuring during a time cycle_
-                - _this also means we can clear up any errors before the start of the next cycle, but after (and not during)events/actions have occurred_
+    - _I have considered how to implement time in this game, and I believe the best model is this:_
+        - _the time controller asserts when time cycles occur and how long they are_
+        - _entity actions have a certain duration consisting of time cycle integers_
+        - _entity actions are carried out until completion, but are only evaluated during time cycles_
+            - _since entity actions are whole integers, action completion will be determined by the number of time cycles, rather than the length of the events occuring during a time cycle_
+            - _this also means we can clear up any errors before the start of the next cycle, but after (and not during)events/actions have occurred_
 
 #### Done
 
@@ -36,6 +34,9 @@
     - [x] on _encounter_, encounter controller makes calls to involved entity controllers until an entity is defeated
 - [x] ensure entity controllers are checking for defeat conditions at all times
 - [x] implement logging to log file per game
+- [x] implement fundamental systems: resource collection, encounters, player stat progression
+- [x] refactor codebase
+- [x] add base entity controller and reorganize player/enemy controller functions according to class hierarchy
 
 
 ### Reference
