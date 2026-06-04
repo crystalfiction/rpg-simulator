@@ -29,7 +29,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	
 	# shortcuts: r
 	if event.is_action_pressed("world_reload"):
-		self.world.data.controller.reload_world()
+		get_tree().reload_current_scene()
 	
 	# shortcuts: s
 	if event.is_action_pressed("world_speed"):

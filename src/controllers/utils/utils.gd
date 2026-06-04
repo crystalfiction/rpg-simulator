@@ -47,7 +47,10 @@ func get_neighbors(entity: Entity, entities: Array) -> Array:
 	return n_constrained
 
 ## gets and returns an entity object given the passed grid index and entities array
-func get_object_by_grid(grid_idx: Vector2i, entities: Array):
+func get_object_by_grid(
+	grid_idx: Vector2i,
+	entities: Array,
+):
 	# loop through entities
 	for x in range(len(entities)):
 		for y in range(len(entities[x])):
@@ -131,3 +134,14 @@ func z_score_normalize(value: float, neighbors: Array) -> float:
 		return 0.0 # Prevent division by zero if dataset has no variance
 	
 	return (value - mean) / std_dev
+
+## accepts a terrain tile map
+## returns an array of world resources
+func get_resources(tile_map: Array) -> Array:
+	var array = []
+	for x in range(tile_map.size()):
+		for y in range(tile_map[x].size()):
+			var t = tile_map[x][y]
+			if t.data.resources.food:
+				array.append(t)
+	return array

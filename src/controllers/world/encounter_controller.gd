@@ -12,7 +12,7 @@ var init_encounter = {
 	"enemies": [],
 	"n_enemies": 0,
 }
-var encounter_chance: float = 0.33
+var encounter_chance: float = 0.50
 var n_encounters = 0
 
 var encountering = false
@@ -41,7 +41,7 @@ func _get_resource_tiles(tiles: Array) -> Array:
 	return [result, r_tiles]
 
 ## determines whether or not the parent tile spawns an encounter
-## returns an array of enemies, or empty if no encounter spawned
+## returns true or false depending on whether encounter was spawned
 func _spawn_encounter(p: Player, tile: Tile) -> bool:
 	var enemy_controller = self.world.data.controller.enemy_controller
 	var new_enemies = []
@@ -131,36 +131,22 @@ func _ready() -> void:
 func _process_encounter(current_encounter: Dictionary):
 	var enemies = current_encounter.enemies
 	var p = current_encounter.player
-	if enemies.any(func(e): return !is_instance_valid(e) || e == null) || (
+	if enemies.all(func(e): return !is_instance_valid(e) || e == null) || (
 		!is_instance_valid(p)
 	):
 		# flag encounter done
 		self.encountering = false
 		return
-		
+	
+	# loop through and delete any enemies that are invalid
+	# until encounter done
+	for e in enemies:
+		if e == null || !is_instance_valid(e):
+			enemies.erase(e)
+
+	# update enemy count if changed
+	current_encounter.n_enemies = enemies.size()
 	FileLogger.log_message(self , "Processing encounter...")
-	## FIXME: with multiple enemies, player attacks for every enemy attack per encounter
-	# for each player,
-	# for each enemy,
-	if enemies.size() > 1:
-		for e in enemies:
-			# evaluate combat
-			p.data.controller.evaluate_combat(p, e)
-			e.data.controller.evaluate_combat(e, p)
-			current_encounter.n_enemies = enemies.size()
-	else:
-		# if either entity is null, stop encounter and initialize data
-		var e = enemies.front()
-		if e == null:
-			# flag encounter done
-			self.encountering = false
-			current_encounter = self.init_encounter
-		# if both entities good,
-		else:
-			# evaluate combat
-			p.data.controller.evaluate_combat(p, e)
-			e.data.controller.evaluate_combat(e, p)
-			current_encounter.n_enemies = enemies.size()
 
 ## handles encounter-level data processing
 func _process_cycle():

@@ -8,14 +8,17 @@ var init_data = {
 	"parent": "", # the parent entity to the enemy
 	"grid_idx": Vector2i(0, 0),
 	"stats": {
-		"level": 1,
-		"health": 100,
-		"attack": 5,
+		"level": 0,
+		"health": 0,
+		"base_health": 100,
+		"max_health": 100,
+		"attack": 0,
+		"base_attack": 5,
 		"hit_chance": 0.66,
-		"crit_chance": 0.33,
+		"crit_chance": 0.11,
 		"crit_bonus": 1.50,
-		"resilience": 1,
-		"strength": 1,
+		"resilience": 0,
+		"strength": 0,
 		## TODO: classes
 	},
 	"actions": {

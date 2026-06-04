@@ -20,7 +20,12 @@ var player_controller: Controller
 var enemy_controller: Controller
 # components
 var uid_ref = 0
+var end_action = true
 
+## handles user inputs depending on Input Map actions
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("world_continue"):
+		end_action = !end_action
 
 # Ui Controllers
 
@@ -63,7 +68,6 @@ func _init_player_controller() -> Error:
 	new_player_controller.name = "PlayerController"
 	new_player_controller.world = self.world
 	new_player_controller.parent = self
-	new_player_controller.process_mode = Node.PROCESS_MODE_PAUSABLE
 	self.player_controller = new_player_controller
 	add_child(new_player_controller)
 	
@@ -174,14 +178,21 @@ func _process_cycle(current_world: Entity):
 		if current_world != null && is_instance_valid(current_world):
 			## process world state conditions
 			# Player
-			var player = self.world.data.player
+			var player = current_world.data.player
+			# if player is not valid,
 			if player == null || !is_instance_valid(player):
-				# game is over,
+				# game is over
 				FileLogger.log_message(self ,
-					"Game over on Map " + str(self.world.data.terrain.map_count)
+					"Game over on Map " + str(current_world.data.terrain.map_count)
 				)
-				# reload game
-				get_tree().reload_current_scene()
+				# quit or restart depending on end_action
+				# toggled via user input using "c" keybind
+				if self.end_action:
+					# quit game
+					get_tree().quit()
+				else:
+					# reload game
+					get_tree().reload_current_scene()
 
 		# if world invalid,
 		else:

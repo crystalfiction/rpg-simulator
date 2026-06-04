@@ -3,10 +3,10 @@ extends EntityController
 # references
 var FileLogger
 var enemy_scene = preload("res://src/entities/enemies/enemy.tscn")
-var enemies = []
 # components
 var eid_ref = 0
-var cycle_complete = false
+
+var enemies = []
 
 
 # Enemy Actions
@@ -14,15 +14,20 @@ var cycle_complete = false
 
 # Enemy Stats
 
-## calculates enemy stats on spawn
-func _calculate_stats(stats: Dictionary) -> Dictionary:
+func _calculate_attributes(stats: Dictionary):
 	var map_level = self.world.data.terrain.map_count
 	stats.level = map_level
-	# increment attributes
 	stats.resilience = stats.level
 	stats.strength = stats.level
-	stats.health += stats.resilience * 10 * (stats.level * 0.5)
-	stats.attack += stats.strength * (stats.level * 0.5)
+	stats.max_health = stats.base_health + (stats.resilience * 25)
+	stats.health = stats.max_health
+	stats.attack = stats.base_attack + (stats.strength * 5)
+	return stats
+
+## calculates enemy stats on spawn
+func _calculate_stats(stats: Dictionary) -> Dictionary:
+	stats = _calculate_attributes(stats)
+	# return updated stats dict
 	return stats
 
 # Enemy Initialization
@@ -37,6 +42,15 @@ func spawn_enemies(n: int = 1) -> Array:
 		self.enemies.append(new_enemy)
 	return new_enemies
 
+## initializes a new action controller for the given player entity
+func _init_action_controller(e: Enemy) -> ActionController:
+	# initialize the controller
+	var new_action_controller = ActionController.new(e)
+	new_action_controller.name = "ActionController"
+	new_action_controller.world = self.world
+	new_action_controller.parent = self
+	return new_action_controller
+
 ## initializes enemy entity
 func _init_enemy_entity():
 	var world_controller = self.world.data.controller
@@ -47,6 +61,8 @@ func _init_enemy_entity():
 	new_enemy.name = "enemy_" + str(new_enemy.data.eid)
 	new_enemy.data.world = self.world
 	new_enemy.data.controller = self
+	# actions
+	new_enemy.data.actions.controller = _init_action_controller(new_enemy)
 
 	var e = new_enemy
 	add_child(new_enemy)
@@ -80,8 +96,14 @@ func _check_enemies(enemy_array: Array):
 func _process_cycle(enemy_array: Array):
 	# only evaluate if time cycling
 	var time_controller = self.world.data.controller.time_controller
-	if time_controller.cycling:
+	if time_controller.cycling && self.world:
+		# check enemies for defeat conditions
 		_check_enemies(enemy_array)
+		
+		# get action for each enemy
+		for e in enemies:
+			e.data.actions.controller.get_action()
+			e.data.actions.controller.evaluate_action()
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:

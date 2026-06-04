@@ -15,7 +15,7 @@ label_density = NodePath("Terrain/Labels/TileData/Density")
 label_water = NodePath("Terrain/Labels/TileData/Water")
 label_erosion = NodePath("Terrain/Labels/TileData/Erosion")
 label_resources = NodePath("Terrain/Labels/Interactables/Resources")
-label_encounters = NodePath("Terrain/Labels/Interactables/Encounters")
+label_encounters = NodePath("")
 label_grid_x = NodePath("Terrain/Labels/GridLabels/x")
 label_grid_y = NodePath("Terrain/Labels/GridLabels/y")
 tile_color = NodePath("Terrain")
@@ -86,16 +86,6 @@ vertical_alignment = 1
 layout_mode = 2
 theme_override_constants/separation = -6
 alignment = 1
-
-[node name="Encounters" type="Label" parent="Terrain/Labels/Interactables" unique_id=1461729585]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_constants/line_spacing = -6
-theme_override_fonts/font = ExtResource("3_mk1qm")
-theme_override_font_sizes/font_size = 13
-horizontal_alignment = 1
-vertical_alignment = 1
-justification_flags = 161
 
 [node name="Resources" type="Label" parent="Terrain/Labels/Interactables" unique_id=772600614]
 layout_mode = 2

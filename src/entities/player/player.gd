@@ -6,28 +6,31 @@ class_name Player extends Entity
 var init_data = {
 	# "uid": 0,
 	# "controller": "",
-	"grid_idx": Vector2i(0, 0),
 	"pid": 0,
+	"grid_idx": Vector2i(0, 0),
 	"stats": {
-		"level": 1,
+		"level": 0,
 		"exp": 0,
 		"exp_cap": 0,
+		"exp_step": 0,
 		"health": 0,
+		"base_health": 150,
 		"max_health": 100,
-		"attack": 5,
-		"last_hit": 0,
+		"regen_rate": 0.33,
+		"attack": 0,
+		"base_attack": 10,
 		"hit_chance": 0.66,
-		"crit_chance": 0.33,
+		"crit_chance": 0.11,
 		"crit_bonus": 1.50,
-		"resilience": 1,
-		"strength": 1,
-		## TODO: classes
+		"resilience": 0,
+		"strength": 0,
+		"wisdom": 0,
+		"largest_hit": 0,
 	},
 	"actions": {
 		"controller": "",
 		"action": null,
-		"last_action": null,
-		## TODO: abilities
+		"history": [],
 	},
 	"resources": {
 		"food": 0
@@ -36,6 +39,8 @@ var init_data = {
 		"active": false,
 		"done": []
 	}
+	## TODO: classes
+	## TODO: abilities
 	## TODO: items
 }
 

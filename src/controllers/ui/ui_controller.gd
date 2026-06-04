@@ -43,8 +43,14 @@ func _update_labels():
 			elif key == "max_health":
 				self.player_health_bar.max_value = entity.data.stats[key]
 				label.text = str(snapped(entity.data.stats[key], 0))
+			elif key == "crit_chance":
+				label.text = str(snapped(entity.data.stats[key], 0.01))
+			elif key == "regen_rate":
+				label.text = str(snapped(entity.data.stats[key], 0.01))
 			elif key == "hit_chance":
 				label.text = str(entity.data.stats[key])
+			elif key == "crit_bonus":
+				label.text = str(snapped(entity.data.stats[key], 0.1))
 			else:
 				label.text = str(snapped(entity.data.stats[key], 0))
 
@@ -57,8 +63,6 @@ func _update_labels():
 				label.text = str(snapped(entity.data.stats[key], 0))
 			elif key == "hit_chance":
 				label.text = str(entity.data.stats[key])
-			elif key == "crit_chance":
-				label.text = str(snapped(entity.data.stats[key], 0.01))
 			else:
 				label.text = str(snapped(entity.data.stats[key], 0))
 
@@ -87,7 +91,7 @@ func _init_enemy_labels():
 					if "stats" in e.data:
 						# for each enemy,
 						for s in e.data.stats:
-							if s == "level" || s == "health" || s == "attack":
+							if s == "level" || s == "health" || s == "attack" || s == "max_health":
 								var data_key = s
 								var new_key_label = Label.new()
 								new_key_label.name = s

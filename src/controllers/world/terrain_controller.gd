@@ -476,15 +476,24 @@ func _ready() -> void:
 # Terrain Processing
 
 ## processes the controller's time cycle
-func _process_cycle():
+func _process_cycle(current_world: World):
 	## General terrain cycle logic
-		if self.world:
+		if current_world:
+			# if no resources left in terrain,
+			var current_terrain = current_world.data.terrain
+			var resources = current_world.data.controller.utils.get_resources(current_terrain.tile_map)
+			var is_resources = !resources.is_empty()
+			if !is_resources:
+				# flag terrain map complete
+				current_world.data.terrain.map_complete = true
+				FileLogger.log_message(self , "No resources found, initializing new map.")
+			
 			# check map completion regardless of time cycle state
-			if self.world.data.terrain.map_complete:
+			if current_world.data.terrain.map_complete:
 				# initialize a new terrain
 				_generate_terrain()
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
 	# process terrain cycle
-	_process_cycle()
+	_process_cycle(self.world)
