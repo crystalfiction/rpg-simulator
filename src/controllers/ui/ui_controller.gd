@@ -8,6 +8,8 @@ var world: World
 @export var player_data_container: GridContainer
 @export var player_exp_bar: ProgressBar
 @export var player_health_bar: ProgressBar
+@export var player_class_label: Label
+
 @export var enemy_data_container: GridContainer
 @export var enemy_health_bar: ProgressBar
 
@@ -148,6 +150,10 @@ func _init_enemy_labels():
 ## initializes player data labels in the player data panel
 func _init_player_labels():
 	var player = self.world.data.player
+	# update class label
+	self.player_class_label.text = player.get_player_class_string()
+	self.player_class_label.label_settings = self.label_settings
+	# update stats grid
 	if "stats" in player.data:
 		for s in player.data.stats:
 			var data_key = s

@@ -101,11 +101,16 @@ func _process_rewards(encounter: Dictionary):
 ## returns updated stats dictionary
 func _calculate_exp(stats: Dictionary) -> Dictionary:
 	stats.level += 1
-	self.exp_step += (10)
-	self.exp_cap = (self.exp_step) * (stats.level * PI)
+	self.exp_step = 10
+	# quadratic formula
+	# self.exp_cap = self.exp_step * (stats.level ** 2)
+	# exponential formula
+	self.exp_cap = self.exp_step * (stats.level - 1) ** 1.5
+
 	stats.exp_step = self.exp_step
 	stats.exp_cap = self.exp_cap
 	stats.exp = 0
+
 	return stats
 
 ## calculates base attribute values for a given stats dictionary
@@ -113,11 +118,10 @@ func _calculate_exp(stats: Dictionary) -> Dictionary:
 func _calculate_attributes(p: Player) -> Dictionary:
 	var stats = p.data.stats
 	# base stats
-	stats.stamina += 2
-	stats.strength += 2
+	stats.stamina += 1
+	stats.strength += 1
 	stats.agility += 1
 	stats.wisdom += 1
-
 	# stamina-based
 	stats.max_health = stats.base_health + (stats.stamina * 25)
 	stats.health = stats.max_health
@@ -127,7 +131,7 @@ func _calculate_attributes(p: Player) -> Dictionary:
 	stats.crit_chance += (stats.agility * 0.0001)
 	stats.dodge_chance += (stats.agility * 0.0001)
 	# wisdom-based
-	stats.exp_step += stats.wisdom
+	# stats.exp_step += stats.wisdom
 	
 	# return stats
 	return stats
@@ -156,7 +160,13 @@ func _init_action_controller(p: Player) -> ActionController:
 ## initializes a new player entity
 func _init_player_entity():
 	var world_controller = self.world.data.controller
+	# create new player scene
 	var new_player = self.player_scene.instantiate()
+	
+	## TODO: get player class
+	# initialize player class and data structure
+	new_player.init_player(Player.PlayerClass.BASE)
+	
 	# metadata
 	new_player.data.uid = world_controller.uid_ref
 	new_player.data.pid = self.pid_ref
@@ -168,6 +178,7 @@ func _init_player_entity():
 	# actions
 	new_player.data.actions.controller = _init_action_controller(new_player)
 	
+	# add player
 	self.player = new_player
 	self.add_child(new_player)
 	
@@ -175,6 +186,7 @@ func _init_player_entity():
 	world_controller.uid_ref += 1
 	self.pid_ref += 1
 
+	# return player
 	return self.player
 
 # Called when the node enters the scene tree for the first time.

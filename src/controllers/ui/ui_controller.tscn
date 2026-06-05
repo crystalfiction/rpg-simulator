@@ -6,7 +6,7 @@
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1mjrn"]
 bg_color = Color(0.4392157, 0.5803922, 0.20784314, 1)
 
-[node name="UiController" type="Control" unique_id=694900400 node_paths=PackedStringArray("world_data_container", "player_data_container", "player_exp_bar", "player_health_bar", "enemy_data_container", "enemy_health_bar")]
+[node name="UiController" type="Control" unique_id=694900400 node_paths=PackedStringArray("world_data_container", "player_data_container", "player_exp_bar", "player_health_bar", "player_class_label", "enemy_data_container", "enemy_health_bar")]
 top_level = true
 layout_mode = 3
 anchors_preset = 15
@@ -19,6 +19,7 @@ world_data_container = NodePath("ScreenMargins/VBoxContainer/PlayerContainer/Mar
 player_data_container = NodePath("ScreenMargins/VBoxContainer/PlayerContainer/MarginContainer/VBoxContainer2/PlayerData")
 player_exp_bar = NodePath("ScreenMargins/VBoxContainer/PlayerContainer/MarginContainer/VBoxContainer2/ExpBar")
 player_health_bar = NodePath("ScreenMargins/VBoxContainer/PlayerContainer/MarginContainer/VBoxContainer2/HealthBar")
+player_class_label = NodePath("ScreenMargins/VBoxContainer/PlayerContainer/MarginContainer/VBoxContainer2/Class")
 enemy_data_container = NodePath("ScreenMargins/VBoxContainer/EnemyContainer/MarginContainer/VBoxContainer2/EnemyData")
 enemy_health_bar = NodePath("ScreenMargins/VBoxContainer/EnemyContainer/MarginContainer/VBoxContainer2/HealthBar")
 
@@ -84,11 +85,16 @@ layout_mode = 2
 layout_mode = 2
 theme_override_constants/separation = 0
 
-[node name="Title" type="Label" parent="ScreenMargins/VBoxContainer/PlayerContainer/MarginContainer/VBoxContainer2" unique_id=890504088]
+[node name="Entity" type="Label" parent="ScreenMargins/VBoxContainer/PlayerContainer/MarginContainer/VBoxContainer2" unique_id=890504088]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_1mjrn")
 theme_override_font_sizes/font_size = 18
 text = "Player"
+
+[node name="Class" type="Label" parent="ScreenMargins/VBoxContainer/PlayerContainer/MarginContainer/VBoxContainer2" unique_id=701654423]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_1mjrn")
+theme_override_font_sizes/font_size = 15
 
 [node name="HSeparator" type="HSeparator" parent="ScreenMargins/VBoxContainer/PlayerContainer/MarginContainer/VBoxContainer2" unique_id=1206222374]
 layout_mode = 2
