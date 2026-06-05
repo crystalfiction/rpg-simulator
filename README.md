@@ -8,7 +8,7 @@
 
 #### Working
 
-- [ ] implement basic attacks
+- [ ] implement basic class structure
 
 #### Done
 
@@ -38,6 +38,7 @@
         - _entity actions are carried out until completion, but are only evaluated during time cycles_
             - _since entity actions are whole integers, action completion will be determined by the number of time cycles, rather than the length of the events occuring during a time cycle_
             - _this also means we can clear up any errors before the start of the next cycle, but after (and not during)events/actions have occurred_
+- [x] implement basic attack action
 
 
 ### Reference
