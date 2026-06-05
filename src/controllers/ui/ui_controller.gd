@@ -30,29 +30,31 @@ func _update_labels():
 		var label = l[2]
 
 		if entity is Player:
-			if key == "exp":
-				# update exp bar
-				self.player_exp_bar.value = entity.data.stats[key]
-				label.text = str(entity.data.stats[key])
-			elif key == "exp_cap":
-				self.player_exp_bar.max_value = entity.data.stats[key]
-				label.text = str(snapped(entity.data.stats[key], 0))
-			elif key == "health":
-				self.player_health_bar.value = entity.data.stats[key]
-				label.text = str(snapped(entity.data.stats[key], 0))
-			elif key == "max_health":
-				self.player_health_bar.max_value = entity.data.stats[key]
-				label.text = str(snapped(entity.data.stats[key], 0))
-			elif key == "crit_chance":
-				label.text = str(snapped(entity.data.stats[key], 0.01))
-			elif key == "regen_rate":
-				label.text = str(snapped(entity.data.stats[key], 0.01))
-			elif key == "hit_chance":
-				label.text = str(entity.data.stats[key])
-			elif key == "crit_bonus":
-				label.text = str(snapped(entity.data.stats[key], 0.1))
-			else:
-				label.text = str(snapped(entity.data.stats[key], 0))
+			if key in entity.data.stats:
+				if key == "exp":
+					# update exp bar
+					self.player_exp_bar.value = entity.data.stats[key]
+					label.text = str(entity.data.stats[key])
+				elif key == "exp_cap":
+					self.player_exp_bar.max_value = entity.data.stats[key]
+					label.text = str(snapped(entity.data.stats[key], 0))
+				elif key == "health":
+					self.player_health_bar.value = entity.data.stats[key]
+					label.text = str(snapped(entity.data.stats[key], 0))
+				elif key == "max_health":
+					self.player_health_bar.max_value = entity.data.stats[key]
+					label.text = str(snapped(entity.data.stats[key], 0))
+				elif key == "crit_chance" || key == "dodge_chance":
+					label.text = str(snapped(entity.data.stats[key], 0.01))
+				elif key == "regen_rate" || key == "base_regen":
+					label.text = str(snapped(entity.data.stats[key], 0.01))
+				elif key == "hit_chance":
+					label.text = str(entity.data.stats[key])
+				elif key == "crit_bonus":
+					label.text = str(snapped(entity.data.stats[key], 0.1))
+				else:
+					label.text = str(snapped(entity.data.stats[key], 0))
+
 
 		if entity is Enemy:
 			if key == "health":
@@ -157,7 +159,7 @@ func _init_player_labels():
 			var data = player.data.stats[s]
 			var new_data_label = Label.new()
 			new_data_label.name = s + "_data"
-			new_data_label.text = str(snapped(data, 0))
+			new_data_label.text = str(data)
 			new_data_label.label_settings = self.label_settings
 
 			var new_label_set = [player, data_key, new_data_label]

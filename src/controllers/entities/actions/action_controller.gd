@@ -54,9 +54,13 @@ func get_action():
 					var enemies = active_encounter.enemies.filter(func(e): return is_instance_valid(e) && e != null)
 					## TODO: choose and maintain target instead of random
 					var target = enemies.pick_random()
+					# if target is valid, 
 					if is_instance_valid(target):
-						self.entity.data.controller.evaluate_combat(
-							self.entity, target)
+						# assign attack action
+						var new_action = AttackAction.new()
+						new_action.src = self.entity
+						new_action.target = target
+						self.entity.data.actions.action = new_action
 	
 	# if enemy entity,
 	elif self.entity is Enemy:
@@ -66,9 +70,14 @@ func get_action():
 		var active_encounter = encounter_controller.encounter
 		var player = active_encounter.player
 		var target = player
+		# if target is valid, 
 		if is_instance_valid(target):
-			self.entity.data.controller.evaluate_combat(
-				self.entity, target)
+			# assign attack action
+			var new_action = AttackAction.new()
+			new_action.src = self.entity
+			new_action.target = target
+			self.entity.data.actions.action = new_action
+
 
 ## evaluates the currently active action for entity
 func evaluate_action():
@@ -82,25 +91,31 @@ func evaluate_action():
 	
 	# match Action.Type
 	match current_action.get_action_type():
+		# FIND
 		Action.ActionType.FIND:
 			# do find action
 			pass
-			
+		
+		# INTERACT
 		Action.ActionType.INTERACT:
 			# current tile should always be the interact target
 			# get current tile
 			var utils = self.world.data.controller.utils
 			var current_tile = utils.get_object_by_grid(
-				self.entity.data.grid_idx, self.world.data.terrain.tile_map)
+				self.entity.data.grid_idx,
+				self.world.data.terrain.tile_map)
 			# interact with tile
 			self.entity.data.controller.interact_with_tile(
 				self.entity, current_tile)
 			# flag action complete
 			current_action.done = true
 		
+		# ATTACK
 		Action.ActionType.ATTACK:
-			# do attack action
-			pass
+			# do attack action to action.target
+			if is_instance_valid(current_action.target):
+				self.entity.data.controller.evaluate_combat(
+					current_action)
 	
 	# if current action done,
 	if current_action.done:
@@ -109,10 +124,12 @@ func evaluate_action():
 		# null action in player data
 		self.entity.data.actions.action = null
 
+
 ## called on script initialization
 func _init(new_entity: Entity) -> void:
 	# define controller entity on initialization
 	self.entity = new_entity
+
 
 func _process(delta: float) -> void:
 	pass

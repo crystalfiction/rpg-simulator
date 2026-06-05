@@ -79,7 +79,7 @@ func _process_rewards(encounter: Dictionary):
 	var level_up = false
 	if self.player.data.stats.exp >= self.exp_cap:
 		# calculate player stats
-		self.player.data.stats = _calculate_stats(self.player.data.stats)
+		self.player.data.stats = _calculate_stats(self.player)
 		level_up = true
 	
 		# update exp_cap reference
@@ -110,26 +110,37 @@ func _calculate_exp(stats: Dictionary) -> Dictionary:
 
 ## calculates base attribute values for a given stats dictionary
 ## returns updated stats dictionary
-func _calculate_attributes(stats: Dictionary) -> Dictionary:
-	# base attributes
-	stats.resilience += 1
-	stats.strength += 1
+func _calculate_attributes(p: Player) -> Dictionary:
+	var stats = p.data.stats
+	# base stats
+	stats.stamina += 2
+	stats.strength += 2
+	stats.agility += 1
 	stats.wisdom += 1
-	stats.max_health = stats.base_health + (stats.resilience * 25)
+
+	# stamina-based
+	stats.max_health = stats.base_health + (stats.stamina * 25)
 	stats.health = stats.max_health
+	# strength-based
 	stats.attack = stats.base_attack + (stats.strength * 5)
+	# agility-based
+	stats.crit_chance += (stats.agility * 0.0001)
+	stats.dodge_chance += (stats.agility * 0.0001)
+	# wisdom-based
 	stats.exp_step += stats.wisdom
+	
+	# return stats
 	return stats
 
 ## calculates player stats and returns stats dictionary
 ## called when player level up conditions met
-func _calculate_stats(stats: Dictionary) -> Dictionary:
+func _calculate_stats(p: Player) -> Dictionary:
 	# calculate initial exp stats
-	stats = _calculate_exp(stats)
+	p.data.stats = _calculate_exp(p.data.stats)
 	# increment attributes
-	stats = _calculate_attributes(stats)
+	p.data.stats = _calculate_attributes(p)
 	# return new stats
-	return stats
+	return p.data.stats
 
 # Player Initialization
 
@@ -153,7 +164,7 @@ func _init_player_entity():
 	new_player.world = self.world
 	new_player.data.controller = self
 	# stats
-	new_player.data.stats = _calculate_stats(new_player.data.stats)
+	new_player.data.stats = _calculate_stats(new_player)
 	# actions
 	new_player.data.actions.controller = _init_action_controller(new_player)
 	

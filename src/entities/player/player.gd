@@ -1,8 +1,7 @@
 class_name Player extends Entity
 
-# refs
-
 # components
+## TODO: migrate cumbersome stats to external data resource
 var init_data = {
 	# "uid": 0,
 	# "controller": "",
@@ -14,16 +13,18 @@ var init_data = {
 		"exp_cap": 0,
 		"exp_step": 0,
 		"health": 0,
+		"max_health": 0,
 		"base_health": 150,
-		"max_health": 100,
-		"regen_rate": 0.33,
+		"regen_rate": 0.3,
 		"attack": 0,
 		"base_attack": 10,
 		"hit_chance": 0.66,
 		"crit_chance": 0.11,
 		"crit_bonus": 1.50,
-		"resilience": 0,
+		"dodge_chance": 0.05,
+		"stamina": 0,
 		"strength": 0,
+		"agility": 0,
 		"wisdom": 0,
 		"largest_hit": 0,
 	},
@@ -44,8 +45,20 @@ var init_data = {
 	## TODO: items
 }
 
-## define entity class data before _ready
+var Class: PlayerClass
+enum PlayerClass {
+	WANDERER,
+}
+
+
+# returns the current Player's PlayerClass value for type validation
+func get_player_class():
+	var curr_class = self.Class
+	return curr_class
+
+## define entity class data
 func _init() -> void:
-	# add data to entity data dict
+	# add init data to entity data dict
 	for k in self.init_data:
+		# init data
 		self.data[k] = self.init_data[k]

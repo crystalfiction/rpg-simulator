@@ -17,11 +17,22 @@ var enemies = []
 func _calculate_attributes(stats: Dictionary):
 	var map_level = self.world.data.terrain.map_count
 	stats.level = map_level
-	stats.resilience = stats.level
-	stats.strength = stats.level
-	stats.max_health = stats.base_health + (stats.resilience * 25)
+	# base stats
+	stats.stamina += stats.level
+	stats.strength += stats.level
+	stats.agility += stats.level
+	stats.wisdom += stats.level
+
+	# stamina-based
+	stats.max_health = stats.base_health + (stats.stamina * 25)
 	stats.health = stats.max_health
+	# strength-based
 	stats.attack = stats.base_attack + (stats.strength * 5)
+	# agility-based
+	stats.crit_chance += (stats.agility * 0.0001)
+	stats.dodge_chance += (stats.agility * 0.0001)
+	# wisdom-based
+	
 	return stats
 
 ## calculates enemy stats on spawn
