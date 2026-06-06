@@ -1,45 +1,11 @@
 extends EntityController
 
 # references
-var FileLogger
 var enemy_scene = preload("res://src/entities/enemies/enemy.tscn")
 # components
 var eid_ref = 0
 
 var enemies = []
-
-
-# Enemy Actions
-
-
-# Enemy Stats
-
-func _calculate_attributes(stats: Dictionary):
-	var map_level = self.world.data.terrain.map_count
-	stats.level = map_level
-	# base stats
-	stats.stamina += stats.level
-	stats.strength += stats.level
-	stats.agility += stats.level
-	stats.wisdom += stats.level
-
-	# stamina-based
-	stats.max_health = stats.base_health + (stats.stamina * 25)
-	stats.health = stats.max_health
-	# strength-based
-	stats.attack = stats.base_attack + (stats.strength * 5)
-	# agility-based
-	stats.crit_chance += (stats.agility * 0.0001)
-	stats.dodge_chance += (stats.agility * 0.0001)
-	# wisdom-based
-	
-	return stats
-
-## calculates enemy stats on spawn
-func _calculate_stats(stats: Dictionary) -> Dictionary:
-	stats = _calculate_attributes(stats)
-	# return updated stats dict
-	return stats
 
 # Enemy Initialization
 
@@ -48,7 +14,7 @@ func spawn_enemies(n: int = 1) -> Array:
 	var new_enemies = []
 	for e in range(n):
 		var new_enemy = _init_enemy_entity()
-		new_enemy.data.stats = _calculate_stats(new_enemy.data.stats)
+		new_enemy.data.stats = _calculate_stats(new_enemy)
 		new_enemies.append(new_enemy)
 		self.enemies.append(new_enemy)
 	return new_enemies
@@ -114,7 +80,7 @@ func _process_cycle(enemy_array: Array):
 		# get action for each enemy
 		for e in enemies:
 			e.data.actions.controller.get_action()
-			e.data.actions.controller.evaluate_action()
+			# e.data.actions.controller.evaluate_action()
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:

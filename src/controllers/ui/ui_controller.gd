@@ -2,6 +2,7 @@ extends Control
 
 # references
 var world: World
+var FileLogger
 
 # components
 @export var world_data_container: GridContainer
@@ -46,17 +47,12 @@ func _update_labels():
 				elif key == "max_health":
 					self.player_health_bar.max_value = entity.data.stats[key]
 					label.text = str(snapped(entity.data.stats[key], 0))
-				elif key == "crit_chance" || key == "dodge_chance":
+				elif key == "crit_chance" || key == "dodge_chance" || key == "regen_rate":
 					label.text = str(snapped(entity.data.stats[key], 0.01))
-				elif key == "regen_rate" || key == "base_regen":
-					label.text = str(snapped(entity.data.stats[key], 0.01))
-				elif key == "hit_chance":
-					label.text = str(entity.data.stats[key])
-				elif key == "crit_bonus":
-					label.text = str(snapped(entity.data.stats[key], 0.1))
 				else:
 					label.text = str(snapped(entity.data.stats[key], 0))
-
+			if key in entity.data.resources:
+				label.text = str(snapped(entity.data.resources[key], 0))
 
 		if entity is Enemy:
 			if key == "health":
@@ -153,26 +149,66 @@ func _init_player_labels():
 	# update class label
 	self.player_class_label.text = player.get_player_class_string()
 	self.player_class_label.label_settings = self.label_settings
+	# ui stats key
+	var stats = [
+		"level",
+		"exp",
+		"exp_cap",
+		"exp_step",
+		"health",
+		"max_health",
+		"regen_rate",
+		"attack",
+		"crit_chance",
+		"dodge_chance",
+		"stamina",
+    	"strength",
+    	"agility",
+    	"wisdom",
+    	"largest_hit",
+	]
 	# update stats grid
 	if "stats" in player.data:
 		for s in player.data.stats:
-			var data_key = s
-			var new_key_label = Label.new()
-			new_key_label.name = s
-			new_key_label.text = s
-			new_key_label.label_settings = self.label_settings
+			if s in stats:
+				var data_key = s
+				var new_key_label = Label.new()
+				new_key_label.name = s
+				new_key_label.text = s
+				new_key_label.label_settings = self.label_settings
 
-			var data = player.data.stats[s]
-			var new_data_label = Label.new()
-			new_data_label.name = s + "_data"
-			new_data_label.text = str(data)
-			new_data_label.label_settings = self.label_settings
+				var data = player.data.stats[s]
+				var new_data_label = Label.new()
+				new_data_label.name = s + "_data"
+				new_data_label.text = str(data)
+				new_data_label.label_settings = self.label_settings
 
-			var new_label_set = [player, data_key, new_data_label]
-			self.labels.append(new_label_set)
+				var new_label_set = [player, data_key, new_data_label]
+				self.labels.append(new_label_set)
 
-			self.player_data_container.add_child(new_key_label)
-			self.player_data_container.add_child(new_data_label)
+				self.player_data_container.add_child(new_key_label)
+				self.player_data_container.add_child(new_data_label)
+	
+	# add resources labels
+	if "resources" in player.data:
+		var data_key = "surplus"
+		var new_key_label = Label.new()
+		new_key_label.name = data_key
+		new_key_label.text = "food " + data_key
+		new_key_label.label_settings = self.label_settings
+
+		var data = player.data.resources[data_key]
+		var new_data_label = Label.new()
+		new_data_label.name = data_key + "_data"
+		new_data_label.text = str(data)
+		new_data_label.label_settings = self.label_settings
+
+		var new_label_set = [player, data_key, new_data_label]
+		self.labels.append(new_label_set)
+
+		self.player_data_container.add_child(new_key_label)
+		self.player_data_container.add_child(new_data_label)
+	
 
 ## initializes world data labels in the world data panel
 func _init_world_labels():
@@ -193,6 +229,9 @@ func _init_world_labels():
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
+	# get file logger
+	self.FileLogger = $"/root/FileLogger"
+
 	# define label settings
 	var new_label_settings = LabelSettings.new()
 	new_label_settings.font = load("res://src/assets/JetBrainsMono-Medium.ttf")

@@ -1,14 +1,14 @@
 class_name BaseClass extends Player
 
 # components
-var init_stats = {
+var stats = {
     "level": 0,
     "exp": 0,
     "exp_cap": 0,
     "exp_step": 0,
     "health": 0,
     "max_health": 0,
-    "base_health": 150,
+    "base_health": 125,
     "regen_rate": 0.33,
     "attack": 0,
     "base_attack": 10,
@@ -19,6 +19,5 @@ var init_stats = {
     "stamina": 0,
     "strength": 0,
     "agility": 0,
-    "wisdom": 0,
     "largest_hit": 0,
 }

@@ -22,6 +22,8 @@ var enemy_controller: Controller
 var uid_ref = 0
 var end_action = true
 
+# User Input
+
 ## handles user inputs depending on Input Map actions
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("world_continue"):
@@ -132,13 +134,6 @@ func _init_world_entity() -> Error:
 
 ## initializes controller dependencies
 func _init_controllers() -> void:
-	# init controller utils script
-	var new_utils = self.utils_script.new()
-	if new_utils:
-		self.utils = new_utils
-	else:
-		FileLogger.log_message(self , "Failed to intiialize utils.")
-	
 	# init functions array
 	var init_controllers = [
 		_init_world_entity(),
@@ -159,12 +154,16 @@ func _init_controllers() -> void:
 
 ## Called when the node enters the scene tree for the first time.
 func _ready() -> void:
+	# get file logger
 	self.FileLogger = $"/root/FileLogger"
+	# get utils
+	self.utils = $"/root/Utils"
+	
 	FileLogger.log_message(self , "Initializing world...")
 	
 	# initialize controller dependencies
 	_init_controllers()
-
+	
 	FileLogger.log_message(self , "World initialized.")
 
 # World Processing
@@ -187,12 +186,17 @@ func _process_cycle(current_world: Entity):
 				)
 				# quit or restart depending on end_action
 				# toggled via user input using "c" keybind
-				if self.end_action:
-					# quit game
-					get_tree().quit()
-				else:
-					# reload game
+				if current_world.data.terrain.map_count == 1:
+					# by default, reload game if player death 
+					# on level 1
 					get_tree().reload_current_scene()
+				else:
+					if self.end_action:
+						# quit game
+						get_tree().quit()
+					else:
+						# reload game
+						get_tree().reload_current_scene()
 
 		# if world invalid,
 		else:

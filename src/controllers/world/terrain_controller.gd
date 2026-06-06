@@ -166,11 +166,14 @@ func _optimize_soil(terrain_map: Array) -> bool:
 	if condition:
 		# conditions met
 		# only print last iteration
-		FileLogger.log_message(self , "iterations: " + str(terrain_iterations))
-		FileLogger.log_message(self , "tiles: " + str(count))
-		FileLogger.log_message(self , "avg_density: " + str(snapped(avg_density, 0.0001)))
-		FileLogger.log_message(self , "avg_dist_sq " + str(snapped(avg_dist_sq, 0.0001)))
-		FileLogger.log_message(self , "threshold " + str(snapped(threshold, 0.0001)))
+		var msg = (
+			"iterations: " + str(terrain_iterations) + " | " +
+			"avg_density: " + str(snapped(avg_density, 0.0001)) + " | " +
+			"avg_dist_sq " + str(snapped(avg_dist_sq, 0.0001)) + " | " +
+			"threshold " + str(snapped(threshold, 0.0001))
+
+		)
+		FileLogger.log_message(self , msg)
 		# flag result
 		result = true
 	

@@ -7,14 +7,18 @@ var player_controller: Controller
 var enemy_controller: Controller
 var encounter_controller: Controller
 # components
-var frames = 0
-var frame_rate = 30
-var double_speed = true # TODO: debugging
+var frames: int = 0
+var frame_rate: int = 5
+var frame_rates: Array = [
+	21,
+	13, # default
+	5,
+	1, # TODO: only for dev
+]
 
-var dependencies = []
-var processing_array = []
-var cycles = 0
-var cycling = null
+var cycle_time: float = 1
+var cycles: int = 0
+var cycling: bool = false
 
 
 ## handles user inputs depending on Input Map actions
@@ -31,22 +35,25 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("world_reload"):
 		get_tree().reload_current_scene()
 	
-	# shortcuts: s
-	if event.is_action_pressed("world_speed"):
-		# double the frame rate
-		self.double_speed = ! self.double_speed
-		if self.double_speed:
-			print("2x speed")
-			self.frame_rate = 15
-		else:
-			print("1x speed")
-			self.frame_rate = 30
+	# shortcuts: =
+	if event.is_action_pressed("world_tick_inc"):
+		var current_speed = self.frame_rates.find(self.frame_rate)
+		var new_speed = clamp(current_speed + 1, 0, self.frame_rates.size() - 1)
+		self.frame_rate = self.frame_rates[new_speed]
+		print("World tick rate: " + str(self.frame_rate))
+	
+	# shortcuts: -
+	if event.is_action_pressed("world_tick_dec"):
+		var current_speed = self.frame_rates.find(self.frame_rate)
+		var new_speed = clamp(current_speed - 1, 0, self.frame_rates.size() - 1)
+		self.frame_rate = self.frame_rates[new_speed]
+		print("World tick rate: " + str(self.frame_rate))
+		
 
 ## initializes controller dependencies
 func _init_controller():
 	# initialize time system
 	self.frames = 0
-	self.frame_rate = (self.frame_rate / 2) if (self.double_speed) else (self.framerate)
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -55,6 +62,7 @@ func _ready() -> void:
 
 	# initialize the controller
 	_init_controller()
+	
 	FileLogger.log_message(self , "Time initialized.")
 
 ## process time-level data for cycle

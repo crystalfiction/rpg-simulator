@@ -16,7 +16,10 @@ var soil_10r = preload("res://src/assets/world/tile/soil_10R.tres")
 
 @export var tile_color: ColorRect
 
-var init_data = {
+var data = {
+	"uid": 0,
+	"controller": "",
+	"grid_idx": Vector2i(0, 0),
 	"terrain": {},
 	"weather": {},
 	"resources": {
@@ -76,12 +79,6 @@ func _update_label_text(tile_data: Dictionary):
 				if tile_data.resources.food:
 					new_text = "+"
 				l.text = new_text
-
-## define entity class data before instantiation
-func _init() -> void:
-	# add data to entity data dict
-	for k in self.init_data:
-		self.data[k] = self.init_data[k]
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:

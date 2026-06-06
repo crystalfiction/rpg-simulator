@@ -1,13 +1,11 @@
 extends EntityController
 
 # references
-var FileLogger
 var player_scene = preload("res://src/entities/player/player.tscn")
 var player: Player
+var item_controller: Controller
 # components
 var pid_ref = 0
-
-var player_speed = 1
 
 var exp_step: int = 1
 var exp_rate: int
@@ -41,12 +39,22 @@ func interact_with_tile(p: Player, current_tile: Tile):
 	self.world.data.terrain.resources.count -= 1
 	# give resources to player
 	p.data.resources.food += 1
-	# increase player health by regen_rate if resource
-	var regen = p.data.stats.max_health * (p.data.stats.regen_rate)
-	var new_health = clamp(p.data.stats.health + regen, 0, p.data.stats.max_health)
-	p.data.stats.health = new_health
+	
+	# if player health already max,
+	if p.data.stats.health == p.data.stats.max_health:
+		# add to food surplus
+		p.data.resources.surplus += 1
+	# if player health below max,
+	else:
+		# increase by regen_rate
+		var regen = p.data.stats.max_health * (p.data.stats.regen_rate)
+		var new_health = clamp(p.data.stats.health + regen, 0, p.data.stats.max_health)
+		p.data.stats.health = new_health
+
 	# log resource acquisition
 	FileLogger.log_message(self , "Resource acquired.")
+	# flag action as complete
+	p.data.actions.action.done = true
 
 ## moves the passed player to the passed tile and updates player grid_idx
 func move_to_tile(p: Player, t: Tile):
@@ -62,15 +70,34 @@ func move_to_tile(p: Player, t: Tile):
 		p.global_position, grid_scale
 	)
 
+## moves the passed player one tile towards the passed tile,
+## or to the passed tile if only one tile distance
+func move_towards_tile(p: Player, t: Tile) -> bool:
+	var utils = self.world.data.controller.utils
+	# get direction to tile
+	var p_idx = p.data.grid_idx as Vector2
+	var t_idx = t.data.grid_idx as Vector2
+	var direction = (t_idx - p_idx).normalized().snapped(Vector2(1, 1))
+	# get object 1 tile away in direction towards t tile from player p
+	var target = Vector2i(p_idx + direction)
+	var target_obj = utils.get_object_by_grid(
+		target, self.world.data.terrain.tile_map)
+	# move to target
+	move_to_tile(p, target_obj)
+
+	# check if player is at target and return result
+	if p.data.grid_idx == t.data.grid_idx:
+		return true
+	else:
+		return false
+
 # Player Stats
 
 ## process stat rewards considering the cycle's encounter
 func _process_rewards(encounter: Dictionary):
-	# reward player exp based on number of enemies killed
-	# var map_count = self.world.data.terrain.map_count
-	self.player.data.stats.exp += (
-		self.exp_step * (encounter.n_enemies)
-	)
+	# reward player exp 
+	self.player.data.stats.exp += self.exp_step
+
 	FileLogger.log_message(self ,
 		str(self.exp_step * (encounter.n_enemies)) + " exp rewarded."
 	)
@@ -85,11 +112,13 @@ func _process_rewards(encounter: Dictionary):
 		# update exp_cap reference
 		self.player.data.stats.exp_cap = self.exp_cap
 		
-		FileLogger.log_message(self , "src_lvl: " + str(self.player.data.stats.level))
-		FileLogger.log_message(self , "src_exp: " + str(self.player.data.stats.exp))
-		FileLogger.log_message(self , "exp_rate: " + str(self.exp_step))
-		FileLogger.log_message(self , "exp_cap: " + str(self.exp_cap))
-
+		var msg = (
+			"src_lvl: " + str(self.player.data.stats.level) + " | " +
+			"src_exp: " + str(self.player.data.stats.exp) + " | " +
+			"exp_rate: " + str(self.exp_step) + " | " +
+			"exp_cap: " + str(self.exp_cap)
+		)
+		FileLogger.log_message(self , msg)
 
 	# log if level up
 	if level_up:
@@ -97,56 +126,17 @@ func _process_rewards(encounter: Dictionary):
 		self.player.data.stats.health = self.player.data.stats.max_health
 		FileLogger.log_message(self , self.player.name + " is now level " + str(self.player.data.stats.level))
 
-## calculates base experience values for a given stats dictionary
-## returns updated stats dictionary
-func _calculate_exp(stats: Dictionary) -> Dictionary:
-	stats.level += 1
-	self.exp_step = 10
-	# quadratic formula
-	# self.exp_cap = self.exp_step * (stats.level ** 2)
-	# exponential formula
-	self.exp_cap = self.exp_step * (stats.level - 1) ** 1.5
-
-	stats.exp_step = self.exp_step
-	stats.exp_cap = self.exp_cap
-	stats.exp = 0
-
-	return stats
-
-## calculates base attribute values for a given stats dictionary
-## returns updated stats dictionary
-func _calculate_attributes(p: Player) -> Dictionary:
-	var stats = p.data.stats
-	# base stats
-	stats.stamina += 1
-	stats.strength += 1
-	stats.agility += 1
-	stats.wisdom += 1
-	# stamina-based
-	stats.max_health = stats.base_health + (stats.stamina * 25)
-	stats.health = stats.max_health
-	# strength-based
-	stats.attack = stats.base_attack + (stats.strength * 5)
-	# agility-based
-	stats.crit_chance += (stats.agility * 0.0001)
-	stats.dodge_chance += (stats.agility * 0.0001)
-	# wisdom-based
-	# stats.exp_step += stats.wisdom
-	
-	# return stats
-	return stats
-
-## calculates player stats and returns stats dictionary
-## called when player level up conditions met
-func _calculate_stats(p: Player) -> Dictionary:
-	# calculate initial exp stats
-	p.data.stats = _calculate_exp(p.data.stats)
-	# increment attributes
-	p.data.stats = _calculate_attributes(p)
-	# return new stats
-	return p.data.stats
-
 # Player Initialization
+
+## initializes a new item controller for players
+func _init_item_controller():
+	var new_item_controller = ItemController.new()
+	new_item_controller.name = "ItemController"
+	new_item_controller.world = self.world
+	new_item_controller.parent = self
+	new_item_controller.FileLogger = self.FileLogger
+	self.item_controller = new_item_controller
+	add_child(item_controller)
 
 ## initializes a new action controller for the given player entity
 func _init_action_controller(p: Player) -> ActionController:
@@ -155,6 +145,7 @@ func _init_action_controller(p: Player) -> ActionController:
 	new_action_controller.name = "ActionController"
 	new_action_controller.world = self.world
 	new_action_controller.parent = self
+	new_action_controller.FileLogger = self.FileLogger
 	return new_action_controller
 
 ## initializes a new player entity
@@ -191,12 +182,19 @@ func _init_player_entity():
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
+	# get file logger
 	self.FileLogger = $"/root/FileLogger"
-	## TODO: account for multiple players
+
+	# initialize item controller
+	_init_item_controller()
+
+	# TODO: account for multiple players
 	# initialize the player entity as scene
 	_init_player_entity()
+
 	# update player entity reference
 	self.world.data.player = self.player
+	
 	FileLogger.log_message(self , "Player initialized.")
 
 # Player Processing
@@ -243,7 +241,6 @@ func _process_cycle(p: Player):
 
 		# get player action for cycle
 		p.data.actions.controller.get_action()
-		p.data.actions.controller.evaluate_action()
 
 		# if terrain map complete,
 		if self.world.data.terrain.map_complete:

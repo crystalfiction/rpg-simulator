@@ -71,7 +71,7 @@ show_percentage = false
 
 [node name="EnemyData" type="GridContainer" parent="ScreenMargins/VBoxContainer/EnemyContainer/MarginContainer/VBoxContainer2" unique_id=1588473823]
 layout_mode = 2
-theme_override_constants/v_separation = 0
+theme_override_constants/v_separation = -2
 columns = 2
 
 [node name="PlayerContainer" type="FoldableContainer" parent="ScreenMargins/VBoxContainer" unique_id=1048321919]
@@ -87,14 +87,13 @@ theme_override_constants/separation = 0
 
 [node name="Entity" type="Label" parent="ScreenMargins/VBoxContainer/PlayerContainer/MarginContainer/VBoxContainer2" unique_id=890504088]
 layout_mode = 2
+size_flags_vertical = 0
 theme_override_fonts/font = ExtResource("2_1mjrn")
 theme_override_font_sizes/font_size = 18
 text = "Player"
 
 [node name="Class" type="Label" parent="ScreenMargins/VBoxContainer/PlayerContainer/MarginContainer/VBoxContainer2" unique_id=701654423]
 layout_mode = 2
-theme_override_fonts/font = ExtResource("2_1mjrn")
-theme_override_font_sizes/font_size = 15
 
 [node name="HSeparator" type="HSeparator" parent="ScreenMargins/VBoxContainer/PlayerContainer/MarginContainer/VBoxContainer2" unique_id=1206222374]
 layout_mode = 2
@@ -112,7 +111,7 @@ show_percentage = false
 
 [node name="PlayerData" type="GridContainer" parent="ScreenMargins/VBoxContainer/PlayerContainer/MarginContainer/VBoxContainer2" unique_id=460919521]
 layout_mode = 2
-theme_override_constants/v_separation = 0
+theme_override_constants/v_separation = -2
 columns = 2
 
 [node name="WorldData" type="GridContainer" parent="ScreenMargins/VBoxContainer/PlayerContainer/MarginContainer/VBoxContainer2" unique_id=1456096322]

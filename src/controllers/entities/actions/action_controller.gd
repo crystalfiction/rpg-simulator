@@ -1,6 +1,7 @@
 class_name ActionController extends Controller
 
 # refs
+var FileLogger
 var entity: Entity
 
 
@@ -12,25 +13,34 @@ func get_action():
 		# if resources exist and player not in encounter,
 		var resources_exist = self.world.data.terrain.resources.count > 0
 		if resources_exist && ! self.entity.data.encounters.active:
-			## FIND
-			## TODO: this doesn't make sense as its own action until
-			## travel time is added to movement
-			# find the nearest resource
-			var n_resource = self.entity.data.controller.find_nearest_resource(self.entity, self.world)
-			# move to tile
-			self.entity.data.controller.move_to_tile(self.entity, n_resource)
-			# check if tile contains encounter
-			var is_encounter = n_resource.data.encounters["spawn"].call(self.entity)
-			# if encounter spawned,
-			if is_encounter:
-				# flag player as in active encounter
-				self.entity.data.encounters.active = is_encounter
-			# if no encounter spawned,
+			# get current tile
+			var current_tile = world.data.controller.utils.get_object_by_grid(
+				self.entity.data.grid_idx, self.world.data.terrain.tile_map)
+			# check if tile contains resources,
+			if current_tile.data.resources.food:
+				# check if tile contains encounter
+				var is_encounter = current_tile.data.encounters["spawn"].call(self.entity)
+				# if encounter spawned,
+				if is_encounter:
+					# flag player as in active encounter
+					self.entity.data.encounters.active = is_encounter
+				# if no encounter spawned,
+				else:
+					## INTERACT
+					var target_type = InteractAction.InteractTarget.RESOURCE
+					var new_action = InteractAction.new(target_type)
+					new_action.src = self.entity
+					self.entity.data.actions.action = new_action
+			
+			# if current tile has no resources,
 			else:
-				## INTERACT
-				var target_type = InteractAction.InteractTarget.RESOURCE
-				var new_action = InteractAction.new(target_type)
+				# get the nearest resource tile
+				var n_resource = self.entity.data.controller.find_nearest_resource(self.entity, self.world)
+				## FIND
+				var objective = FindAction.FindType.RESOURCE
+				var new_action = FindAction.new(objective)
 				new_action.src = self.entity
+				new_action.target = n_resource
 				self.entity.data.actions.action = new_action
 		
 		# if resources exist and player in encounter,
@@ -56,8 +66,8 @@ func get_action():
 					var target = enemies.pick_random()
 					# if target is valid, 
 					if is_instance_valid(target):
-						# assign attack action
-						var new_action = AttackAction.new()
+						# assign next available attack ability
+						var new_action = BasicAttack.new()
 						new_action.src = self.entity
 						new_action.target = target
 						self.entity.data.actions.action = new_action
@@ -72,20 +82,23 @@ func get_action():
 		var target = player
 		# if target is valid, 
 		if is_instance_valid(target):
-			# assign attack action
-			var new_action = AttackAction.new()
+			# assign next available attack ability
+			var new_action = BasicAttack.new()
 			new_action.src = self.entity
 			new_action.target = target
 			self.entity.data.actions.action = new_action
+	
+	# try to evaluate the current action
+	_evaluate_action()
 
 
 ## evaluates the currently active action for entity
-func evaluate_action():
+func _evaluate_action():
 	# get current action
 	var current_action = self.entity.data.actions.action
 	# don't process action if null
 	# !! this means the only indication of a failed action
-	# !! is contextual, fails silently
+	# !! this should only happen if no valid action exists this cycle
 	if current_action == null:
 		return
 	
@@ -93,9 +106,22 @@ func evaluate_action():
 	match current_action.get_action_type():
 		# FIND
 		Action.ActionType.FIND:
-			# do find action
-			pass
-		
+			# move towards resource tile
+			var action_target = current_action.target
+			var result = self.entity.data.controller.move_towards_tile(
+				self.entity, action_target)
+			# if player is at find target,
+			if result:
+				# action done
+				current_action.done = true
+			else:
+				# log update
+				var action_v = current_action.get_action_string()
+				var objective_v = current_action.get_objective_string()
+				FileLogger.log_message(self , (
+					self.entity.name + ": " + action_v + " " + objective_v
+				), )
+
 		# INTERACT
 		Action.ActionType.INTERACT:
 			# current tile should always be the interact target
@@ -107,8 +133,6 @@ func evaluate_action():
 			# interact with tile
 			self.entity.data.controller.interact_with_tile(
 				self.entity, current_tile)
-			# flag action complete
-			current_action.done = true
 		
 		# ATTACK
 		Action.ActionType.ATTACK:
@@ -123,7 +147,6 @@ func evaluate_action():
 		self.entity.data.actions.history.append(current_action)
 		# null action in player data
 		self.entity.data.actions.action = null
-
 
 ## called on script initialization
 func _init(new_entity: Entity) -> void:

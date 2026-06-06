@@ -6,7 +6,11 @@ enum FindType {
     RESOURCE,
 }
 
-var target = null
+
+func get_objective_string() -> String:
+    var objective = self.Objective
+    var key = FindType.find_key(objective)
+    return key
 
 # initialize data before _ready
 func _init(objective: FindType) -> void:

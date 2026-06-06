@@ -10,15 +10,15 @@ enum ActionType {
 
 var src = null # the source of the action
 var target = null # the target of the action
-var done = null # the completion state of the action
+var done: bool = false # the completion state of the action
 
 # returns the current Action's ActionType value for type validation
-func get_action_type():
+func get_action_type() -> ActionType:
 	var curr_type = self.Type
 	return curr_type
 
 # returns the current Action's ActionType string
-func get_action_string():
+func get_action_string() -> String:
 	var curr_type = self.Type
 	var key = self.ActionType.find_key(curr_type)
 	return key
