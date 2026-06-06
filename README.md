@@ -6,11 +6,18 @@
 
 ### TODO
 
-#### Working
+MVP
 
-- [ ] implement basic class structure
+- [ ] implement basic item system with a Sword weapon
+    - player is given a random weapon within Maps 1-2 that directly prolongs life cycle
+- [ ] implement basic skill system, starting with Weapon Skill
+    - player builds skill points by utilizing items of a specific proficiency
+        - _i.e. player builds x sword skill every time player attacks with sword_
+- [ ] implement organic matter to terrain with basic life simulation
+- [ ] finish implementing basic erosion
 
-#### Done
+<details>
+    <summary>Done</summary>
 
 - [x] scrap current encounters system
     - [x] remove from time controller
@@ -39,7 +46,13 @@
             - _since entity actions are whole integers, action completion will be determined by the number of time cycles, rather than the length of the events occuring during a time cycle_
             - _this also means we can clear up any errors before the start of the next cycle, but after (and not during)events/actions have occurred_
 - [x] implement basic attack action
+- [x] implement basic class structure
+- [x] implement food surplus mechanic
+    - _if player health full when food resource is acquired, resource goes into food surplus_
+    - _food surplus is checked after combat and regen rate applied to health if surplus exists_
+- [x] re-implement single-tile movement for player
 
+</details>
 
 ### Reference
 
