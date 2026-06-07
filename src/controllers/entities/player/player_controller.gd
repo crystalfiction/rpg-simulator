@@ -128,16 +128,6 @@ func _process_rewards(encounter: Dictionary):
 
 # Player Initialization
 
-## initializes a new item controller for players
-func _init_item_controller():
-	var new_item_controller = ItemController.new()
-	new_item_controller.name = "ItemController"
-	new_item_controller.world = self.world
-	new_item_controller.parent = self
-	new_item_controller.FileLogger = self.FileLogger
-	self.item_controller = new_item_controller
-	add_child(item_controller)
-
 ## initializes a new action controller for the given player entity
 func _init_action_controller(p: Player) -> ActionController:
 	# initialize the controller
@@ -184,9 +174,6 @@ func _init_player_entity():
 func _ready() -> void:
 	# get file logger
 	self.FileLogger = $"/root/FileLogger"
-
-	# initialize item controller
-	_init_item_controller()
 
 	# TODO: account for multiple players
 	# initialize the player entity as scene
