@@ -114,7 +114,7 @@ func _init_terrain_controller() -> Error:
 ## initializes the world entity as scene
 func _init_world_entity() -> Error:
 	# create new world obj
-	var new_world = self.world_scene.instantiate()
+	var new_world = World.new().init_scene()
 	new_world.name = "World"
 	var screen_size = get_tree().root.size
 	new_world.texture.width = screen_size.x

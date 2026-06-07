@@ -1,9 +1,8 @@
 class_name Player extends Entity
 
 # components
-var data = {
-	"uid": 0,
-	"controller": "",
+var init_player: Resource = preload("res://src/entities/player/player.tscn")
+var init_data: Dictionary = {
 	"world": "",
 	"grid_idx": Vector2i(0, 0),
 	"stats": {
@@ -40,3 +39,15 @@ var data = {
 		"done": []
 	}
 }
+
+
+## initializes the entity scene
+func init_scene() -> Sprite2D:
+	var new_scene = self.init_player.instantiate()
+	return new_scene
+
+## initializes the entity
+func _init() -> void:
+	self.Type = EntityType.PLAYER
+	for k in self.init_data:
+		self.data[k] = init_data[k]

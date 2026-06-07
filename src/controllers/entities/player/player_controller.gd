@@ -1,9 +1,7 @@
 extends EntityController
 
 # references
-var player_scene = preload("res://src/entities/player/player.tscn")
 var player: Player
-var item_controller: Controller
 # components
 var exp_step: int = 1
 var exp_rate: int
@@ -140,7 +138,7 @@ func _init_action_controller(p: Player) -> ActionController:
 func _init_player_entity():
 	var world_controller = self.world.data.controller
 	# create new player scene
-	var new_player = self.player_scene.instantiate()
+	var new_player = Player.new().init_scene()
 	# metadata
 	new_player.data.uid = world_controller.uid_ref
 	new_player.data.world = self.world

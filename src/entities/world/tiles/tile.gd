@@ -10,15 +10,13 @@ var soil_10r = preload("res://src/assets/world/tile/soil_10R.tres")
 @export var label_water: Label
 @export var label_erosion: Label
 @export var label_resources: Label
-@export var label_encounters: Label
 @export var label_grid_x: Label
 @export var label_grid_y: Label
 
 @export var tile_color: ColorRect
 
-var data = {
-	"uid": 0,
-	"controller": "",
+var init_tile: Resource = preload("res://src/entities/world/tiles/tile.tscn")
+var init_data: Dictionary = {
 	"world": "",
 	"grid_idx": Vector2i(0, 0),
 	"terrain": {},
@@ -29,6 +27,27 @@ var data = {
 	"encounters": {},
 }
 
+# Tile Initialization
+
+# Called when the node enters the scene tree for the first time.
+func _ready() -> void:
+	# init color
+	_update_color(self.data)
+	# init label text
+	_update_label_text(self.data)
+
+## initializes the entity scene
+func init_scene() -> Sprite2D:
+	var new_scene = self.init_tile.instantiate()
+	return new_scene
+
+## initializes the entity
+func _init() -> void:
+	self.Type = EntityType.TILE
+	for k in self.init_data:
+		self.data[k] = init_data[k]
+
+# Tile Processing
 
 # determines which color to render depending on tile data
 func _update_color(tile_data: Dictionary):
@@ -80,15 +99,6 @@ func _update_label_text(tile_data: Dictionary):
 				if tile_data.resources.food:
 					new_text = "+"
 				l.text = new_text
-
-# Called when the node enters the scene tree for the first time.
-func _ready() -> void:
-	# init color
-	_update_color(self.data)
-	# init label text
-	_update_label_text(self.data)
-
-# Tile Processing
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:

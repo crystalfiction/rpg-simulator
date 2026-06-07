@@ -1,9 +1,8 @@
 class_name Enemy extends Entity
 
 # components
-var data = {
-	"uid": 0,
-	"controller": "",
+var init_enemy: Resource = preload("res://src/entities/enemies/enemy.tscn")
+var init_data: Dictionary = {
 	"world": "",
 	"grid_idx": Vector2i(0, 0),
 	"stats": {
@@ -27,3 +26,15 @@ var data = {
 		"history": [],
 	},
 }
+
+
+## initializes the entity scene
+func init_scene() -> Sprite2D:
+	var new_scene = self.init_enemy.instantiate()
+	return new_scene
+
+## initializes the entity
+func _init() -> void:
+	self.Type = EntityType.ENEMY
+	for k in self.init_data:
+		self.data[k] = init_data[k]

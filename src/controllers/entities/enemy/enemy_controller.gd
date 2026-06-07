@@ -1,7 +1,5 @@
 extends EntityController
 
-# references
-var enemy_scene = preload("res://src/entities/enemies/enemy.tscn")
 # components
 var enemies = []
 
@@ -29,7 +27,7 @@ func _init_action_controller(e: Enemy) -> ActionController:
 ## initializes enemy entity
 func _init_enemy_entity():
 	var world_controller = self.world.data.controller
-	var new_enemy = self.enemy_scene.instantiate()
+	var new_enemy = Enemy.new().init_scene()
 	# metadata
 	new_enemy.data.uid = world_controller.uid_ref
 	new_enemy.data.world = self.world

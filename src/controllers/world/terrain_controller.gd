@@ -2,7 +2,6 @@ extends Controller
 
 # refs
 var FileLogger
-var tile_scene = preload("res://src/entities/world/tiles/tile.tscn")
 var weather_controller_script = preload("res://src/controllers/world/weather_controller.gd")
 var resource_controller_script = preload("res://src/controllers/world/resource_controller.gd")
 var encounter_controller_script = preload("res://src/controllers/world/encounter_controller.gd")
@@ -274,7 +273,7 @@ func _init_terrain(tile_map: Array) -> Array:
 ## returns the new tile object
 func _init_grid_tile(pos: Vector2i, grid_idx: Vector2i) -> Tile:
 	var uid_ref = self.world.data.controller.uid_ref
-	var new_tile = tile_scene.instantiate()
+	var new_tile = Tile.new().init_scene()
 	# set tile data
 	new_tile.data.world = self.world
 	new_tile.data.uid = uid_ref
