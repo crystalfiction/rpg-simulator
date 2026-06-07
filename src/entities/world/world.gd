@@ -1,11 +1,10 @@
 class_name World extends Entity
 
-# refs
-
 # components
 var data = {
 	"uid": 0,
 	"controller": "",
+	"world": "",
 	"terrain": {
 		"grid": [], # [[ Vector2i(x, y) ]]
 		"tile_map": [], # [[ Tile<Sprite2D> ]]

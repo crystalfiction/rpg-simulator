@@ -19,6 +19,7 @@ var soil_10r = preload("res://src/assets/world/tile/soil_10R.tres")
 var data = {
 	"uid": 0,
 	"controller": "",
+	"world": "",
 	"grid_idx": Vector2i(0, 0),
 	"terrain": {},
 	"weather": {},

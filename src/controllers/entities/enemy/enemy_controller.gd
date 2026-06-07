@@ -3,8 +3,6 @@ extends EntityController
 # references
 var enemy_scene = preload("res://src/entities/enemies/enemy.tscn")
 # components
-var eid_ref = 0
-
 var enemies = []
 
 # Enemy Initialization
@@ -34,8 +32,6 @@ func _init_enemy_entity():
 	var new_enemy = self.enemy_scene.instantiate()
 	# metadata
 	new_enemy.data.uid = world_controller.uid_ref
-	new_enemy.data.eid = self.eid_ref
-	new_enemy.name = "enemy_" + str(new_enemy.data.eid)
 	new_enemy.data.world = self.world
 	new_enemy.data.controller = self
 	# actions
@@ -46,7 +42,6 @@ func _init_enemy_entity():
 	
 	# update uid ref
 	world_controller.uid_ref += 1
-	self.eid_ref += 1
 
 	return e
 

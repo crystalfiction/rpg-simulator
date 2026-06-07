@@ -1,13 +1,13 @@
 [gd_scene format=3 uid="uid://gg1b5vs25d6r"]
 
-[ext_resource type="Script" uid="uid://da2ik1gon7omk" path="res://src/entities/world/tile.gd" id="1_1rpgm"]
+[ext_resource type="Script" uid="uid://cs6ty2gbfts44" path="res://src/entities/world/tiles/tile.gd" id="1_1rpgm"]
 [ext_resource type="Gradient" uid="uid://chwasyj7f5pin" path="res://src/assets/world/tile/soil_5YR.tres" id="1_f75nv"]
 [ext_resource type="FontFile" uid="uid://dvjb12pu7hof1" path="res://src/assets/JetBrainsMono-Medium.ttf" id="3_mk1qm"]
 
 [sub_resource type="GradientTexture2D" id="GradientTexture2D_mk1qm"]
 gradient = ExtResource("1_f75nv")
 
-[node name="Tile" type="Sprite2D" unique_id=1023157020 node_paths=PackedStringArray("label_density", "label_water", "label_erosion", "label_resources", "label_encounters", "label_grid_x", "label_grid_y", "tile_color") groups=["tiles"]]
+[node name="Tile" type="Sprite2D" unique_id=1023157020 node_paths=PackedStringArray("label_density", "label_water", "label_erosion", "label_resources", "label_grid_x", "label_grid_y", "tile_color") groups=["tiles"]]
 texture = SubResource("GradientTexture2D_mk1qm")
 centered = false
 script = ExtResource("1_1rpgm")
@@ -15,7 +15,6 @@ label_density = NodePath("Terrain/Labels/TileData/Density")
 label_water = NodePath("Terrain/Labels/TileData/Water")
 label_erosion = NodePath("Terrain/Labels/TileData/Erosion")
 label_resources = NodePath("Terrain/Labels/Interactables/Resources")
-label_encounters = NodePath("")
 label_grid_x = NodePath("Terrain/Labels/GridLabels/x")
 label_grid_y = NodePath("Terrain/Labels/GridLabels/y")
 tile_color = NodePath("Terrain")

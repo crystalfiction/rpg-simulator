@@ -4,10 +4,27 @@ class_name Player extends Entity
 var data = {
 	"uid": 0,
 	"controller": "",
-	"pid": 0,
+	"world": "",
 	"grid_idx": Vector2i(0, 0),
 	"stats": {
-		# written on init
+		"level": 0,
+		"exp": 0,
+		"exp_cap": 0,
+		"exp_step": 0,
+		"health": 0,
+		"max_health": 0,
+		"base_health": 100,
+		"regen_rate": 0.33,
+		"attack": 0,
+		"base_attack": 5,
+		"hit_chance": 0.66,
+		"crit_chance": 0.11,
+		"crit_bonus": 1.50,
+		"dodge_chance": 0.05,
+		"stamina": 0,
+		"strength": 0,
+		"agility": 0,
+		"largest_hit": 0,
 	},
 	"actions": {
 		"controller": "",
@@ -23,39 +40,3 @@ var data = {
 		"done": []
 	}
 }
-
-var Class: PlayerClass
-enum PlayerClass {
-	BASE,
-}
-var class_objs = {
-	0: BaseClass,
-}
-
-## gets and returns the class's initial stats from script object
-func _get_class_data(player_class: PlayerClass) -> Dictionary:
-	# create new class object
-	var new_obj = self.class_objs[player_class].new()
-	var class_stats = new_obj.stats
-	return class_stats
-
-## returns the current Player's PlayerClass value for type validation
-func get_player_class() -> PlayerClass:
-	var curr_class = self.Class
-	return curr_class
-
-# returns the current player's PlayerClass string
-func get_player_class_string() -> String:
-	var curr_class = self.Class
-	var key = self.PlayerClass.find_key(curr_class)
-	return key
-
-## sets player.Class to the passed player_class before entering tree
-func init_player(
-	player_class: PlayerClass = PlayerClass.BASE,
-):
-	# set player class
-	self.Class = player_class
-	# overwrite stats with class stats
-	var new_stats = _get_class_data(self.Class)
-	self.data.stats = new_stats

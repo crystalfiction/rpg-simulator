@@ -4,8 +4,7 @@ class_name Enemy extends Entity
 var data = {
 	"uid": 0,
 	"controller": "",
-	"eid": 0,
-	"parent": "", # the parent entity to the enemy
+	"world": "",
 	"grid_idx": Vector2i(0, 0),
 	"stats": {
 		"level": 0,

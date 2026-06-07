@@ -5,8 +5,6 @@ var player_scene = preload("res://src/entities/player/player.tscn")
 var player: Player
 var item_controller: Controller
 # components
-var pid_ref = 0
-
 var exp_step: int = 1
 var exp_rate: int
 var exp_cap: int
@@ -143,16 +141,9 @@ func _init_player_entity():
 	var world_controller = self.world.data.controller
 	# create new player scene
 	var new_player = self.player_scene.instantiate()
-	
-	## TODO: get player class
-	# initialize player class and data structure
-	new_player.init_player(Player.PlayerClass.BASE)
-	
 	# metadata
 	new_player.data.uid = world_controller.uid_ref
-	new_player.data.pid = self.pid_ref
-	new_player.name = "player_" + str(new_player.data.pid)
-	new_player.world = self.world
+	new_player.data.world = self.world
 	new_player.data.controller = self
 	# stats
 	new_player.data.stats = _calculate_stats(new_player)
@@ -165,7 +156,6 @@ func _init_player_entity():
 	
 	# update uid ref
 	world_controller.uid_ref += 1
-	self.pid_ref += 1
 
 	# return player
 	return self.player

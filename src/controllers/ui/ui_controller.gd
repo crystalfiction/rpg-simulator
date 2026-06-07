@@ -147,8 +147,6 @@ func _init_enemy_labels():
 func _init_player_labels():
 	var player = self.world.data.player
 	# update class label
-	self.player_class_label.text = player.get_player_class_string()
-	self.player_class_label.label_settings = self.label_settings
 	# ui stats key
 	var stats = [
 		"level",
