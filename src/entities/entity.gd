@@ -7,6 +7,7 @@ enum EntityType {
     TILE,
     PLAYER,
     ENEMY,
+    ITEM,
 }
 
 var data: Dictionary = {

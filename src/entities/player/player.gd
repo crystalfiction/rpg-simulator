@@ -1,30 +1,19 @@
 class_name Player extends Entity
 
-# components
+# refs
 var init_player: Resource = preload("res://src/entities/player/player.tscn")
-var init_data: Dictionary = {
+
+# components
+var Class: PlayerClass
+enum PlayerClass {
+	BASE
+}
+
+var player_data: Dictionary = {
 	"world": "",
 	"grid_idx": Vector2i(0, 0),
-	"stats": {
-		"level": 0,
-		"exp": 0,
-		"exp_cap": 0,
-		"exp_step": 0,
-		"health": 0,
-		"max_health": 0,
-		"base_health": 100,
-		"regen_rate": 0.33,
-		"attack": 0,
-		"base_attack": 5,
-		"hit_chance": 0.66,
-		"crit_chance": 0.11,
-		"crit_bonus": 1.50,
-		"dodge_chance": 0.05,
-		"stamina": 0,
-		"strength": 0,
-		"agility": 0,
-		"largest_hit": 0,
-	},
+	"class": Class,
+	"stats": {},
 	"actions": {
 		"controller": "",
 		"action": null,
@@ -37,17 +26,22 @@ var init_data: Dictionary = {
 	"encounters": {
 		"active": false,
 		"done": []
+	},
+	"inventory": {
+		"equipped": {
+			"weapon": null,
+		},
 	}
 }
 
-
-## initializes the entity scene
+## initializes the entity as scene
 func init_scene() -> Sprite2D:
-	var new_scene = self.init_player.instantiate()
+	var new_scene: Sprite2D = self.init_player.instantiate()
+	new_scene.data = self.data
 	return new_scene
 
-## initializes the entity
+## initializes the entity data
 func _init() -> void:
 	self.Type = EntityType.PLAYER
-	for k in self.init_data:
-		self.data[k] = init_data[k]
+	for k in self.player_data:
+		self.data[k] = player_data[k]

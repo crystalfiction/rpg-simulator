@@ -138,7 +138,7 @@ func _init_action_controller(p: Player) -> ActionController:
 func _init_player_entity():
 	var world_controller = self.world.data.controller
 	# create new player scene
-	var new_player = Player.new().init_scene()
+	var new_player = BaseClass.new().init_scene()
 	# metadata
 	new_player.data.uid = world_controller.uid_ref
 	new_player.data.world = self.world
@@ -166,6 +166,10 @@ func _ready() -> void:
 	# TODO: account for multiple players
 	# initialize the player entity as scene
 	_init_player_entity()
+
+	# TODO: give player weapon
+	var new_weapon = Sword.new()
+	self.player.data.inventory.equipped.weapon = new_weapon
 
 	# update player entity reference
 	self.world.data.player = self.player

@@ -82,6 +82,17 @@ func evaluate_combat(attack: AttackAction):
 	var src_crit_bonus = attack.src.data.stats.crit_bonus
 	var target_health = attack.target.data.stats.health
 	var target_dodge = attack.target.data.stats.dodge_chance
+
+	var weapon_equipped = false
+	var equipped_weapon = null
+	if attack.src is Player:
+		weapon_equipped = attack.src.data.inventory.equipped.weapon != null
+		if weapon_equipped:
+			# calculate attack damage factoring weapon
+			equipped_weapon = attack.src.data.inventory.equipped.weapon
+			var weapon_bonus = equipped_weapon.data.stats.damage
+			src_attack += weapon_bonus
+
 	# evaluate if enemy attack is hit
 	var r = randf_range(0, 1)
 	# if random number r is below hit threshold
@@ -145,7 +156,8 @@ func evaluate_combat(attack: AttackAction):
 		else:
 			FileLogger.log_message(self ,
 				attack.src.name + " " + result + " " + attack.target.name + " for " +
-				str(src_attack) + " with " + str(attack.get_attack_type_string()) + " attack",
+				str(src_attack) + " with " + str(attack.get_attack_type_string()) + " attack" +
+				(" using " + equipped_weapon.get_weapon_class_string() if weapon_equipped else ""),
 			"COMBAT")
 	
 	# flag action complete
