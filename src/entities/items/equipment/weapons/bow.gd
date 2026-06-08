@@ -1,4 +1,4 @@
-class_name Bow extends Weapon
+class_name BowWeapon extends Weapon
 
 # components
 var bow_data = {

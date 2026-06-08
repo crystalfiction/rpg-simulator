@@ -12,8 +12,14 @@ enum PlayerClass {
 var player_data: Dictionary = {
 	"world": "",
 	"grid_idx": Vector2i(0, 0),
-	"class": Class,
 	"stats": {},
+	"skills": {
+		"UNARMED": {
+			"level": 0,
+			"exp": 0,
+			"cap": 0,
+		},
+	},
 	"actions": {
 		"controller": "",
 		"action": null,

@@ -38,12 +38,6 @@ func _calculate_attributes(e: Entity) -> Dictionary:
 		stats.stamina += 1
 		stats.strength += 1
 		stats.agility += 1
-
-		# players receive bonus stats on every even level
-		if stats.level % 2 == 0:
-			stats.stamina += 1
-			stats.strength += 1
-			stats.agility += 1
 	
 	if e is Enemy:
 		# base stats
@@ -90,7 +84,9 @@ func evaluate_combat(attack: AttackAction):
 		if weapon_equipped:
 			# calculate attack damage factoring weapon
 			equipped_weapon = attack.src.data.inventory.equipped.weapon
-			var weapon_bonus = equipped_weapon.data.stats.damage
+			var weapon_skill = attack.src.data.skills[equipped_weapon.get_weapon_class_string()].level
+			var weapon_dmg = equipped_weapon.data.stats.damage
+			var weapon_bonus = (weapon_dmg + (weapon_skill / 2)) / 2
 			src_attack += weapon_bonus
 
 	# evaluate if enemy attack is hit
@@ -123,12 +119,9 @@ func evaluate_combat(attack: AttackAction):
 
 	# update last hit taken amount if Player
 	if attack.target is Player:
-		if src_attack >= attack.target.data.stats.largest_hit:
-			attack.target.data.stats.largest_hit = src_attack
-
-	# if target is player,
-	if attack.target is Player:
 		var p = attack.target
+		if src_attack >= p.data.stats.largest_hit:
+			p.data.stats.largest_hit = src_attack
 		# check if food surplus,
 		if p.data.resources.surplus > 0 && (
 				p.data.stats.health < p.data.stats.max_health):
@@ -142,6 +135,14 @@ func evaluate_combat(attack: AttackAction):
 				(p.data.resources.surplus - 1) if (p.data.resources.surplus > 0
 				) else (p.data.resources.surplus)
 			)
+
+	# if attack source is player,
+	if attack.src is Player:
+		if result == "HITS" || result == "CRITS":
+			if weapon_equipped:
+				# increment weapon skill if hit
+				attack.src.data.controller.increment_skill(
+					attack.src, equipped_weapon.get_weapon_class_string())
 
 	# log results
 	if result == "DODGES":

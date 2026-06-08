@@ -1,4 +1,4 @@
-class_name Staff extends Weapon
+class_name StaffWeapon extends Weapon
 
 # components
 var staff_data = {

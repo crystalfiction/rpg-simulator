@@ -122,6 +122,30 @@ func _process_rewards(encounter: Dictionary):
 		self.player.data.stats.health = self.player.data.stats.max_health
 		FileLogger.log_message(self , self.player.name + " is now level " + str(self.player.data.stats.level))
 
+func increment_skill(
+	p: Player, skill: String
+):
+	var step = 10
+	p.data.skills[skill].exp += step
+	if p.data.skills[skill].exp >= p.data.skills[skill].cap:
+		_calculate_skills(p)
+
+func _calculate_skills(p: Player):
+	## FIXME: increments all skills when called
+	for s in p.data.skills:
+		# check if skill level up,
+		if int(p.data.skills[s].exp) >= int(p.data.skills[s].cap):
+			p.data.skills[s].level += 1
+			p.data.skills[s].exp = 0
+		
+		# calculate skill caps
+		var step = 10
+		var cap = floori((step) * (p.data.skills[s].level - 1) ** 1.5)
+		p.data.skills[s].cap = cap
+			
+	# update player data
+	return p.data.skills
+
 # Player Initialization
 
 ## initializes a new action controller for the given player entity
@@ -145,6 +169,7 @@ func _init_player_entity():
 	new_player.data.controller = self
 	# stats
 	new_player.data.stats = _calculate_stats(new_player)
+	new_player.data.skills = _calculate_skills(new_player)
 	# actions
 	new_player.data.actions.controller = _init_action_controller(new_player)
 	
@@ -168,7 +193,7 @@ func _ready() -> void:
 	_init_player_entity()
 
 	# TODO: give player weapon
-	var new_weapon = Sword.new()
+	var new_weapon = UnarmedWeapon.new()
 	self.player.data.inventory.equipped.weapon = new_weapon
 
 	# update player entity reference
@@ -185,7 +210,10 @@ func _check_player(p: Player):
 		# if enemy isn't already queued for deletion,
 		if !p.is_queued_for_deletion():
 			FileLogger.log_message(self ,
-				"Final stats: " + str(self.world.data.player.data.stats)
+				str(self.player.data.stats)
+			)
+			FileLogger.log_message(self ,
+				str(self.player.data.skills)
 			)
 			# queue for deletion
 			p.queue_free()

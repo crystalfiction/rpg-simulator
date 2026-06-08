@@ -25,6 +25,11 @@ var init_data: Dictionary = {
 		"action": null,
 		"history": [],
 	},
+	"inventory": {
+		"equipped": {
+			"weapon": null,
+		}
+	}
 }
 
 

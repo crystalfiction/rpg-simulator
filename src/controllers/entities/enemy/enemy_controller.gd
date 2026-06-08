@@ -11,6 +11,8 @@ func spawn_enemies(n: int = 1) -> Array:
 	for e in range(n):
 		var new_enemy = _init_enemy_entity()
 		new_enemy.data.stats = _calculate_stats(new_enemy)
+		var new_weapon = UnarmedWeapon.new()
+		new_enemy.data.inventory.equipped.weapon = new_weapon
 		new_enemies.append(new_enemy)
 		self.enemies.append(new_enemy)
 	return new_enemies
