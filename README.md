@@ -4,20 +4,48 @@
 
 ## Dev
 
-### TODO
+### MVP
 
-MVP
+Create a procedurally generated RPG simulation that embraces chaos and instability, balanced by user input and natural in-game forces
 
-- [ ] implement basic item system with a Sword weapon
-    - player is given a random weapon within Maps 1-2 that directly prolongs life cycle
-- [ ] implement basic skill system, starting with Weapon Skill
-    - player builds skill points by utilizing items of a specific proficiency
-        - _i.e. player builds x sword skill every time player attacks with sword_
-- [ ] implement organic matter to terrain with basic life simulation
-- [ ] finish implementing basic erosion
+- [ ] *meta systems*:
+    - [ ] decide on and implement actual screen dimensions
+    - [ ] create a functional ui for dev
+        - [ ] data panels
+            - [x] world data
+            - [ ] party data
+                - [x] player data
+                    - [x] stats
+                    - [x] equipped items
+                - [ ] multiple player data
+                - [ ] party inventory
+                    - [ ] unequipped items
+            - [x] enemy data
+                - [x] stats
+            - [x] time data
+- [ ] *player systems*
+    - [ ] *class system*: allow player to choose a player class that forms a unique, distinct way of interacting with the world
+        - [ ] *subclass system*: once a particular stance threshold is reached, player can choose to specialize in an associated subclas
+            - [ ] *style system*: each base class has 3 "styles" that can be cycled through, allowing experience to be accumulated for that particular style
+                - [ ] styles represent strategy/role types: defensive, offensive, utility
+                - [ ] only one style can be active at a time, but players can switch styles when a new party member is acquired
+    - [ ] *skill system*: players accumulate skill points for specific skills by doing specific actions
+        - [ ] weapon skills accumulated in combat while using a particular weapon type
+        - [ ] stat skills accumulated in combat i.e. defense on damage taken, resilience on crit taken, etc. 
+    - [ ] *item system*: players have a chance to randomly find items including weapons, armor
+        - [ ] *weapons*: any class can equip any type of weapon; the only determinant is weapon skills
+        - [ ] *armor*: any class can equip any armor type, but each armor type has benefits and drawbacks, relying mainly on armor skill of that particular type
+    - [ ] *party system*: player has a random chance to encounter neutral entities, within particular progress thresholds, that can be adopted into the player's party
+        - [ ] progress thresholds are determined by player : enemy stat ratios
+            - thresholds act primarily as a way to smooth out world randomness by giving agency to the player at specific progress levels
+        - [ ] neutral entities are a type of player starting with a randomized class
+        - [ ] player can choose to adopt this player into their party or pass
+- [ ] *environmental system*: create a dynamic environment with terrain, weather, and organic life simulation that directly impacts the player's world interaction somehow
+    - [ ] implement organic matter to terrain with basic life simulation
+    - [ ] finish implementing basic erosion
 
 <details>
-    <summary>Done</summary>
+    <summary>DONE</summary>
 
 - [x] scrap current encounters system
     - [x] remove from time controller
@@ -51,20 +79,10 @@ MVP
     - _if player health full when food resource is acquired, resource goes into food surplus_
     - _food surplus is checked after combat and regen rate applied to health if surplus exists_
 - [x] re-implement single-tile movement for player
+- [x] implement basic item system with a Sword weapon
+    - player is given a random weapon within Maps 1-2 that directly prolongs life cycle
+- [x] implement basic skill system, starting with Weapon Skill
+    - player builds skill points by utilizing items of a specific proficiency
+        - _i.e. player builds x sword skill every time player attacks with sword_
 
 </details>
-
-### Reference
-
-World Initialization
-```mermaid
-sequenceDiagram
-    participant controller.World
-    create participant entity.World
-    controller.World->>entity.World: instantiates world entity
-    create participant controller.System
-    controller.World->>controller.System: instantiates system controller scripts
-    controller.System->>entity.World: initializes system data in World.data
-    controller.World<<->>entity.World: validate World.data
-
-```
