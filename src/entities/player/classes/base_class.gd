@@ -10,7 +10,7 @@ var class_data: Dictionary = {
 		"health": 0,
 		"max_health": 0,
 		"base_health": 100,
-		"regen_rate": 0.33,
+		"regen_rate": 0.165,
 		"attack": 0,
 		"base_attack": 5,
 		"hit_chance": 0.66,

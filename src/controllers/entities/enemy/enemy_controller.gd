@@ -1,7 +1,7 @@
 extends EntityController
 
 # components
-var enemies = []
+var enemies: Array = []
 
 # Enemy Initialization
 

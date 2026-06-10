@@ -91,8 +91,10 @@ func move_towards_tile(p: Player, t: Tile) -> bool:
 
 ## process stat rewards considering the cycle's encounter
 func _process_rewards(encounter: Dictionary):
-	# reward player exp 
-	self.player.data.stats.exp += self.exp_step
+	# reward player exp
+	var map_count = self.world.data.terrain.map_count
+	var enemy_exp = floori(encounter.n_enemies * (map_count / PI))
+	self.player.data.stats.exp += self.exp_step + enemy_exp
 
 	FileLogger.log_message(self ,
 		str(self.exp_step * (encounter.n_enemies)) + " exp rewarded."
@@ -121,30 +123,29 @@ func _process_rewards(encounter: Dictionary):
 		# reset player health to max if level up
 		self.player.data.stats.health = self.player.data.stats.max_health
 		FileLogger.log_message(self , self.player.name + " is now level " + str(self.player.data.stats.level))
-
-func increment_skill(
-	p: Player, skill: String
-):
-	var step = 10
-	p.data.skills[skill].exp += step
-	if p.data.skills[skill].exp >= p.data.skills[skill].cap:
-		_calculate_skills(p)
-
-func _calculate_skills(p: Player):
-	## FIXME: increments all skills when called
-	for s in p.data.skills:
-		# check if skill level up,
-		if int(p.data.skills[s].exp) >= int(p.data.skills[s].cap):
-			p.data.skills[s].level += 1
-			p.data.skills[s].exp = 0
-		
-		# calculate skill caps
-		var step = 10
-		var cap = floori((step) * (p.data.skills[s].level - 1) ** 1.5)
-		p.data.skills[s].cap = cap
-			
-	# update player data
-	return p.data.skills
+	else:
+		# check if food surplus,
+		if self.player.data.resources.surplus > 0 && (
+				self.player.data.stats.health < self.player.data.stats.max_health):
+			# increase health by regen_rate
+			var regen_amt = self.player.data.stats.max_health * (self.player.data.stats.regen_rate)
+			# get # of times regen amt fits into missing health
+			var n_regen = ceil((self.player.data.stats.max_health - self.player.data.stats.health) / regen_amt)
+			# if regen times is more than surplus allows,
+			# but greater than 0,
+			if n_regen > player.data.resources.surplus:
+				var difference = player.data.resources.surplus - n_regen
+				n_regen += difference
+			# apply regen times to amount
+			regen_amt *= n_regen
+			var new_health = clamp(
+				self.player.data.stats.health + regen_amt, 0, self.player.data.stats.max_health)
+			self.player.data.stats.health = new_health
+			# reduce resource surplus by 1 if > 0
+			self.player.data.resources.surplus = (
+				(self.player.data.resources.surplus - n_regen) if (self.player.data.resources.surplus > 0
+				) else (self.player.data.resources.surplus)
+			)
 
 # Player Initialization
 
@@ -169,7 +170,6 @@ func _init_player_entity():
 	new_player.data.controller = self
 	# stats
 	new_player.data.stats = _calculate_stats(new_player)
-	new_player.data.skills = _calculate_skills(new_player)
 	# actions
 	new_player.data.actions.controller = _init_action_controller(new_player)
 	

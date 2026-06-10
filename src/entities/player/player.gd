@@ -12,13 +12,9 @@ enum PlayerClass {
 var player_data: Dictionary = {
 	"world": "",
 	"grid_idx": Vector2i(0, 0),
-	"stats": {},
-	"skills": {
-		"UNARMED": {
-			"level": 0,
-			"exp": 0,
-			"cap": 0,
-		},
+	"class": self.Class,
+	"stats": {
+		# initialized by PlayerClass
 	},
 	"actions": {
 		"controller": "",
@@ -39,6 +35,11 @@ var player_data: Dictionary = {
 		},
 	}
 }
+
+func get_class_string() -> String:
+	var curr_class = self.Class
+	var key = PlayerClass.find_key(curr_class)
+	return key
 
 ## initializes the entity as scene
 func init_scene() -> Sprite2D:

@@ -1,5 +1,9 @@
 extends Node
 
+# refs
+var ui_controller: Control
+
+# components
 const LOG_FILE_PATH = "res://world_log.txt"
 
 ## initializes the FileLogger
@@ -11,16 +15,17 @@ func _ready() -> void:
 
 ## logs the passed message to log file ./world_log.txt
 ## according to timestamp, caller, and alert level
-static func log_message(
+func log_message(
     caller: Variant,
     message: String,
     level: String = "INFO"
 ) -> void:
     var timestamp = _get_timestamp()
     # append caller to beginning of message
-    message = str(caller.name) + ": " + message
+    var caller_message = str(caller.name) + ": " + message
     # format message
     var formatted_message = "[%s] [%s] %s\n" % [timestamp, level.to_upper(), message]
+    var formatted_caller_message = "[%s] [%s] %s\n" % [timestamp, level.to_upper(), caller_message]
     print(formatted_message.strip_edges())
 
     # check file validity,
@@ -34,10 +39,11 @@ static func log_message(
     
     # if file valid, write
     if file:
-        file.store_string(formatted_message)
+        file.store_string(formatted_caller_message)
         file.flush() # force write immediately to prevent data loss
         file.close()
 
+    
 ## gets the current datetime and formats it
 ## returns formatted datetime String
 static func _get_timestamp() -> String:

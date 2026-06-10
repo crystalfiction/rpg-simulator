@@ -4,8 +4,8 @@ class_name World extends Entity
 var init_world: Resource = preload("res://src/entities/world/world.tscn")
 var init_data: Dictionary = {
 	"terrain": {
-		"grid": [], # [[ Vector2i(x, y) ]]
-		"tile_map": [], # [[ Tile<Sprite2D> ]]
+		"grid": [],
+		"tile_map": [],
 		"map_complete": false,
 		"map_count": 0,
 		"weather": {

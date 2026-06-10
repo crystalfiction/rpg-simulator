@@ -20,14 +20,8 @@ var player_controller: Controller
 var enemy_controller: Controller
 # components
 var uid_ref = 0
-var end_action = true
 
 # User Input
-
-## handles user inputs depending on Input Map actions
-func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("world_continue"):
-		end_action = !end_action
 
 # Ui Controllers
 
@@ -37,6 +31,7 @@ func _init_ui() -> Error:
 	new_ui.name = "UiController"
 	new_ui.world = self.world
 	self.ui_controller = new_ui
+	self.FileLogger.ui_controller = self.ui_controller
 	add_child(new_ui)
 
 	# validate result
@@ -191,12 +186,8 @@ func _process_cycle(current_world: Entity):
 					# on level 1
 					get_tree().reload_current_scene()
 				else:
-					if self.end_action:
-						# quit game
-						get_tree().quit()
-					else:
-						# reload game
-						get_tree().reload_current_scene()
+					# quit game
+					get_tree().quit()
 
 		# if world invalid,
 		else:

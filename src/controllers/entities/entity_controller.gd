@@ -14,7 +14,7 @@ func _calculate_exp(e: Entity) -> Dictionary:
 		# quadratic formula
 		# self.exp_cap = self.exp_step * (stats.level ** 2)
 		# exponential formula
-		self.exp_cap = (self.exp_step) * (stats.level) ** 1.5
+		self.exp_cap = (self.exp_step) * (stats.level - 1) ** 1.5
 
 		stats.exp_step = self.exp_step
 		stats.exp_cap = self.exp_cap
@@ -84,9 +84,8 @@ func evaluate_combat(attack: AttackAction):
 		if weapon_equipped:
 			# calculate attack damage factoring weapon
 			equipped_weapon = attack.src.data.inventory.equipped.weapon
-			var weapon_skill = attack.src.data.skills[equipped_weapon.get_weapon_class_string()].level
 			var weapon_dmg = equipped_weapon.data.stats.damage
-			var weapon_bonus = (weapon_dmg + (weapon_skill / 2)) / 2
+			var weapon_bonus = weapon_dmg / 2
 			src_attack += weapon_bonus
 
 	# evaluate if enemy attack is hit
@@ -122,27 +121,6 @@ func evaluate_combat(attack: AttackAction):
 		var p = attack.target
 		if src_attack >= p.data.stats.largest_hit:
 			p.data.stats.largest_hit = src_attack
-		# check if food surplus,
-		if p.data.resources.surplus > 0 && (
-				p.data.stats.health < p.data.stats.max_health):
-			# increase health by regen_rate
-			var regen = p.data.stats.max_health * (p.data.stats.regen_rate)
-			var new_health = clamp(
-				p.data.stats.health + regen, 0, p.data.stats.max_health)
-			p.data.stats.health = new_health
-			# reduce resource surplus by 1 if > 0
-			p.data.resources.surplus = (
-				(p.data.resources.surplus - 1) if (p.data.resources.surplus > 0
-				) else (p.data.resources.surplus)
-			)
-
-	# if attack source is player,
-	if attack.src is Player:
-		if result == "HITS" || result == "CRITS":
-			if weapon_equipped:
-				# increment weapon skill if hit
-				attack.src.data.controller.increment_skill(
-					attack.src, equipped_weapon.get_weapon_class_string())
 
 	# log results
 	if result == "DODGES":

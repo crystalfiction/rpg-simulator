@@ -38,8 +38,8 @@ var cycle_complete = false
 
 var soil_density_min = 0.11
 var soil_density_max = 1.00
-var soil_variance = 0.66
-var soil_texture_factor = 0.44
+var soil_variance = 0.55
+var soil_texture_factor = 0.33
 
 
 # Terrain Simulation

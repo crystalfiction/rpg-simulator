@@ -13,28 +13,23 @@ var frame_rates: Array = [
 	21,
 	13, # default
 	5,
-	1, # TODO: only for dev
+	1, # TODO: dev speed
 ]
 
-var cycle_time: float = 1
 var cycles: int = 0
 var cycling: bool = false
 
 
 ## handles user inputs depending on Input Map actions
 func _unhandled_input(event: InputEvent) -> void:
-	# shortcuts: t, space
-	if event.is_action_pressed("world_pause"):
-		get_tree().paused = !get_tree().paused
-		if get_tree().paused:
-			print("World paused.")
-		else:
-			print("World unpaused.")
-	
 	# shortcuts: r
 	if event.is_action_pressed("world_reload"):
 		get_tree().reload_current_scene()
 	
+	# shortcuts: s
+	# if event.is_action_pressed("world_pause"):
+	# 	get_tree().paused = !get_tree().paused
+
 	# shortcuts: =
 	if event.is_action_pressed("world_tick_inc"):
 		var current_speed = self.frame_rates.find(self.frame_rate)
