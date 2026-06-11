@@ -1,7 +1,7 @@
 class_name EntityController extends Controller
 
 # components
-var FileLogger
+
 
 ## calculates base experience values for a given stats dictionary
 ## returns updated stats dictionary

@@ -16,7 +16,7 @@ var soil_10r = preload("res://src/assets/world/tile/soil_10R.tres")
 @export var tile_terrain: ColorRect
 @export var tile_weather: ColorRect
 
-var init_tile: Resource = preload("res://src/entities/world/tiles/tile.tscn")
+var init_tile: Resource = preload("res://src/entities/world/terrain/tiles/tile.tscn")
 var init_data: Dictionary = {
 	"world": "",
 	"grid_idx": Vector2i(0, 0),

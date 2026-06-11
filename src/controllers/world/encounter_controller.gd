@@ -1,10 +1,9 @@
 extends Controller
 
 # refs
-var FileLogger
 
 # components
-var tile_map: Array
+var terrain: Terrain
 var init_encounter = {
 	"cycle": 0,
 	"player": null,
@@ -19,26 +18,6 @@ var encounter: Dictionary
 
 # Encounter Generation
 
-## gets r random tiles and returns as an array of objects
-func _get_resource_tiles(tiles: Array) -> Array:
-	# flatten terrain map
-	var tiles_flattened = []
-	for x in range(tiles.size()):
-		for y in range(tiles[x].size()):
-			var t = tiles[x][y]
-			tiles_flattened.append(t)
-	
-	# pick r random tiles with resources
-	var tiles_filtered = tiles_flattened.filter(func(t): return t.data.resources.food)
-	var r_tiles = tiles_filtered
-	
-	# validate result
-	var result = OK
-	if r_tiles.size() == 0:
-		# invalid resource data; resources don't exist
-		result = ERR_INVALID_PARAMETER
-	return [result, r_tiles]
-
 ## determines whether or not the parent tile spawns an encounter
 ## returns true or false depending on whether encounter was spawned
 func _spawn_encounter(p: Player, tile: Tile) -> bool:
@@ -52,7 +31,7 @@ func _spawn_encounter(p: Player, tile: Tile) -> bool:
 		if r <= self.encounter_chance:
 			# encounter spawned,
 			# spawn enemies,
-			var map_count = self.world.data.terrain.data.map_count
+			var map_count = self.terrain.data.map_count
 			# var n_enemies = ceil(map_count / 2.5)
 			new_enemies = enemy_controller.spawn_enemies(1) # only spawn 1 enemy
 			# prepare new encounter for processing
@@ -85,42 +64,30 @@ func _generate_encounters(tile_map: Array) -> Array:
 				"spawn": _spawn_encounter.bind(t)
 			}
 
-	# validate
-	var result = OK
-	if !tile_map:
-		result = ERR_INVALID_DATA
-	return [result, tile_map]
+	return tile_map
+
 
 # Encounter Initialization
 
 ## initializes controller dependencies
 ## returns result flag and tile_map
-func init_controller() -> Array:
+func init_controller() -> void:
 	# generate player encounters in world tiles
-	var results = _generate_encounters(self.tile_map)
-	var is_OK = results[0]
-	var new_tile_map = results[1]
-
-	# validate
-	var result = is_OK
-	if is_OK != OK:
-		result = ERR_INVALID_DATA
-	return [result, new_tile_map]
+	var new_tile_map = _generate_encounters(self.terrain.data.tile_map)
+	# update terrain
+	self.terrain.data.tile_map = new_tile_map
+	self.terrain.data.on_change.call()
 
 ## Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	# get FileLogger
+	# get file logger
 	self.FileLogger = $"/root/FileLogger"
+	# get utils
+	self.Utils = $"/root/Utils"
+
 	# initialize encounter system
-	var results = init_controller()
-	var is_OK = results[0]
-	var new_tile_map = results[1]
-	if is_OK == OK:
-		# update resource map
-		self.world.data.terrain.data.tile_map = new_tile_map
-	else:
-		# log results if error
-		FileLogger.log_message(self , results)
+	init_controller()
+	
 
 # Encounter Processing
 
@@ -148,9 +115,10 @@ func _process_encounter(current_encounter: Dictionary):
 ## handles encounter-level data processing
 func _process_cycle():
 	var time_controller = self.world.data.controller.time_controller
-	if time_controller.cycling && self.world:
-		if self.encountering:
-			_process_encounter(self.encounter)
+	if time_controller:
+		if time_controller.cycling && self.world:
+			if self.encountering:
+				_process_encounter(self.encounter)
 
 ## Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:

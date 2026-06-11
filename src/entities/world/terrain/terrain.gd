@@ -2,6 +2,7 @@ class_name Terrain extends Entity
 
 # components
 var init_terrain = {
+	"on_change": null,
 	"grid": [],
 	"tile_map": [],
 	"map_complete": false,
@@ -25,7 +26,6 @@ func get_terrain_biome() -> Biome:
 	var new_biome = Biome.new(biome_data)
 	self.data.biome = new_biome
 	return self.data.biome
-
 
 ## initializes the entity
 func _init() -> void:

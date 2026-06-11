@@ -1,5 +1,7 @@
 class_name Controller extends Node
 
-# global references
-var world: World
-var parent: Controller # parent controller if nested
+# refs
+var Utils: Node
+var FileLogger: Node
+var world: Sprite2D
+var parent: Controller

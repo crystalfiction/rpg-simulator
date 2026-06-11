@@ -1,15 +1,14 @@
 extends Controller
 
 # refs
-var FileLogger
 
 # components
-var tile_map: Array
+var terrain: Terrain
 var resource_iterations: int
 var resources_optimized = null
 var resource_count = 0
 
-var food_factor = 0.22 # chance to generate food on a given tile
+var food_factor = 0.11 # chance to generate food on a given tile
 
 
 # Resource Generation
@@ -86,47 +85,29 @@ func _evaluate_terrain(tile_map: Array) -> Array:
 		"resources_generated: " + str(self.resource_count)
 	)
 	
-	# validate
-	var result = OK
-	if !tile_map:
-		result = ERR_INVALID_DATA
-	return [result, tile_map]
+	return tile_map
 
 # Resource Initialization
 
 ## initializes world resource system
-func init_controller(tile_map: Array) -> Array:
+func init_controller() -> void:
 	# evaluate the current terrain map and place resources
-	var results = _evaluate_terrain(tile_map)
-	var is_OK = results[0]
-	var new_tile_map = results[1]
-
-	# validate result
-	var result = is_OK
-	if result != OK:
-		result = ERR_SCRIPT_FAILED
-	else:
-		## TODO: make this actually true
-		self.resources_optimized = true
-		# update world resource count if valid
-		self.world.data.terrain.data.resources.count = self.resource_count
-	
-	return [result, new_tile_map]
+	var tile_map = _evaluate_terrain(self.terrain.data.tile_map)
+	# update world resource count if valid
+	self.terrain.data.resources.count = self.resource_count
+	self.resource_count = 0
+	self.terrain.data.tile_map = tile_map
+	self.terrain.data.on_change.call()
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	# get FileLogger
+	# get file logger
 	self.FileLogger = $"/root/FileLogger"
+	# get utils
+	self.Utils = $"/root/Utils"
 
 	# initialize resource system
-	var results = init_controller(self.tile_map)
-	var is_OK = results[0]
-	var new_tile_map = results[1]
-	if is_OK == OK:
-		# if resources optimized,
-		if self.resources_optimized:
-			# add to terrain data
-			self.world.data.terrain.data.tile_map = new_tile_map
+	init_controller()
 
 # Resource Processing
 

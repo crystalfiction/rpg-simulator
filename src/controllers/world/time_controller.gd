@@ -1,7 +1,6 @@
 extends Controller
 
 # references
-var FileLogger
 var terrain_controller: Controller
 var player_controller: Controller
 var enemy_controller: Controller
@@ -20,37 +19,32 @@ var frame_rates: Array = [
 var cycling: bool = false
 var cycles: int = 0
 
-var seconds: int = 0
-var minutes: int = 0
-var hours: int = 0
-var days: int = 0
-var weeks: int = 0
-var months: int = 0
-var years: int = 0
+# var seconds: int = 0
+# var minutes: int = 0
+# var hours: int = 0
+# var days: int = 0
+# var weeks: int = 0
+# var months: int = 0
+# var years: int = 0
 
 var data = {
 	"frame_rate": 0,
 	"cycles": 0,
-	"seconds": 0,
-	"minutes": 0
 }
 
 
 func _update_time_stats(curr_cycles: int):
-	self.seconds = curr_cycles
-	self.minutes = floor(seconds / time_scale)
-	self.hours = floor(minutes / time_scale)
-	self.days = floor(hours / 24.0)
-	self.weeks = floor(days / 7.0)
-	self.months = floor(weeks / 4.0)
-	self.years = floor(months / 12.0)
-
+	# self.seconds = curr_cycles
+	# self.minutes = floor(seconds / time_scale)
+	# self.hours = floor(minutes / time_scale)
+	# self.days = floor(hours / 24.0)
+	# self.weeks = floor(days / 7.0)
+	# self.months = floor(weeks / 4.0)
+	# self.years = floor(months / 12.0)
 	var new_time_data = {
 		"frames": self.frames,
 		"frame_rate": self.frame_rate,
-		"cycles": self.cycles,
-		"seconds": self.seconds,
-		"minutes": self.minutes,
+		"cycles": curr_cycles,
 	}
 	self.data = new_time_data
 
@@ -78,25 +72,31 @@ func _unhandled_input(event: InputEvent) -> void:
 		self.frame_rate = self.frame_rates[new_speed]
 		print("World tick rate: " + str(self.frame_rate))
 
-## initializes controller dependencies
-func _init_controller():
-	pass
-
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	# get FileLogger
 	self.FileLogger = $"/root/FileLogger"
-
-	# initialize the controller
-	_init_controller()
-	
 	FileLogger.log_message(self , "Time initialized.")
+
+
+# Time Processing
+
+## checks whether time cycle conditions are currently valid
+func _check_cycle_conditions() -> bool:
+	var conditions = (
+		self.world &&
+		self.world.data.terrain &&
+		"weather" in self.world.data.terrain.data &&
+		"resources" in self.world.data.terrain.data
+	)
+	return true if conditions else false
 
 ## process time-level data for cycle
 func _process_cycle():
-# only process cycle if tree !paused
-	# update frames
-	if !get_tree().paused && self.world:
+	# only process cycle if tree !paused
+	var cycle_conditions = _check_cycle_conditions()
+	if !get_tree().paused && cycle_conditions:
+		# update frames
 		frames += time_scale
 		# if frame interval,
 		if int(self.frames) % int(self.frame_rate * time_scale) == 0:
@@ -104,10 +104,9 @@ func _process_cycle():
 			self.cycles += 1
 			# flag time as cycling
 			self.cycling = true
-			# TODO: do time processing
-			FileLogger.log_message(self , "Starting cycle " + str(self.cycles))
 			# process time stats
 			_update_time_stats(self.cycles)
+			FileLogger.log_message(self , "Starting cycle " + str(self.cycles))
 
 		# if not frame interval,
 		else:

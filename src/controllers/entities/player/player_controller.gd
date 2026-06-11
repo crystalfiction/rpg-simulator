@@ -13,9 +13,8 @@ var exp_cap: int
 ## finds the nearest resource tile to player and returns it
 func find_nearest_resource(p: Player, w: World) -> Tile:
 	# get all resource tiles
-	var utils = w.data.controller.utils
 	var tile_map = w.data.terrain.data.tile_map
-	var resources = utils.get_resources(tile_map)
+	var resources = self.Utils.get_resources(tile_map)
 	var n_resources = resources
 	# sort resources by distance to player
 	n_resources.sort_custom(func(a, b): return (
@@ -62,21 +61,20 @@ func move_to_tile(p: Player, t: Tile):
 	# update grid_idx
 	var world_controller = self.world.data.controller
 	var grid_scale = world_controller.terrain_controller.grid_scale
-	p.data.grid_idx = world_controller.utils.world_to_grid(
+	p.data.grid_idx = self.Utils.world_to_grid(
 		p.global_position, grid_scale
 	)
 
 ## moves the passed player one tile towards the passed tile,
 ## or to the passed tile if only one tile distance
 func move_towards_tile(p: Player, t: Tile) -> bool:
-	var utils = self.world.data.controller.utils
 	# get direction to tile
 	var p_idx = p.data.grid_idx as Vector2
 	var t_idx = t.data.grid_idx as Vector2
 	var direction = (t_idx - p_idx).normalized().snapped(Vector2(1, 1))
 	# get object 1 tile away in direction towards t tile from player p
 	var target = Vector2i(p_idx + direction)
-	var target_obj = utils.get_object_by_grid(
+	var target_obj = self.Utils.get_object_by_grid(
 		target, self.world.data.terrain.data.tile_map)
 	# move to target
 	move_to_tile(p, target_obj)
@@ -156,6 +154,7 @@ func _init_action_controller(p: Player) -> ActionController:
 	new_action_controller.name = "ActionController"
 	new_action_controller.world = self.world
 	new_action_controller.parent = self
+	new_action_controller.Utils = self.Utils
 	new_action_controller.FileLogger = self.FileLogger
 	return new_action_controller
 
@@ -173,27 +172,28 @@ func _init_player_entity():
 	# actions
 	new_player.data.actions.controller = _init_action_controller(new_player)
 	
-	# add player
-	self.player = new_player
+	# add player to tree
 	self.add_child(new_player)
 	
 	# update uid ref
 	world_controller.uid_ref += 1
 
 	# return player
-	return self.player
+	return new_player
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	# get file logger
 	self.FileLogger = $"/root/FileLogger"
+	# get utils
+	self.Utils = $"/root/Utils"
 
 	# TODO: account for multiple players
 	# initialize the player entity as scene
-	_init_player_entity()
+	self.player = _init_player_entity()
 
 	# TODO: give player weapon
-	var new_weapon = UnarmedWeapon.new()
+	var new_weapon = SwordWeapon.new()
 	self.player.data.inventory.equipped.weapon = new_weapon
 
 	# update player entity reference
@@ -238,19 +238,19 @@ func check_encounter(p: Player) -> bool:
 func _process_cycle(p: Player):
 	var time_controller = world.data.controller.time_controller
 	# if time cycling,
-	# and if player valid
-	if time_controller.cycling:
-		# check player health,
-		_check_player(p)
+	if time_controller:
+		if time_controller.cycling:
+			# check player health,
+			_check_player(p)
 
-		# get player action for cycle
-		p.data.actions.controller.get_action()
+			# get player action for cycle
+			p.data.actions.controller.get_action()
 
-		# if terrain map complete,
-		if self.world.data.terrain.data.map_complete:
-			# reset player health
-			# and wait for new map to be initialized
-			p.data.stats.health = p.data.stats.max_health
+			# if terrain map complete,
+			if self.world.data.terrain.data.map_complete:
+				# reset player health
+				# and wait for new map to be initialized
+				p.data.stats.health = p.data.stats.max_health
 
 func _process(delta: float) -> void:
 	# if player is valid,

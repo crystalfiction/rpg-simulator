@@ -1,8 +1,9 @@
 extends Control
 
 # references
-var world: World
-var FileLogger
+var world: Sprite2D
+var Utils: Node
+var FileLogger: Node
 
 # components
 var stat_label_settings: LabelSettings
@@ -37,7 +38,7 @@ var label_entry = {
 	"label": null,
 }
 
-var string_n := 10
+var string_n := 12
 
 
 func _get_substring(string: String, n: int) -> String:
@@ -50,7 +51,7 @@ func _update_labels(curr_labels: Array):
 	var player_controller = self.world.data.controller.player_controller
 	var enemy_controller = self.world.data.controller.enemy_controller
 
-	# delete labels with invalid objects
+	# check for invalid labels
 	var invalid_entries = curr_labels.filter(func(l): return !is_instance_valid(l.obj))
 	for i in range(invalid_entries.size()):
 		# queue the label for deletion
@@ -179,6 +180,9 @@ func _make_data_labels(obj: Variant, container: String):
 	var terrain_filter = {
 		0: ["map_count", "metrics", "weather", "resources"],
 	}
+	var biome_filter = {
+		0: ["class_v", "ranges"]
+	}
 	var player_filter = {
 		0: ["stats", "skills", "resources", "inventory"]
 	}
@@ -189,6 +193,7 @@ func _make_data_labels(obj: Variant, container: String):
 		if (
 			obj is World && k in world_filter[0] ||
 			obj is Terrain && k in terrain_filter[0] ||
+			obj is Biome && k in biome_filter[0] ||
 			obj is Player && k in player_filter[0] ||
 			obj is Enemy && k in enemy_filter[0]
 		):
@@ -199,14 +204,16 @@ func _make_data_labels(obj: Variant, container: String):
 					if (
 						obj is Player ||
 						obj is Enemy ||
-						obj is Terrain
+						obj is Terrain ||
+						obj is Biome
 					):
 						if obj.data[k][k_n] is Dictionary:
 							for k_n_n in obj.data[k][k_n]:
 								if (
 									obj is Player ||
 									obj is Enemy ||
-									obj is Terrain
+									obj is Terrain ||
+									obj is Biome
 								):
 									# if not dictionary entry,
 									var entry_key = ".".join([k, k_n, k_n_n])
@@ -236,6 +243,14 @@ func _check_obj_labels(obj: Variant, curr_labels: Array):
 			else:
 				return found
 
+## removes lingering name labels in stats container
+func _remove_lingerers(container: String):
+	var lingering = self [container].get_children()
+	for l in lingering:
+		if is_instance_valid(l):
+			if !l.is_queued_for_deletion():
+				l.queue_free()
+
 func _init_enemy_stats(curr_labels: Array):
 	var enemy_controller = self.world.data.controller.enemy_controller
 	if enemy_controller:
@@ -249,11 +264,7 @@ func _init_enemy_stats(curr_labels: Array):
 				self.enemy_panel.folded = false
 		else:
 			# if enemies array empty, delete lingering name labels
-			var lingering = self.enemy_stats.get_children()
-			for l in lingering:
-				if is_instance_valid(l):
-					if !l.is_queued_for_deletion():
-						l.queue_free()
+			_remove_lingerers("enemy_stats")
 			# hide
 			self.enemy_panel.folded = true
 
@@ -270,9 +281,13 @@ func _init_world_stats():
 	# make world labels
 	var w = self.world
 	_make_data_labels(w, "world_stats")
+	# terrain data
 	var terrain = self.world.data.terrain
 	_make_data_labels(terrain, "world_stats")
-	# make time data labels
+	# biome data
+	var biome = self.world.data.terrain.data.biome
+	_make_data_labels(biome, "world_stats")
+	# time data
 	var t = self.world.data.controller.time_controller
 	_make_data_labels(t, "world_stats")
 
@@ -280,6 +295,8 @@ func _init_world_stats():
 func _ready() -> void:
 	# get file logger
 	self.FileLogger = $"/root/FileLogger"
+	# get utils
+	self.Utils = $"/root/Utils"
 
 	# define label settings
 	var new_stat_label_settings = LabelSettings.new()

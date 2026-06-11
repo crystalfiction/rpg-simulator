@@ -25,11 +25,13 @@ func _init_action_controller(e: Enemy) -> ActionController:
 	new_action_controller.name = "ActionController"
 	new_action_controller.world = self.world
 	new_action_controller.parent = self
+	new_action_controller.Utils = self.Utils
+	new_action_controller.FileLogger = self.FileLogger
 	return new_action_controller
 
 ## initializes enemy entity
 func _init_enemy_entity():
-	var world_controller = self.world.data.controller
+	var world_controller = self.parent
 	var new_enemy = Enemy.new().init_scene()
 	# metadata
 	new_enemy.data.uid = world_controller.uid_ref
@@ -38,17 +40,19 @@ func _init_enemy_entity():
 	# actions
 	new_enemy.data.actions.controller = _init_action_controller(new_enemy)
 
-	var e = new_enemy
 	add_child(new_enemy)
 	
 	# update uid ref
 	world_controller.uid_ref += 1
 
-	return e
+	return new_enemy
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
+	# get file logger
 	self.FileLogger = $"/root/FileLogger"
+	# get utils
+	self.Utils = $"/root/Utils"
 
 # Enemy Processing
 
@@ -69,13 +73,13 @@ func _check_enemies(enemy_array: Array):
 func _process_cycle(enemy_array: Array):
 	# only evaluate if time cycling
 	var time_controller = self.world.data.controller.time_controller
-	if time_controller.cycling && self.world:
-		# check enemies for defeat conditions
-		_check_enemies(enemy_array)
-		
-		# get action for each enemy
-		for e in enemies:
-			e.data.actions.controller.get_action()
+	if time_controller:
+		if time_controller.cycling && self.world:
+			# check enemies for defeat conditions
+			_check_enemies(enemy_array)
+			# get action for each enemy
+			for e in enemies:
+				e.data.actions.controller.get_action()
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:

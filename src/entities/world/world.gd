@@ -9,7 +9,7 @@ var init_data: Dictionary = {
 
 ## initializes the scene
 func init_scene() -> Sprite2D:
-	var new_scene = self.init_world.instantiate()
+	var new_scene: Sprite2D = self.init_world.instantiate()
 	return new_scene
 
 ## initializes the entity

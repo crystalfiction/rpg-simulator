@@ -1,10 +1,9 @@
 extends Controller
 
 # refs
-var FileLogger
 
 # components
-var tile_map: Array
+var terrain: Terrain
 var weather_optimized = null
 var erosion_complete = null
 var erosion_cycle = 0
@@ -20,29 +19,29 @@ var erosion_factor = 0.11
 
 var weather_metrics: Dictionary
 
+
 # Weather Simulation
 
 ## applies erosion to the current weather_map given the paramaters
-func _apply_erosion(terrain: Array) -> Array:
-	var utils = self.world.data.controller.utils
+func _apply_erosion(curr_terrain: Array) -> Array:
 	var avg_erosion = 0.0
 	var count = 0
 	var avg_density = 0.0
-	for x in range(terrain.size()):
-		for y in range(terrain[x].size()):
+	for x in range(curr_terrain.size()):
+		for y in range(curr_terrain[x].size()):
 			# tile
-			var w = terrain[x][y]
+			var w = curr_terrain[x][y]
 			# apply erosion by sum
 			w.data.weather.erosion += w.data.weather.erosion
 			# reduce soil density by new erosion sum
 			var new_soil_density = clamp(
 				w.data.terrain.density - w.data.weather.erosion,
-				world.data.controller.terrain_controller.soil_density_min,
-				world.data.controller.terrain_controller.soil_density_max
+				self.parent.soil_density_min,
+				self.parent.soil_density_max
 			)
 			w.data.terrain.density = new_soil_density
 			# update texture string
-			w.data.terrain.texture = utils.get_soil_texture(w)
+			w.data.terrain.texture = self.Utils.get_soil_texture(w)
 			# update metrics
 			count += 1
 			avg_density += w.data.terrain.density
@@ -51,8 +50,7 @@ func _apply_erosion(terrain: Array) -> Array:
 	# update metrics
 	avg_erosion /= count
 	avg_density /= count
-	self.world.data.terrain.data.metrics.avg_density = snapped(avg_density, 0.001)
-	
+	self.terrain.data.metrics.avg_density = snapped(avg_density, 0.001)
 	var new_avg_texture = ""
 	if avg_density >= 0 && avg_density < 0.33:
 		new_avg_texture = "sand"
@@ -60,21 +58,20 @@ func _apply_erosion(terrain: Array) -> Array:
 		new_avg_texture = "silt"
 	elif avg_density >= 0.66 && avg_density <= 1:
 		new_avg_texture = "clay"
-	
-	self.world.data.terrain.data.metrics.avg_texture = new_avg_texture
+	self.terrain.data.metrics.avg_texture = new_avg_texture
 
 	# return new map
-	return terrain
+	return curr_terrain
 
 ## calculates erosion values per tile given water values
-func _calculate_erosion(terrain: Array) -> Dictionary:
+func _calculate_erosion(curr_terrain: Array) -> Dictionary:
 	var avg_erosion = 0.0
 	var avg_soil_density = 0.0
 	var count = 0
-	for x in range(terrain.size()):
-		for y in range(terrain[x].size()):
+	for x in range(curr_terrain.size()):
+		for y in range(curr_terrain[x].size()):
 			# tile
-			var w = terrain[x][y]
+			var w = curr_terrain[x][y]
 			var erosion = (
 				((w.data.weather.water) *
 				(1 - w.data.weather.drainage) *
@@ -97,15 +94,15 @@ func _calculate_erosion(terrain: Array) -> Dictionary:
 	return metrics
 
 ## calculates water values per tile given rainfall, drainage
-func _calculate_water(terrain: Array) -> Dictionary:
+func _calculate_water(curr_terrain: Array) -> Dictionary:
 	var avg_rainfall = 0.0
 	var avg_drainage = 0.0
 	var avg_water = 0.0
 	var count = 0
-	for x in range(terrain.size()):
-		for y in range(terrain[x].size()):
+	for x in range(curr_terrain.size()):
+		for y in range(curr_terrain[x].size()):
 			# tile
-			var w = terrain[x][y]
+			var w = curr_terrain[x][y]
 			# calculate water value
 			var water = clamp(
 				(w.data.weather.rainfall ** 2) *
@@ -134,14 +131,14 @@ func _calculate_water(terrain: Array) -> Dictionary:
 	return metrics
 
 ## processes weather for the current weather_map
-func _optimize_weather(terrain: Array) -> Array:
+func _optimize_weather(curr_terrain: Array) -> Array:
 	FileLogger.log_message(self , "Optimizing weather...")
 	
 	# calculate features
 	var new_metrics: Dictionary
-	var water_metrics = _calculate_water(terrain)
+	var water_metrics = _calculate_water(curr_terrain)
 	new_metrics.merge(water_metrics)
-	var erosion_metrics = _calculate_erosion(terrain)
+	var erosion_metrics = _calculate_erosion(curr_terrain)
 	new_metrics.merge(erosion_metrics)
 	
 	## TODO: optimize features with metrics
@@ -151,7 +148,7 @@ func _optimize_weather(terrain: Array) -> Array:
 	
 	# run weather erosion cycle
 	var n_cycles = 1
-	var final: Array = terrain
+	var final: Array = curr_terrain
 	for i in range(n_cycles):
 		# apply erosion
 		final = _apply_erosion(final)
@@ -166,7 +163,7 @@ func _optimize_weather(terrain: Array) -> Array:
 		)
 		FileLogger.log_message(self , msg)
 	
-	# terrain is optimized and valid
+	# curr_terrain is optimized and valid
 	erosion_complete = true
 	
 	weather_iterations += 1
@@ -174,45 +171,74 @@ func _optimize_weather(terrain: Array) -> Array:
 
 	return final
 
+
 # Weather Initialization
 
 ## initializes the weather system controller
-func init_controller(terrain: Array) -> void:
+func init_controller() -> void:
+	# check if biome exists
+	var biome = self.terrain.data.biome
+	if biome == null:
+		rainfall = randf_range(
+			rainfall_min,
+			rainfall_max)
+	else:
+		rainfall = randf_range(
+			biome.data.ranges.rainfall[0],
+			biome.data.ranges.rainfall[1])
+	
 	# init features
-	rainfall = randf_range(rainfall_min, rainfall_max)
-	
+	var tile_map = self.terrain.data.tile_map
 	## loop through tile entities and create init weather data
-	for x in range(len(terrain)):
-		for y in range(len(terrain[x])):
-			var t = terrain[x][y]
+	for x in range(len(tile_map)):
+		for y in range(len(tile_map[x])):
+			var t = tile_map[x][y]
 			# initialize weather data
-			var drainage = 1 - t.data.terrain.density # invert density
-			drainage = clamp(drainage, drainage_min, drainage_max)
-			t.data.weather = {
-				"rainfall": rainfall,
-				"drainage": drainage,
-				"water": 0.0,
-				"erosion": 0.0
-			}
+			if biome == null:
+				var drainage = 1 - t.data.terrain.density # invert density
+				drainage = clamp(drainage, drainage_min, drainage_max)
+				t.data.weather = {
+					"rainfall": rainfall,
+					"drainage": drainage,
+					"water": 0.0,
+					"erosion": 0.0
+				}
+			# if biome passed,
+			else:
+				var drainage = 1 - t.data.terrain.density # invert density
+				drainage = clamp(
+					drainage,
+					biome.data.ranges.drainage[0],
+					biome.data.ranges.drainage[1]
+				)
+				t.data.weather = {
+					"rainfall": rainfall,
+					"drainage": drainage,
+					"water": 0.0,
+					"erosion": 0.0
+				}
 	
+	# optimize weather
+	tile_map = _optimize_weather(tile_map)
+
 	# reset metrics
 	weather_iterations = 0
 
+	# update terrain
+	self.terrain.data.weather = self.weather_metrics
+	self.terrain.data.tile_map = tile_map
+	self.terrain.data.on_change.call()
+
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	# get FileLogger
+	# get file logger
 	self.FileLogger = $"/root/FileLogger"
+	# get utils
+	self.Utils = $"/root/Utils"
 
 	# initialize controller with terrain given on initialization
-	init_controller(self.tile_map)
-	# optimize weather
-	var new_tile_map = _optimize_weather(self.tile_map)
-	# if weather optimized
-	if weather_optimized:
-		# update terrain.weather with new weather data
-		var terrain = self.world.data.terrain
-		terrain.data.weather = self.weather_metrics
-		terrain.data.tile_map = new_tile_map
+	init_controller()
+
 
 # Weather Processing
 
