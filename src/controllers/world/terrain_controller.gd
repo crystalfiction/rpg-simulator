@@ -134,17 +134,9 @@ func _optimize_soil(terrain: Terrain) -> Array:
 			avg_textures.append(new_t[3])
 			count += 1
 
-	# determine if biome has been evaluated,
-	var sd_min = self.soil_density_min
-	var sd_max = self.soil_density_max
-	if terrain.data.biome != null:
-		var biome = terrain.data.biome
-		sd_min = biome.data.ranges.density[0]
-		sd_max = biome.data.ranges.density[1]
-
 	# apply normalization to terrain soil density
 	# according to biome if one exists
-	var norm_soil = _normalize_soil(tile_map, sd_min, sd_max)
+	var norm_soil = _normalize_soil(tile_map)
 	tile_map = norm_soil[0]
 	avg_density = norm_soil[1]
 	
@@ -455,21 +447,22 @@ func _ready() -> void:
 ## processes the controller's time cycle
 func _process_cycle(curr_world: Sprite2D):
 	## General terrain cycle logic
-		if curr_world:
-			# if no resources left in terrain,
-			var current_terrain = curr_world.data.terrain
-			var resources = self.Utils.get_resources(current_terrain.data.tile_map)
-			var is_resources = !resources.is_empty()
-			if !is_resources:
-				# flag terrain map complete
-				curr_world.data.terrain.data.map_complete = true
-				FileLogger.log_message(self , "No resources found, initializing new map.")
-			
-			# check map completion regardless of time cycle state
-			if curr_world.data.terrain.data.map_complete:
-				var curr_terrain = curr_world.data.terrain
-				# initialize a new terrain
-				_generate_terrain(curr_terrain)
+	# ignore time cycle
+	if curr_world:
+		# if no resources left in terrain,
+		var current_terrain = curr_world.data.terrain
+		var resources = self.Utils.get_resources(current_terrain.data.tile_map)
+		var is_resources = !resources.is_empty()
+		if !is_resources:
+			# flag terrain map complete
+			curr_world.data.terrain.data.map_complete = true
+			FileLogger.log_message(self , "No resources found, initializing new map.")
+		
+		# check map completion regardless of time cycle state
+		if curr_world.data.terrain.data.map_complete:
+			var curr_terrain = curr_world.data.terrain
+			# initialize a new terrain
+			_generate_terrain(curr_terrain)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:

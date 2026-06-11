@@ -75,7 +75,7 @@ func _calculate_erosion(curr_terrain: Array) -> Dictionary:
 			var erosion = (
 				((w.data.weather.water) *
 				(1 - w.data.weather.drainage) *
-				(1 - w.data.terrain.density ** 2)) * erosion_factor
+				(1 - w.data.terrain.density)) * erosion_factor
 			)
 			w.data.weather.erosion = erosion
 			# update metrics
@@ -131,14 +131,15 @@ func _calculate_water(curr_terrain: Array) -> Dictionary:
 	return metrics
 
 ## processes weather for the current weather_map
-func _optimize_weather(curr_terrain: Array) -> Array:
+func _optimize_weather(curr_terrain: Terrain) -> Terrain:
 	FileLogger.log_message(self , "Optimizing weather...")
 	
 	# calculate features
+	var tile_map = curr_terrain.data.tile_map
 	var new_metrics: Dictionary
-	var water_metrics = _calculate_water(curr_terrain)
+	var water_metrics = _calculate_water(tile_map)
 	new_metrics.merge(water_metrics)
-	var erosion_metrics = _calculate_erosion(curr_terrain)
+	var erosion_metrics = _calculate_erosion(tile_map)
 	new_metrics.merge(erosion_metrics)
 	
 	## TODO: optimize features with metrics
@@ -147,8 +148,8 @@ func _optimize_weather(curr_terrain: Array) -> Array:
 	self.weather_metrics = new_metrics
 	
 	# run weather erosion cycle
-	var n_cycles = 1
-	var final: Array = curr_terrain
+	var n_cycles = 3
+	var final: Array = curr_terrain.data.tile_map
 	for i in range(n_cycles):
 		# apply erosion
 		final = _apply_erosion(final)
@@ -164,28 +165,41 @@ func _optimize_weather(curr_terrain: Array) -> Array:
 		FileLogger.log_message(self , msg)
 	
 	# curr_terrain is optimized and valid
-	erosion_complete = true
+	self.erosion_complete = true
 	
-	weather_iterations += 1
-	weather_optimized = true
+	self.weather_iterations += 1
+	self.weather_optimized = true
 
-	return final
+	tile_map = final
+	curr_terrain.data.tile_map = tile_map
+	return curr_terrain
+
+func _calculate_rainfall(curr_terrain: Terrain) -> void:
+	# check if biome exists
+	var biome = curr_terrain.data.biome
+	if biome == null:
+		self.rainfall = randf_range(
+			rainfall_min,
+			rainfall_max)
+	else:
+		var r = randf_range(0, 1)
+		var rainfall_chance = biome.data.ranges.rainfall_chance
+		if r <= rainfall_chance:
+			self.rainfall = randf_range(
+				biome.data.ranges.rainfall[0],
+				biome.data.ranges.rainfall[1])
+		else:
+			self.rainfall = 0.0
 
 
 # Weather Initialization
 
 ## initializes the weather system controller
 func init_controller() -> void:
-	# check if biome exists
-	var biome = self.terrain.data.biome
-	if biome == null:
-		rainfall = randf_range(
-			rainfall_min,
-			rainfall_max)
-	else:
-		rainfall = randf_range(
-			biome.data.ranges.rainfall[0],
-			biome.data.ranges.rainfall[1])
+	# check biome
+	var biome = self.terrain.data.biome if self.terrain.data.biome != null else null
+	# calculate rain
+	_calculate_rainfall(self.terrain)
 	
 	# init features
 	var tile_map = self.terrain.data.tile_map
@@ -214,12 +228,12 @@ func init_controller() -> void:
 				t.data.weather = {
 					"rainfall": rainfall,
 					"drainage": drainage,
-					"water": 0.0,
-					"erosion": 0.0
+					"water": t.data.weather.water,
+					"erosion": t.data.weather.erosion
 				}
 	
 	# optimize weather
-	tile_map = _optimize_weather(tile_map)
+	self.terrain = _optimize_weather(self.terrain)
 
 	# reset metrics
 	weather_iterations = 0
@@ -244,8 +258,19 @@ func _ready() -> void:
 
 ## processes weather-level terrain data
 func _process_weather():
-	pass
+	var time_controller = self.parent.parent.time_controller
+	if time_controller:
+		var weather_interval = 7
+		if time_controller.cycling && (
+			int(time_controller.cycles) % weather_interval == 0
+		):
+			# # calculate weather cycle
+			# _calculate_rainfall(self.terrain)
+			# # update terrain
+			# self.terrain.data.weather = self.weather_metrics
+			# self.terrain.data.on_change.call()
+			pass
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
-	pass
+	_process_weather()

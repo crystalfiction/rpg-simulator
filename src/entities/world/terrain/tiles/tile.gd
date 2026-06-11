@@ -78,6 +78,7 @@ func _update_color(tile_data: Dictionary):
 	# update color
 	self.tile_terrain.color = new_color
 
+
 # determines which label text to render given tile data
 func _update_label_text(tile_data: Dictionary):
 	# check for tile data to label in order of importance
