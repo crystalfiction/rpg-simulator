@@ -51,12 +51,11 @@ Create a procedurally generated RPG simulation that embraces chaos and instabili
     - *too much controller data is being routed through entities before validation/initialization*
         - *results in mismatched data references and cumbersome validation processes*
     - *in sequence, controllers should...*
-        - [ ] initialize entities and entity data they control
-        - [ ] validate entity data
-            - [ ] initialize + validate ALL entity data, including sub-system controllers, before updating parent entity data
+        - [x] initialize entities and entity data they control
+        - [x] validate entity data
+            - [x] initialize + validate ALL entity data, including sub-system controllers, before updating parent entity data
                 - *i.e. WorldController should initialize and validate World + ALL dependency data in World.data before main processing loop starts, not during*
-        - [ ] controller entity references should not exist on the controller object, they should be made as needed and be passed only to the relevant functions
-            - *having multiple references for the same entity gets confusing and difficult to manage as soon as data persistence or entity instantiation is added*
+        - [x] if controller entity data references are kept on system controllers, they should have callback functions for when said data reference changes
         - [ ] start processing ONLY IF all data + parent entity data is validated
 
 <details>
