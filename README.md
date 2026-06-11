@@ -47,16 +47,7 @@ Create a procedurally generated RPG simulation that embraces chaos and instabili
 
 #### DevOps
 
-- [ ] restructure controller initialization process
-    - *too much controller data is being routed through entities before validation/initialization*
-        - *results in mismatched data references and cumbersome validation processes*
-    - *in sequence, controllers should...*
-        - [x] initialize entities and entity data they control
-        - [x] validate entity data
-            - [x] initialize + validate ALL entity data, including sub-system controllers, before updating parent entity data
-                - *i.e. WorldController should initialize and validate World + ALL dependency data in World.data before main processing loop starts, not during*
-        - [x] if controller entity data references are kept on system controllers, they should have callback functions for when said data reference changes
-        - [ ] start processing ONLY IF all data + parent entity data is validated
+- [ ] 
 
 <details>
     <summary>DONE</summary>
@@ -98,5 +89,15 @@ Create a procedurally generated RPG simulation that embraces chaos and instabili
 - [x] implement basic skill system, starting with Weapon Skill
     - player builds skill points by utilizing items of a specific proficiency
         - _i.e. player builds x sword skill every time player attacks with sword_
+- [x] restructure controller initialization process
+    - *too much controller data is being routed through entities before validation/initialization*
+        - *results in mismatched data references and cumbersome validation processes*
+    - *in sequence, controllers should...*
+        - [x] initialize entities and entity data they control
+        - [x] validate entity data
+            - [x] initialize + validate ALL entity data, including sub-system controllers, before updating parent entity data
+                - *i.e. WorldController should initialize and validate World + ALL dependency data in World.data before main processing loop starts, not during*
+        - [x] if controller entity data references are kept on system controllers, they should have callback functions for when said data reference changes
+        - [x] start processing ONLY IF all data + parent entity data is validated
 
 </details>
