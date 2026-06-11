@@ -11,11 +11,11 @@ func get_action():
 	# if Player entity,
 	if self.entity is Player:
 		# if resources exist and player not in encounter,
-		var resources_exist = self.world.data.terrain.resources.count > 0
+		var resources_exist = self.world.data.terrain.data.resources.count > 0
 		if resources_exist && ! self.entity.data.encounters.active:
 			# get current tile
 			var current_tile = world.data.controller.utils.get_object_by_grid(
-				self.entity.data.grid_idx, self.world.data.terrain.tile_map)
+				self.entity.data.grid_idx, self.world.data.terrain.data.tile_map)
 			# check if tile contains resources,
 			if current_tile.data.resources.food:
 				# check if tile contains encounter
@@ -76,21 +76,31 @@ func get_action():
 	elif self.entity is Enemy:
 		## ATTACK
 		# evaluate combat
-		var encounter_controller = self.world.data.controller.terrain_controller.encounter_controller
-		var active_encounter = encounter_controller.encounter
-		var player = active_encounter.player
-		var target = player
-		# if target is valid, 
-		if is_instance_valid(target):
-			# assign next available attack ability
-			var new_action = BasicAttack.new()
-			new_action.src = self.entity
-			new_action.target = target
-			self.entity.data.actions.action = new_action
+		var terrain_controller = self.entity.data.world.data.controller.terrain_controller
+		var encounter_controller = terrain_controller.encounter_controller
+		# check if enemy is in encounter
+		if self.entity.data.encounters.active:
+			var active_encounter = encounter_controller.encounter
+			var player = active_encounter.player
+			var target = player
+			# if target is valid, 
+			if is_instance_valid(target):
+				# assign next available attack ability
+				var new_action = BasicAttack.new()
+				new_action.src = self.entity
+				new_action.target = target
+				self.entity.data.actions.action = new_action
+		
+		# if encounter not active,
+		else:
+			## !! forcing enemy to avoid attacking until the action
+			## !! cycle AFTER they have spawned ensures enemy/target
+			## !! start encounter on same action cycle
+			# make it active
+			self.entity.data.encounters.active = true
 	
 	# try to evaluate the current action
 	_evaluate_action()
-
 
 ## evaluates the currently active action for entity
 func _evaluate_action():
@@ -129,7 +139,7 @@ func _evaluate_action():
 			var utils = self.world.data.controller.utils
 			var current_tile = utils.get_object_by_grid(
 				self.entity.data.grid_idx,
-				self.world.data.terrain.tile_map)
+				self.world.data.terrain.data.tile_map)
 			# interact with tile
 			self.entity.data.controller.interact_with_tile(
 				self.entity, current_tile)

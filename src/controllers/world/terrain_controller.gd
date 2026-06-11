@@ -15,28 +15,12 @@ var encounter_controller: Controller
 var grid_dimensions: Vector2i
 var grid_scale = Vector2i(36, 36)
 
-var terrain = {
-	"grid": [],
-	"tile_map": [],
-	"map_complete": false,
-	"map_count": 0,
-	"weather": {
-		"tile_map": []
-	},
-	"resources": {
-		"tile_map": [],
-		"count": 0
-	},
-	"encounters": {
-		"tile_map": [],
-		"count": 0
-	},
-}
+var terrain: Terrain
 var terrain_iterations: int
 var terrain_optimized = null
 var cycle_complete = false
 
-var soil_density_min = 0.11
+var soil_density_min = 0.22 # min increased to account for erosion
 var soil_density_max = 1.00
 var soil_variance = 0.55
 var soil_texture_factor = 0.33
@@ -154,7 +138,11 @@ func _optimize_soil(terrain_map: Array) -> bool:
 	terrain_iterations += 1
 	avg_density = new_terrain[1]
 	avg_dist_sq = avg_dist_sq * 100 / count
-	# var total_avg_texture = self.world.data..terrain.common_string(avg_textures)
+	var total_avg_texture = self.world.data.controller.utils.common_string(avg_textures)
+	self.terrain.data.metrics = {
+		"avg_density": snapped(avg_density, 0.001),
+		"avg_texture": total_avg_texture
+	}
 
 	# define completion threshold
 	var threshold = soil_variance / 1.5
@@ -186,11 +174,12 @@ func _optimize_soil(terrain_map: Array) -> bool:
 
 ## optimizes terrain in the world tile map
 ## returns optimized flag
-func _optimize_terrain(terrain_map: Array) -> bool:
+func _optimize_terrain(terrain: Terrain) -> bool:
 	FileLogger.log_message(self , "Optimizing terrain...")
-	
+
 	# run terrain optimization cycle
 	var optimized = false
+	var terrain_map = terrain.data.tile_map
 	while !optimized:
 		# try to optimize soil
 		var result = _optimize_soil(terrain_map)
@@ -208,38 +197,49 @@ func _optimize_terrain(terrain_map: Array) -> bool:
 	# return optimization results
 	return optimized
 
-## generates new terrain on the current tile_map,
-## initializes dependency controllers weather, resources, encounters
-## in new tile_map and updates World.data.terrain
-func _generate_terrain() -> void:
+## generates new terrain object and saves to world.data.terrain
+## called when player has completed all conditions on a map
+func _generate_terrain(curr_terrain: Terrain) -> void:
+	## TODO: account for existing terrain classification data
+	## when generating new maps
+	# evaluate biome
+	var new_biome = terrain.get_terrain_biome()
+
+	# create new Terrain obj
+	var new_terrain = Terrain.new()
+	new_terrain.data.map_count = self.terrain.data.map_count
+	new_terrain.data.grid = self.terrain.data.grid
+	new_terrain.data.tile_map = self.terrain.data.tile_map
+	self.terrain = new_terrain
+
 	# initialize terrain data in tile_map
-	var new_terrain_map = _init_terrain(self.terrain.tile_map)
-	self.terrain.tile_map = new_terrain_map[1]
+	var new_terrain_map = _init_soil(self.terrain.data.tile_map)
+	self.terrain.data.tile_map = new_terrain_map[1]
 
 	# try to optimize terrain
-	_optimize_terrain(self.terrain.tile_map)
+	_optimize_terrain(self.terrain)
+
+	# unflag map_complete
+	self.terrain.data.map_complete = false
+
+	# update world data to new terrain map
+	self.world.data.terrain = self.terrain
 
 	# generate weather on terrain
-	self.weather_controller.init_controller(self.terrain.tile_map)
+	self.weather_controller.init_controller(self.terrain.data.tile_map)
 	# generate resources after weather
-	self.resource_controller.init_controller(self.terrain.weather.tile_map)
+	self.resource_controller.init_controller(self.terrain.data.tile_map)
 	# generate encounters on terrain
 	self.encounter_controller.init_controller()
 
-	# unflag map_complete
-	self.terrain.map_complete = false
-
-	# update world data to new terrain map after
-	self.world.data.terrain = self.terrain
-
 	# log update
-	FileLogger.log_message(self , "Map " + str(self.terrain.map_count) + " generated.")
+	FileLogger.log_message(self , "Map " + str(self.terrain.data.map_count) + " generated.")
 
 # Terrain Initialization
 
 ## accepts a tile_map
 ## returns an array mapped with terrain values
-func _init_terrain(tile_map: Array) -> Array:
+func _init_soil(tile_map: Array) -> Array:
 	for x in range(tile_map.size()):
 		for y in range(tile_map[x].size()):
 			var t = tile_map[x][y]
@@ -259,7 +259,7 @@ func _init_terrain(tile_map: Array) -> Array:
 			t.data.terrain.texture = self.world.data.controller.utils.get_soil_texture(t)
 	
 	# update terrain.map_count
-	self.terrain.map_count += 1
+	self.terrain.data.map_count += 1
 
 	# validate result if tile_map valid
 	var result = OK
@@ -350,7 +350,7 @@ func _init_encounters() -> Error:
 	new_encounter_controller.name = "EncounterController"
 	new_encounter_controller.world = self.world
 	new_encounter_controller.parent = self
-	new_encounter_controller.encounters.tile_map = self.terrain.tile_map
+	new_encounter_controller.tile_map = self.terrain.data.tile_map
 	self.encounter_controller = new_encounter_controller
 	add_child(new_encounter_controller)
 	
@@ -367,7 +367,7 @@ func _init_resources() -> Error:
 	new_resource_controller.name = "ResourceController"
 	new_resource_controller.world = self.world
 	new_resource_controller.parent = self
-	new_resource_controller.resources.tile_map = self.terrain.tile_map
+	new_resource_controller.tile_map = self.terrain.data.tile_map
 	self.resource_controller = new_resource_controller
 	add_child(new_resource_controller)
 	
@@ -384,7 +384,7 @@ func _init_weather() -> Error:
 	new_weather_controller.name = "WeatherController"
 	new_weather_controller.world = self.world
 	new_weather_controller.parent = self
-	new_weather_controller.weather.tile_map = self.terrain.tile_map
+	new_weather_controller.tile_map = self.terrain.data.tile_map
 	self.weather_controller = new_weather_controller
 	add_child(new_weather_controller)
 	
@@ -397,31 +397,35 @@ func _init_weather() -> Error:
 ## initializes the world terrain with init terrain data,
 ## returns error flag
 func _init_controller() -> Error:
+	# create new Terrain obj
+	var new_terrain = Terrain.new()
+	self.terrain = new_terrain
+
 	# initialize world grid
 	var new_grid_results = _init_grid(self.grid_scale)
 	var is_OK = new_grid_results[0]
 	if is_OK == OK:
 		var new_grid = new_grid_results[1]
-		self.terrain.grid = new_grid
+		self.terrain.data.grid = new_grid
 	
 	# initialize world tiles
-	var new_tiles_results = _init_grid_tiles(self.terrain.grid)
+	var new_tiles_results = _init_grid_tiles(self.terrain.data.grid)
 	is_OK = new_tiles_results[0]
 	if is_OK == OK:
 		var new_tiles = new_tiles_results[1]
-		self.terrain.tile_map = new_tiles
+		self.terrain.data.tile_map = new_tiles
 	
-	# initialize terrain data in tile_map
-	var new_terrain_results = _init_terrain(self.terrain.tile_map)
-	is_OK = new_terrain_results[0]
+	# initialize soil data in tile_map
+	var new_soil_results = _init_soil(self.terrain.data.tile_map)
+	is_OK = new_soil_results[0]
 	if is_OK == OK:
-		var new_terrain = new_terrain_results[1]
-		self.terrain.tile_map = new_terrain
+		var new_soil = new_soil_results[1]
+		self.terrain.data.tile_map = new_soil
 
 	# check dependency objects for errors
 	var dependencies = [
-		self.terrain.grid,
-		self.terrain.tile_map
+		self.terrain.data.grid,
+		self.terrain.data.tile_map
 	]
 	var result = OK
 	for d in dependencies:
@@ -438,7 +442,10 @@ func _ready() -> void:
 	_init_controller()
 
 	# try to optimize terrain
-	_optimize_terrain(self.terrain.tile_map)
+	_optimize_terrain(self.terrain)
+
+	# update world terrain before init scripts
+	self.world.data.terrain = self.terrain
 
 	# move to dependent controllers...
 	# controllers dependent on terrain_controller
@@ -447,33 +454,18 @@ func _ready() -> void:
 		_init_resources(),
 		_init_encounters()
 	]
-	var keys = [
-		"weather",
-		"resources",
-		"encounters"
-	]
 	# if terrain optimized,
+	var results = []
 	if self.terrain_optimized:
-		# run dependent scrips
-		for s in range(init_scripts.size()):
-			var result = init_scripts[s]
-			# if error initializing...
-			if result != OK:
-				# print error & pause tree
-				FileLogger.log_message(self , error_string(result) + " at script " + str(s))
-				self.get_tree().paused = true
-			# if no errors...
+		for s in init_scripts:
+			if s != OK:
+				FileLogger.log_message(self , error_string(s))
 			else:
-				# initialization process was valid,
-				# for each controller data key,
-				for k in keys:
-					# if controller terrain data is valid,
-					if self.terrain[k] != null:
-						# update tile_map to controller tile_map
-						self.terrain.tile_map = self.terrain[k].tile_map
+				results.append(s)
 
-		# update world data to new terrain map after
-		self.world.data.terrain = self.terrain
+	# get biome classification
+	var new_biome = self.terrain.get_terrain_biome()
+	self.terrain.data.biome = new_biome
 
 # Terrain Processing
 
@@ -483,17 +475,17 @@ func _process_cycle(current_world: World):
 		if current_world:
 			# if no resources left in terrain,
 			var current_terrain = current_world.data.terrain
-			var resources = current_world.data.controller.utils.get_resources(current_terrain.tile_map)
+			var resources = current_world.data.controller.utils.get_resources(current_terrain.data.tile_map)
 			var is_resources = !resources.is_empty()
 			if !is_resources:
 				# flag terrain map complete
-				current_world.data.terrain.map_complete = true
+				current_world.data.terrain.data.map_complete = true
 				FileLogger.log_message(self , "No resources found, initializing new map.")
 			
 			# check map completion regardless of time cycle state
-			if current_world.data.terrain.map_complete:
+			if current_world.data.terrain.data.map_complete:
 				# initialize a new terrain
-				_generate_terrain()
+				_generate_terrain(self.terrain)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:

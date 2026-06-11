@@ -4,16 +4,15 @@ extends Controller
 var FileLogger
 
 # components
-var encounters = {
-	"tile_map": []
-}
+var tile_map: Array
 var init_encounter = {
+	"cycle": 0,
 	"player": null,
 	"enemies": [],
 	"n_enemies": 0,
 }
 var encounter_chance: float = 0.50
-var n_encounters = 0
+var encounter_count: int = 0
 
 var encountering = false
 var encounter: Dictionary
@@ -53,7 +52,7 @@ func _spawn_encounter(p: Player, tile: Tile) -> bool:
 		if r <= self.encounter_chance:
 			# encounter spawned,
 			# spawn enemies,
-			var map_count = self.world.data.terrain.map_count
+			var map_count = self.world.data.terrain.data.map_count
 			# var n_enemies = ceil(map_count / 2.5)
 			new_enemies = enemy_controller.spawn_enemies(1) # only spawn 1 enemy
 			# prepare new encounter for processing
@@ -98,7 +97,7 @@ func _generate_encounters(tile_map: Array) -> Array:
 ## returns result flag and tile_map
 func init_controller() -> Array:
 	# generate player encounters in world tiles
-	var results = _generate_encounters(self.encounters.tile_map)
+	var results = _generate_encounters(self.tile_map)
 	var is_OK = results[0]
 	var new_tile_map = results[1]
 
@@ -118,9 +117,7 @@ func _ready() -> void:
 	var new_tile_map = results[1]
 	if is_OK == OK:
 		# update resource map
-		self.encounters.tile_map = new_tile_map
-		# add to terrain data
-		self.parent.terrain.encounters = self.encounters
+		self.world.data.terrain.data.tile_map = new_tile_map
 	else:
 		# log results if error
 		FileLogger.log_message(self , results)

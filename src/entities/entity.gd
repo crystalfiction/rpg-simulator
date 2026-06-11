@@ -4,6 +4,7 @@ class_name Entity extends Node2D
 var Type: EntityType
 enum EntityType {
     WORLD,
+    TERRAIN,
     TILE,
     PLAYER,
     ENEMY,

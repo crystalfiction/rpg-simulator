@@ -3,23 +3,7 @@ class_name World extends Entity
 # components
 var init_world: Resource = preload("res://src/entities/world/world.tscn")
 var init_data: Dictionary = {
-	"terrain": {
-		"grid": [],
-		"tile_map": [],
-		"map_complete": false,
-		"map_count": 0,
-		"weather": {
-			"tile_map": [],
-		},
-		"resources": {
-			"tile_map": [],
-			"count": 0
-		},
-		"encounters": {
-			"tile_map": [],
-			"count": 0
-		}
-	},
+	"terrain": {},
 }
 
 

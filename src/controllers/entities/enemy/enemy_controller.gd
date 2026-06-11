@@ -14,7 +14,8 @@ func spawn_enemies(n: int = 1) -> Array:
 		var new_weapon = UnarmedWeapon.new()
 		new_enemy.data.inventory.equipped.weapon = new_weapon
 		new_enemies.append(new_enemy)
-		self.enemies.append(new_enemy)
+		
+	self.enemies = new_enemies
 	return new_enemies
 
 ## initializes a new action controller for the given player entity
@@ -75,7 +76,6 @@ func _process_cycle(enemy_array: Array):
 		# get action for each enemy
 		for e in enemies:
 			e.data.actions.controller.get_action()
-			# e.data.actions.controller.evaluate_action()
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:

@@ -21,11 +21,14 @@ func log_message(
     level: String = "INFO"
 ) -> void:
     var timestamp = _get_timestamp()
-    # append caller to beginning of message
-    var caller_message = str(caller.name) + ": " + message
+    # determine message level
+    var new_level = ""
+    var s_caller: String = caller.name.replace("Controller", "")
+    new_level = s_caller
+    level = new_level
+
     # format message
     var formatted_message = "[%s] [%s] %s\n" % [timestamp, level.to_upper(), message]
-    var formatted_caller_message = "[%s] [%s] %s\n" % [timestamp, level.to_upper(), caller_message]
     print(formatted_message.strip_edges())
 
     # check file validity,
@@ -39,7 +42,7 @@ func log_message(
     
     # if file valid, write
     if file:
-        file.store_string(formatted_caller_message)
+        file.store_string(formatted_message)
         file.flush() # force write immediately to prevent data loss
         file.close()
 

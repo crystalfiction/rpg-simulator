@@ -14,7 +14,7 @@ var exp_cap: int
 func find_nearest_resource(p: Player, w: World) -> Tile:
 	# get all resource tiles
 	var utils = w.data.controller.utils
-	var tile_map = w.data.terrain.tile_map
+	var tile_map = w.data.terrain.data.tile_map
 	var resources = utils.get_resources(tile_map)
 	var n_resources = resources
 	# sort resources by distance to player
@@ -32,7 +32,7 @@ func interact_with_tile(p: Player, current_tile: Tile):
 	# take resources from tile
 	current_tile.data.resources.food = false
 	# update world ref 
-	self.world.data.terrain.resources.count -= 1
+	self.world.data.terrain.data.resources.count -= 1
 	# give resources to player
 	p.data.resources.food += 1
 	
@@ -77,7 +77,7 @@ func move_towards_tile(p: Player, t: Tile) -> bool:
 	# get object 1 tile away in direction towards t tile from player p
 	var target = Vector2i(p_idx + direction)
 	var target_obj = utils.get_object_by_grid(
-		target, self.world.data.terrain.tile_map)
+		target, self.world.data.terrain.data.tile_map)
 	# move to target
 	move_to_tile(p, target_obj)
 
@@ -92,7 +92,7 @@ func move_towards_tile(p: Player, t: Tile) -> bool:
 ## process stat rewards considering the cycle's encounter
 func _process_rewards(encounter: Dictionary):
 	# reward player exp
-	var map_count = self.world.data.terrain.map_count
+	var map_count = self.world.data.terrain.data.map_count
 	var enemy_exp = floori(encounter.n_enemies * (map_count / PI))
 	self.player.data.stats.exp += self.exp_step + enemy_exp
 
@@ -212,9 +212,6 @@ func _check_player(p: Player):
 			FileLogger.log_message(self ,
 				str(self.player.data.stats)
 			)
-			FileLogger.log_message(self ,
-				str(self.player.data.skills)
-			)
 			# queue for deletion
 			p.queue_free()
 
@@ -250,7 +247,7 @@ func _process_cycle(p: Player):
 		p.data.actions.controller.get_action()
 
 		# if terrain map complete,
-		if self.world.data.terrain.map_complete:
+		if self.world.data.terrain.data.map_complete:
 			# reset player health
 			# and wait for new map to be initialized
 			p.data.stats.health = p.data.stats.max_health

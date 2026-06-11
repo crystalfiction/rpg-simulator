@@ -22,7 +22,7 @@ func _calculate_exp(e: Entity) -> Dictionary:
 	
 	# if enemy,
 	if e is Enemy:
-		var map_level = self.world.data.terrain.map_count
+		var map_level = self.world.data.terrain.data.map_count
 		stats.level = map_level
 
 	# return stats dict

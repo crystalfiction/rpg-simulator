@@ -133,8 +133,8 @@ func _init_controllers() -> void:
 	var init_controllers = [
 		_init_world_entity(),
 		_init_terrain_controller(),
-		_init_player_controller(),
-		_init_enemy_controller(),
+		# _init_player_controller(),
+		# _init_enemy_controller(),
 		_init_time_controller(),
 		_init_ui(),
 	]
@@ -171,22 +171,19 @@ func _process_cycle(current_world: Entity):
 		# if world is valid,
 		if current_world != null && is_instance_valid(current_world):
 			## process world state conditions
-			# Player
-			var player = current_world.data.player
-			# if player is not valid,
-			if player == null || !is_instance_valid(player):
-				# game is over
-				FileLogger.log_message(self ,
-					"Game over on Map " + str(current_world.data.terrain.map_count)
-				)
-				# quit or restart depending on end_action
-				# toggled via user input using "c" keybind
-				if current_world.data.terrain.map_count == 1:
-					# by default, reload game if player death 
-					# on level 1
+			# if player_controller exists, but player is invalid
+			if player_controller && ! self.world.data.player:
+				# reload game if only Map 1,
+				if current_world.data.terrain.data.map_count == 1:
+					FileLogger.log_message(self ,
+						"Player died on Map 1, reloading world..."
+					)
 					get_tree().reload_current_scene()
 				else:
-					# quit game
+					# otherwise end game
+					FileLogger.log_message(self ,
+						"Player died on Map " + str(current_world.data.terrain.data.map_count)
+					)
 					get_tree().quit()
 
 		# if world invalid,

@@ -13,7 +13,8 @@ var soil_10r = preload("res://src/assets/world/tile/soil_10R.tres")
 @export var label_grid_x: Label
 @export var label_grid_y: Label
 
-@export var tile_color: ColorRect
+@export var tile_terrain: ColorRect
+@export var tile_weather: ColorRect
 
 var init_tile: Resource = preload("res://src/entities/world/tiles/tile.tscn")
 var init_data: Dictionary = {
@@ -58,7 +59,6 @@ func _update_color(tile_data: Dictionary):
 		if "weather" in tile_data && "water" in tile_data.weather:
 			# define water gradient
 			var water = tile_data.weather.water
-			#self.weather.color = water_gradient.sample(water)
 			
 			# define soil gradient
 			var new_gradient
@@ -68,16 +68,15 @@ func _update_color(tile_data: Dictionary):
 				new_gradient = gradients[1]
 			elif water >= 0.66 && water <= 1:
 				new_gradient = gradients[2]
-			# apply gradient
+			# apply gradient based on water content
 			self.texture.gradient = new_gradient
 				
 		if "density" in tile_data.terrain:
 			# sample gradient
 			new_color = self.texture.gradient.sample(tile_data.terrain.density)
-			
 	
 	# update color
-	self.tile_color.color = new_color
+	self.tile_terrain.color = new_color
 
 # determines which label text to render given tile data
 func _update_label_text(tile_data: Dictionary):

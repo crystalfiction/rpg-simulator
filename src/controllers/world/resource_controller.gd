@@ -4,12 +4,10 @@ extends Controller
 var FileLogger
 
 # components
-var resources = {
-	"tile_map": [],
-	"count": 0
-}
+var tile_map: Array
 var resource_iterations: int
 var resources_optimized = null
+var resource_count = 0
 
 var food_factor = 0.22 # chance to generate food on a given tile
 
@@ -33,7 +31,7 @@ func _evaluate_resources(tile: Tile) -> Tile:
 			) else false
 			if food_conditions:
 				tile.data.resources.food = true
-				self.resources.count += 1
+				self.resource_count += 1
 	
 	# return the tile with updated data
 	return tile
@@ -80,12 +78,12 @@ func _evaluate_terrain(tile_map: Array) -> Array:
 	var keys = metrics.keys()
 	var metrics_v = ""
 	for m in range(keys.size()):
-		metrics_v += keys[m] + ": " + str(snapped(metrics[keys[m]], 0.001))
+		metrics_v += keys[m] + ": " + str(snapped(metrics[keys[m]], 0.0001))
 		if m < keys.size() - 1:
 			metrics_v += " | "
 	FileLogger.log_message(self , metrics_v)
 	FileLogger.log_message(self ,
-		"resources_generated: " + str(self.resources.count)
+		"resources_generated: " + str(self.resource_count)
 	)
 	
 	# validate
@@ -102,11 +100,17 @@ func init_controller(tile_map: Array) -> Array:
 	var results = _evaluate_terrain(tile_map)
 	var is_OK = results[0]
 	var new_tile_map = results[1]
-	
+
 	# validate result
 	var result = is_OK
 	if result != OK:
 		result = ERR_SCRIPT_FAILED
+	else:
+		## TODO: make this actually true
+		self.resources_optimized = true
+		# update world resource count if valid
+		self.world.data.terrain.data.resources.count = self.resource_count
+	
 	return [result, new_tile_map]
 
 # Called when the node enters the scene tree for the first time.
@@ -115,18 +119,14 @@ func _ready() -> void:
 	self.FileLogger = $"/root/FileLogger"
 
 	# initialize resource system
-	var results = init_controller(self.resources.tile_map)
+	var results = init_controller(self.tile_map)
 	var is_OK = results[0]
 	var new_tile_map = results[1]
 	if is_OK == OK:
-		## TODO: make this actually true
-		self.resources_optimized = true
 		# if resources optimized,
 		if self.resources_optimized:
-			# update resource map
-			self.resources.tile_map = new_tile_map
 			# add to terrain data
-			self.parent.terrain.resources = self.resources
+			self.world.data.terrain.data.tile_map = new_tile_map
 
 # Resource Processing
 

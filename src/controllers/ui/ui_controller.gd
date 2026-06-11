@@ -8,15 +8,21 @@ var FileLogger
 var stat_label_settings: LabelSettings
 var log_label_settings: LabelSettings
 
+@export var world_panel: FoldableContainer
 @export var world_stats: GridContainer
-@export var enemy_stats: GridContainer
-@export var player_class: Label
-@export var player_stats: GridContainer
+
 @export var party_inventory: GridContainer
 
+@export var player_panel: FoldableContainer
+@export var player_class: Label
+@export var player_stats: GridContainer
 @export var player_health_bar: ProgressBar
 @export var player_exp_bar: ProgressBar
+
+@export var enemy_panel: FoldableContainer
+@export var enemy_stats: GridContainer
 @export var enemy_health_bar: ProgressBar
+
 
 var stat_containers = [
 	world_stats,
@@ -31,7 +37,7 @@ var label_entry = {
 	"label": null,
 }
 
-var string_n := 8
+var string_n := 10
 
 
 func _get_substring(string: String, n: int) -> String:
@@ -40,6 +46,10 @@ func _get_substring(string: String, n: int) -> String:
 	return substring
 
 func _update_labels(curr_labels: Array):
+	# check for controller existence
+	var player_controller = self.world.data.controller.player_controller
+	var enemy_controller = self.world.data.controller.enemy_controller
+
 	# delete labels with invalid objects
 	var invalid_entries = curr_labels.filter(func(l): return !is_instance_valid(l.obj))
 	for i in range(invalid_entries.size()):
@@ -51,27 +61,29 @@ func _update_labels(curr_labels: Array):
 		curr_labels.erase(invalid_entries[i])
 
 	# player progress bars updated directly
-	var p = self.world.data.controller.player_controller.player
-	if is_instance_valid(p):
-		# update class title
-		self.player_class.text = p.get_class_string()
-		# update progress bars
-		self.player_health_bar.value = p.data.stats.health
-		self.player_health_bar.max_value = p.data.stats.max_health
-		self.player_exp_bar.value = p.data.stats.exp
-		self.player_exp_bar.max_value = p.data.stats.exp_cap
+	if player_controller:
+		var p = self.world.data.controller.player_controller.player
+		if is_instance_valid(p):
+			# update class title
+			self.player_class.text = p.get_class_string()
+			# update progress bars
+			self.player_health_bar.value = p.data.stats.health
+			self.player_health_bar.max_value = p.data.stats.max_health
+			self.player_exp_bar.value = p.data.stats.exp
+			self.player_exp_bar.max_value = p.data.stats.exp_cap
 	
 	## TODO: make this account for multiple enemies
-	var enemies = self.world.data.controller.enemy_controller.enemies
-	if !enemies.is_empty():
-		var e = enemies[0]
-		if is_instance_valid(e):
-			# update progress bars
-			self.enemy_health_bar.value = e.data.stats.health
-			self.enemy_health_bar.max_value = e.data.stats.max_health
-			self.enemy_health_bar.show()
-	else:
-		self.enemy_health_bar.hide()
+	if enemy_controller:
+		var enemies = self.world.data.controller.enemy_controller.enemies
+		if !enemies.is_empty():
+			var e = enemies[0]
+			if is_instance_valid(e):
+				# update progress bars
+				self.enemy_health_bar.value = e.data.stats.health
+				self.enemy_health_bar.max_value = e.data.stats.max_health
+				self.enemy_health_bar.show()
+		else:
+			self.enemy_health_bar.hide()
 	
 	# traverse labels
 	for l in curr_labels:
@@ -126,19 +138,24 @@ func _make_data_label(
 	var new_name_label = Label.new()
 	new_name_label.label_settings = self.stat_label_settings
 	new_name_label.name = key
-	new_name_label.text = entry_key
+	if obj is Controller:
+		var time_controller = self.world.data.controller.time_controller
+		if obj == time_controller:
+			new_name_label.text = "time." + entry_key
+	elif obj is Biome:
+		new_name_label.text = "biome." + entry_key
+	else:
+		new_name_label.text = entry_key
+
 	new_name_label.clip_text = true
 	new_name_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	new_name_label.custom_minimum_size = Vector2(140, 0)
+	new_name_label.custom_minimum_size = Vector2(160, 0)
 
 	var new_data_label = Label.new()
 	new_data_label.label_settings = self.stat_label_settings
 	new_data_label.name = key + "_data"
 	var data_string = null
-	if obj is Controller:
-		data_string = _get_substring(str(obj[key]), string_n)
-	else:
-		data_string = _parse_label_entry(obj, entry_key)
+	data_string = _parse_label_entry(obj, entry_key)
 	
 	new_data_label.text = data_string
 	
@@ -157,9 +174,13 @@ func _make_data_label(
 ## and processes ui controller label entries for updating labels
 func _make_data_labels(obj: Variant, container: String):
 	var world_filter = {
-		0: ["uid", "terrain"],
-		1: ["map_count", "resources", "encounters"],
-		2: ["count"]
+		0: ["uid"]
+	}
+	var terrain_filter = {
+		0: ["map_count", "metrics", "weather", "resources"],
+	}
+	var biome_filter = {
+		0: ["class_v"]
 	}
 	var player_filter = {
 		0: ["stats", "skills", "resources", "inventory"]
@@ -170,32 +191,45 @@ func _make_data_labels(obj: Variant, container: String):
 	for k in obj.data:
 		if (
 			obj is World && k in world_filter[0] ||
+			obj is Terrain && k in terrain_filter[0] ||
+			obj is Biome && k in biome_filter[0] ||
 			obj is Player && k in player_filter[0] ||
 			obj is Enemy && k in enemy_filter[0]
 		):
+			# if dictionary entry, traverse to the 3rd degree
+			## TODO: make this recursive
 			if obj.data[k] is Dictionary:
 				for k_n in obj.data[k]:
 					if (
-						obj is World && k_n in world_filter[1] ||
 						obj is Player ||
-						obj is Enemy
+						obj is Enemy ||
+						obj is Terrain
 					):
 						if obj.data[k][k_n] is Dictionary:
 							for k_n_n in obj.data[k][k_n]:
 								if (
-									obj is World && k_n_n in world_filter[2] ||
 									obj is Player ||
-									obj is Enemy
+									obj is Enemy ||
+									obj is Terrain
 								):
+									# if not dictionary entry,
 									var entry_key = ".".join([k, k_n, k_n_n])
 									_make_data_label(obj, k_n_n, container, entry_key)
-							
+						# if not dictionary entry,	
 						else:
 							var entry_key = ".".join([k, k_n])
 							_make_data_label(obj, k_n, container, entry_key)
-
+			# if not dictionary entry,
 			else:
 				_make_data_label(obj, k, container)
+		
+		# if not Entity,
+		# check controllers
+		else:
+			if obj is Controller:
+				var time_controller = self.world.data.controller.time_controller
+				if obj == time_controller:
+					_make_data_label(obj, k, container)
 
 func _check_obj_labels(obj: Variant, curr_labels: Array):
 	if is_instance_valid(obj):
@@ -206,36 +240,54 @@ func _check_obj_labels(obj: Variant, curr_labels: Array):
 			else:
 				return found
 
-func _init_enemy_stats(enemies: Array, curr_labels: Array):
-	if !enemies.is_empty():
-		# make stats
-		## TODO: make this dynamic for arrays
-		var found = _check_obj_labels(enemies[0], curr_labels)
-		if !found:
-			_make_data_labels(enemies[0], "enemy_stats")
-			self.enemy_stats.show()
-	else:
-		# if enemies array empty, delete lingering name labels
-		var lingering = self.enemy_stats.get_children()
-		for l in lingering:
-			if is_instance_valid(l):
-				if !l.is_queued_for_deletion():
-					l.queue_free()
-
-		self.enemy_stats.hide()
+func _init_enemy_stats(curr_labels: Array):
+	var enemy_controller = self.world.data.controller.enemy_controller
+	if enemy_controller:
+		var enemies: Array = enemy_controller.enemies
+		if !enemies.is_empty():
+			# make stats
+			## TODO: make this dynamic for arrays
+			var found = _check_obj_labels(enemies[0], curr_labels)
+			if !found:
+				_make_data_labels(enemies[0], "enemy_stats")
+				self.enemy_panel.folded = false
+		else:
+			# if enemies array empty, delete lingering name labels
+			var lingering = self.enemy_stats.get_children()
+			for l in lingering:
+				if is_instance_valid(l):
+					if !l.is_queued_for_deletion():
+						l.queue_free()
+			# hide
+			self.enemy_panel.folded = true
 
 func _init_player_stats():
-	var p = self.world.data.controller.player_controller.player
-	_make_data_labels(p, "player_stats")
+	var player_controller = self.world.data.controller.player_controller
+	if player_controller:
+		var p = player_controller.player
+		_make_data_labels(p, "player_stats")
+	else:
+		# no player controller, hide player panel
+		self.player_panel.folded = true
+
+func _init_biome_stats(curr_labels: Array):
+	if self.world.data.terrain:
+		if self.world.data.terrain.data.weather:
+			if ! self.world.data.terrain.data.weather.is_empty():
+				var biome = self.world.data.terrain.data.biome
+				var found = _check_obj_labels(biome, curr_labels)
+				if !found:
+					_make_data_labels(biome, "world_stats")
 
 func _init_world_stats():
 	# make world labels
 	var w = self.world
 	_make_data_labels(w, "world_stats")
+	var terrain = self.world.data.terrain
+	_make_data_labels(terrain, "world_stats")
 	# make time data labels
 	var t = self.world.data.controller.time_controller
-	_make_data_label(t, "frame_rate", "world_stats")
-	_make_data_label(t, "cycles", "world_stats")
+	_make_data_labels(t, "world_stats")
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -254,7 +306,6 @@ func _ready() -> void:
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
-	_init_enemy_stats(
-		self.world.data.controller.enemy_controller.enemies,
-		self.labels)
+	_init_biome_stats(self.labels)
+	_init_enemy_stats(self.labels)
 	_update_labels(self.labels)
