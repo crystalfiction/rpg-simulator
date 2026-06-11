@@ -202,9 +202,6 @@ func _optimize_terrain(terrain: Terrain) -> bool:
 func _generate_terrain(curr_terrain: Terrain) -> void:
 	## TODO: account for existing terrain classification data
 	## when generating new maps
-	# evaluate biome
-	var new_biome = terrain.get_terrain_biome()
-
 	# create new Terrain obj
 	var new_terrain = Terrain.new()
 	new_terrain.data.map_count = self.terrain.data.map_count
@@ -221,6 +218,7 @@ func _generate_terrain(curr_terrain: Terrain) -> void:
 
 	# unflag map_complete
 	self.terrain.data.map_complete = false
+	self.terrain.data.map_count += 1
 
 	# update world data to new terrain map
 	self.world.data.terrain = self.terrain
@@ -462,10 +460,6 @@ func _ready() -> void:
 				FileLogger.log_message(self , error_string(s))
 			else:
 				results.append(s)
-
-	# get biome classification
-	var new_biome = self.terrain.get_terrain_biome()
-	self.terrain.data.biome = new_biome
 
 # Terrain Processing
 

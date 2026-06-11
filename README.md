@@ -6,23 +6,23 @@
 
 ### MVP
 
+#### Goals
+
 Create a procedurally generated RPG simulation that embraces chaos and instability, balanced by user input and natural in-game forces
 
 - [ ] *meta systems*:
     - [ ] decide on and implement actual screen dimensions
+        - !! **this directly impacts performance**
     - [ ] create a functional ui for dev
         - [ ] data panels
             - [x] world data
             - [ ] party data
                 - [x] player data
-                    - [x] stats
-                    - [x] equipped items
                 - [ ] multiple player data
                 - [ ] party inventory
-                    - [ ] unequipped items
             - [x] enemy data
-                - [x] stats
             - [x] time data
+
 - [ ] *player systems*
     - [ ] *class system*: allow player to choose a player class that forms a unique, distinct way of interacting with the world
         - [ ] *subclass system*: once a particular stance threshold is reached, player can choose to specialize in an associated subclas
@@ -42,7 +42,22 @@ Create a procedurally generated RPG simulation that embraces chaos and instabili
         - [ ] player can choose to adopt this player into their party or pass
 - [ ] *environmental system*: create a dynamic environment with terrain, weather, and organic life simulation that directly impacts the player's world interaction somehow
     - [ ] implement organic matter to terrain with basic life simulation
-    - [ ] finish implementing basic erosion
+    - [x] finish implementing basic erosion
+
+
+#### DevOps
+
+- [ ] restructure controller initialization process
+    - *too much controller data is being routed through entities before validation/initialization*
+        - *results in mismatched data references and cumbersome validation processes*
+    - *in sequence, controllers should...*
+        - [ ] initialize entities and entity data they control
+        - [ ] validate entity data
+            - [ ] initialize + validate ALL entity data, including sub-system controllers, before updating parent entity data
+                - *i.e. WorldController should initialize and validate World + ALL dependency data in World.data before main processing loop starts, not during*
+        - [ ] controller entity references should not exist on the controller object, they should be made as needed and be passed only to the relevant functions
+            - *having multiple references for the same entity gets confusing and difficult to manage as soon as data persistence or entity instantiation is added*
+        - [ ] start processing ONLY IF all data + parent entity data is validated
 
 <details>
     <summary>DONE</summary>

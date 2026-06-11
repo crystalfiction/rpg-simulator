@@ -7,18 +7,14 @@
 [sub_resource type="GradientTexture2D" id="GradientTexture2D_mk1qm"]
 gradient = ExtResource("1_f75nv")
 
-[node name="Tile" type="Sprite2D" unique_id=1023157020 node_paths=PackedStringArray("label_density", "label_water", "label_erosion", "label_resources", "label_grid_x", "label_grid_y", "tile_terrain", "tile_weather") groups=["tiles"]]
+[node name="Tile" type="Sprite2D" unique_id=1023157020 node_paths=PackedStringArray("label_resources", "label_grid_x", "label_grid_y", "tile_terrain") groups=["tiles"]]
 texture = SubResource("GradientTexture2D_mk1qm")
 centered = false
 script = ExtResource("1_1rpgm")
-label_density = NodePath("")
-label_water = NodePath("")
-label_erosion = NodePath("")
 label_resources = NodePath("Terrain/Labels/Interactables/Resources")
 label_grid_x = NodePath("Terrain/Labels/GridLabels/x")
 label_grid_y = NodePath("Terrain/Labels/GridLabels/y")
 tile_terrain = NodePath("Terrain")
-tile_weather = NodePath("")
 
 [node name="Terrain" type="ColorRect" parent="." unique_id=1311118609]
 anchors_preset = 15

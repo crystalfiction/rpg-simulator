@@ -179,9 +179,6 @@ func _make_data_labels(obj: Variant, container: String):
 	var terrain_filter = {
 		0: ["map_count", "metrics", "weather", "resources"],
 	}
-	var biome_filter = {
-		0: ["class_v"]
-	}
 	var player_filter = {
 		0: ["stats", "skills", "resources", "inventory"]
 	}
@@ -192,7 +189,6 @@ func _make_data_labels(obj: Variant, container: String):
 		if (
 			obj is World && k in world_filter[0] ||
 			obj is Terrain && k in terrain_filter[0] ||
-			obj is Biome && k in biome_filter[0] ||
 			obj is Player && k in player_filter[0] ||
 			obj is Enemy && k in enemy_filter[0]
 		):
@@ -270,15 +266,6 @@ func _init_player_stats():
 		# no player controller, hide player panel
 		self.player_panel.folded = true
 
-func _init_biome_stats(curr_labels: Array):
-	if self.world.data.terrain:
-		if self.world.data.terrain.data.weather:
-			if ! self.world.data.terrain.data.weather.is_empty():
-				var biome = self.world.data.terrain.data.biome
-				var found = _check_obj_labels(biome, curr_labels)
-				if !found:
-					_make_data_labels(biome, "world_stats")
-
 func _init_world_stats():
 	# make world labels
 	var w = self.world
@@ -306,6 +293,5 @@ func _ready() -> void:
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
-	_init_biome_stats(self.labels)
 	_init_enemy_stats(self.labels)
 	_update_labels(self.labels)

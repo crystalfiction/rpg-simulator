@@ -9,9 +9,8 @@ var encounter_controller: Controller
 # components
 var frames: float = 0.0
 var time_scale: float = 60.0
-var frame_rate: int = 15
+var frame_rate: int = 5
 var frame_rates: Array = [
-	30,
 	15, # default
 	8,
 	5,
