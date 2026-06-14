@@ -3,7 +3,14 @@ class_name AttackAction extends Action
 var Attack: AttackType
 enum AttackType {
 	BASIC,
+	HEAVY,
 }
+
+var data: Dictionary = {
+    "multi": 0.0,
+    "cooldown": 0,
+}
+
 
 func get_attack_type() -> AttackType:
 	var curr_type = self.Attack

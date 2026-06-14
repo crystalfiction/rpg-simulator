@@ -19,7 +19,7 @@ var class_data: Dictionary = {
 		"dodge_chance": 0.05,
 		"stamina": 0,
 		"strength": 0,
-		"agility": 0,
+		"perception": 0,
 		"largest_hit": 0,
 	},
 }

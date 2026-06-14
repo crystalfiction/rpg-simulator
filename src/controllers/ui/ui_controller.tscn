@@ -6,10 +6,12 @@
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1mjrn"]
 bg_color = Color(0.3882353, 0.5294118, 0.16862746, 1)
 
+[sub_resource type="ButtonGroup" id="ButtonGroup_1mjrn"]
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fsh7l"]
 bg_color = Color(0.3882353, 0.5294118, 0.16862746, 1)
 
-[node name="UiController" type="Control" unique_id=694900400 node_paths=PackedStringArray("world_panel", "world_stats", "party_inventory", "player_panel", "player_class", "player_stats", "player_health_bar", "player_exp_bar", "enemy_panel", "enemy_stats", "enemy_health_bar")]
+[node name="UiController" type="Control" unique_id=694900400 node_paths=PackedStringArray("world_panel", "world_stats", "party_inventory", "player_panel", "player_class", "player_stats", "player_health_bar", "player_exp_bar", "player_actions", "enemy_panel", "enemy_stats", "enemy_health_bar")]
 top_level = true
 layout_mode = 3
 anchors_preset = 15
@@ -20,12 +22,13 @@ grow_vertical = 2
 script = ExtResource("1_2yfeh")
 world_panel = NodePath("MarginContainer/WorldPanel")
 world_stats = NodePath("MarginContainer/WorldPanel/MarginContainer/VBoxContainer/WorldContainer/WorldStats")
-party_inventory = NodePath("Main/BoxContainer/PlayerPanel/MarginContainer/VBoxContainer/PartyContainer/PartyInventory")
-player_panel = NodePath("Main/BoxContainer/PlayerPanel")
-player_class = NodePath("Main/BoxContainer/PlayerPanel/MarginContainer/VBoxContainer/PartyContainer/PlayerContainer/PlayerClass")
-player_stats = NodePath("Main/BoxContainer/PlayerPanel/MarginContainer/VBoxContainer/PartyContainer/PlayerContainer/PlayerStats")
-player_health_bar = NodePath("Main/BoxContainer/PlayerPanel/MarginContainer/VBoxContainer/PartyContainer/PlayerContainer/Vitals/Health")
-player_exp_bar = NodePath("Main/BoxContainer/PlayerPanel/MarginContainer/VBoxContainer/PartyContainer/PlayerContainer/Vitals/Exp")
+party_inventory = NodePath("Main/BoxContainer/BoxContainer/PlayerPanel/MarginContainer/VBoxContainer/PartyContainer/PartyInventory")
+player_panel = NodePath("Main/BoxContainer/BoxContainer/PlayerPanel")
+player_class = NodePath("Main/BoxContainer/BoxContainer/PlayerPanel/MarginContainer/VBoxContainer/PartyContainer/PlayerContainer/PlayerClass")
+player_stats = NodePath("Main/BoxContainer/BoxContainer/PlayerPanel/MarginContainer/VBoxContainer/PartyContainer/PlayerContainer/PlayerStats")
+player_health_bar = NodePath("Main/BoxContainer/BoxContainer/PlayerPanel/MarginContainer/VBoxContainer/PartyContainer/PlayerContainer/Vitals/Health")
+player_exp_bar = NodePath("Main/BoxContainer/BoxContainer/PlayerPanel/MarginContainer/VBoxContainer/PartyContainer/PlayerContainer/Vitals/Exp")
+player_actions = NodePath("")
 enemy_panel = NodePath("Main/BoxContainer/EnemyPanel")
 enemy_stats = NodePath("Main/BoxContainer/EnemyPanel/MarginContainer/VBoxContainer/EnemyContainer/EnemyStats")
 enemy_health_bar = NodePath("Main/BoxContainer/EnemyPanel/MarginContainer/VBoxContainer/EnemyContainer/Vitals/Health")
@@ -90,73 +93,109 @@ theme_override_constants/margin_bottom = 4
 layout_mode = 2
 theme_override_constants/separation = 4
 
-[node name="PlayerPanel" type="FoldableContainer" parent="Main/BoxContainer" unique_id=2091273920]
+[node name="BoxContainer" type="BoxContainer" parent="Main/BoxContainer" unique_id=1992779978]
+layout_mode = 2
+vertical = true
+
+[node name="PlayerPanel" type="FoldableContainer" parent="Main/BoxContainer/BoxContainer" unique_id=2091273920]
 layout_mode = 2
 size_flags_vertical = 0
 theme_override_fonts/font = ExtResource("2_1mjrn")
 
-[node name="MarginContainer" type="MarginContainer" parent="Main/BoxContainer/PlayerPanel" unique_id=1830623962]
+[node name="MarginContainer" type="MarginContainer" parent="Main/BoxContainer/BoxContainer/PlayerPanel" unique_id=1830623962]
 layout_mode = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Main/BoxContainer/PlayerPanel/MarginContainer" unique_id=2009706202]
+[node name="VBoxContainer" type="VBoxContainer" parent="Main/BoxContainer/BoxContainer/PlayerPanel/MarginContainer" unique_id=2009706202]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="PartyContainer" type="VBoxContainer" parent="Main/BoxContainer/PlayerPanel/MarginContainer/VBoxContainer" unique_id=293350668]
+[node name="PartyContainer" type="VBoxContainer" parent="Main/BoxContainer/BoxContainer/PlayerPanel/MarginContainer/VBoxContainer" unique_id=293350668]
 layout_mode = 2
 
-[node name="PlayerContainer" type="VBoxContainer" parent="Main/BoxContainer/PlayerPanel/MarginContainer/VBoxContainer/PartyContainer" unique_id=1850851588]
+[node name="PlayerContainer" type="VBoxContainer" parent="Main/BoxContainer/BoxContainer/PlayerPanel/MarginContainer/VBoxContainer/PartyContainer" unique_id=1850851588]
 layout_mode = 2
 theme_override_constants/separation = 1
 
-[node name="Label" type="Label" parent="Main/BoxContainer/PlayerPanel/MarginContainer/VBoxContainer/PartyContainer/PlayerContainer" unique_id=1513690529]
+[node name="Label" type="Label" parent="Main/BoxContainer/BoxContainer/PlayerPanel/MarginContainer/VBoxContainer/PartyContainer/PlayerContainer" unique_id=1513690529]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_1mjrn")
 theme_override_font_sizes/font_size = 18
 text = "Player"
 
-[node name="PlayerClass" type="Label" parent="Main/BoxContainer/PlayerPanel/MarginContainer/VBoxContainer/PartyContainer/PlayerContainer" unique_id=157588049]
+[node name="PlayerClass" type="Label" parent="Main/BoxContainer/BoxContainer/PlayerPanel/MarginContainer/VBoxContainer/PartyContainer/PlayerContainer" unique_id=157588049]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_1mjrn")
 theme_override_font_sizes/font_size = 14
 text = "Class"
 
-[node name="HSeparator" type="HSeparator" parent="Main/BoxContainer/PlayerPanel/MarginContainer/VBoxContainer/PartyContainer/PlayerContainer" unique_id=1548506717]
+[node name="HSeparator" type="HSeparator" parent="Main/BoxContainer/BoxContainer/PlayerPanel/MarginContainer/VBoxContainer/PartyContainer/PlayerContainer" unique_id=1548506717]
 clip_contents = true
 layout_mode = 2
 
-[node name="Vitals" type="VBoxContainer" parent="Main/BoxContainer/PlayerPanel/MarginContainer/VBoxContainer/PartyContainer/PlayerContainer" unique_id=203879371]
+[node name="Vitals" type="VBoxContainer" parent="Main/BoxContainer/BoxContainer/PlayerPanel/MarginContainer/VBoxContainer/PartyContainer/PlayerContainer" unique_id=203879371]
 layout_mode = 2
 theme_override_constants/separation = 1
 
-[node name="Health" type="ProgressBar" parent="Main/BoxContainer/PlayerPanel/MarginContainer/VBoxContainer/PartyContainer/PlayerContainer/Vitals" unique_id=1053375286]
+[node name="Health" type="ProgressBar" parent="Main/BoxContainer/BoxContainer/PlayerPanel/MarginContainer/VBoxContainer/PartyContainer/PlayerContainer/Vitals" unique_id=1053375286]
 custom_minimum_size = Vector2(0, 8)
 layout_mode = 2
 theme_override_styles/fill = SubResource("StyleBoxFlat_1mjrn")
 show_percentage = false
 
-[node name="Exp" type="ProgressBar" parent="Main/BoxContainer/PlayerPanel/MarginContainer/VBoxContainer/PartyContainer/PlayerContainer/Vitals" unique_id=1925969346]
+[node name="Exp" type="ProgressBar" parent="Main/BoxContainer/BoxContainer/PlayerPanel/MarginContainer/VBoxContainer/PartyContainer/PlayerContainer/Vitals" unique_id=1925969346]
 custom_minimum_size = Vector2(0, 4)
 layout_mode = 2
 show_percentage = false
 
-[node name="PlayerStats" type="GridContainer" parent="Main/BoxContainer/PlayerPanel/MarginContainer/VBoxContainer/PartyContainer/PlayerContainer" unique_id=307626570]
+[node name="PlayerStats" type="GridContainer" parent="Main/BoxContainer/BoxContainer/PlayerPanel/MarginContainer/VBoxContainer/PartyContainer/PlayerContainer" unique_id=307626570]
 layout_mode = 2
 theme_override_constants/v_separation = -2
 columns = 2
 
-[node name="PartyInventory" type="GridContainer" parent="Main/BoxContainer/PlayerPanel/MarginContainer/VBoxContainer/PartyContainer" unique_id=1894468770]
+[node name="PartyInventory" type="GridContainer" parent="Main/BoxContainer/BoxContainer/PlayerPanel/MarginContainer/VBoxContainer/PartyContainer" unique_id=1894468770]
 layout_mode = 2
+
+[node name="StancesPanel" type="FoldableContainer" parent="Main/BoxContainer/BoxContainer" unique_id=2113978293]
+visible = false
+layout_mode = 2
+
+[node name="BoxContainer" type="BoxContainer" parent="Main/BoxContainer/BoxContainer/StancesPanel" unique_id=94141563]
+layout_mode = 2
+
+[node name="Button" type="Button" parent="Main/BoxContainer/BoxContainer/StancesPanel/BoxContainer" unique_id=1768853630]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("2_1mjrn")
+theme_override_font_sizes/font_size = 14
+toggle_mode = true
+button_group = SubResource("ButtonGroup_1mjrn")
+text = "Atk"
+
+[node name="Button2" type="Button" parent="Main/BoxContainer/BoxContainer/StancesPanel/BoxContainer" unique_id=172400102]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("2_1mjrn")
+theme_override_font_sizes/font_size = 14
+toggle_mode = true
+button_group = SubResource("ButtonGroup_1mjrn")
+text = "Bal"
+
+[node name="Button3" type="Button" parent="Main/BoxContainer/BoxContainer/StancesPanel/BoxContainer" unique_id=1814159771]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("2_1mjrn")
+theme_override_font_sizes/font_size = 14
+toggle_mode = true
+button_group = SubResource("ButtonGroup_1mjrn")
+text = "Def"
 
 [node name="EnemyPanel" type="FoldableContainer" parent="Main/BoxContainer" unique_id=2010273539]
 layout_mode = 2
 size_flags_horizontal = 8
 size_flags_vertical = 0
 theme_override_fonts/font = ExtResource("2_1mjrn")
-folded = true
 
 [node name="MarginContainer" type="MarginContainer" parent="Main/BoxContainer/EnemyPanel" unique_id=394116400]
-visible = false
 layout_mode = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Main/BoxContainer/EnemyPanel/MarginContainer" unique_id=1250108174]

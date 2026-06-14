@@ -67,7 +67,11 @@ func get_action():
 						# if target is valid, 
 						if is_instance_valid(target):
 							# assign next available attack ability
-							var new_action = BasicAttack.new()
+							var attacks = self.entity.data.actions.attacks
+							var next = attacks.pop_front()
+							self.entity.data.actions.next = next
+							self.entity.data.actions.attacks = attacks
+							var new_action = next.new()
 							new_action.src = self.entity
 							new_action.target = target
 							self.entity.data.actions.action = new_action
@@ -86,7 +90,11 @@ func get_action():
 			# if target is valid, 
 			if is_instance_valid(target):
 				# assign next available attack ability
-				var new_action = BasicAttack.new()
+				var attacks = self.entity.data.actions.attacks
+				var next = attacks.pop_front()
+				self.entity.data.actions.next = next
+				self.entity.data.actions.attacks = attacks
+				var new_action = next.new()
 				new_action.src = self.entity
 				new_action.target = target
 				self.entity.data.actions.action = new_action
@@ -152,8 +160,11 @@ func _evaluate_action():
 	
 	# if current action done,
 	if current_action.done:
-		# update action history
-		self.entity.data.actions.history.append(current_action)
+		if current_action is AttackAction:
+			self.entity.data.actions.attacks.append(
+				self.entity.data.actions.next
+			)
+
 		# null action in player data
 		self.entity.data.actions.action = null
 

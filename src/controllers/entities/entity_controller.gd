@@ -37,13 +37,13 @@ func _calculate_attributes(e: Entity) -> Dictionary:
 		# base stats
 		stats.stamina += 1
 		stats.strength += 1
-		stats.agility += 1
+		stats.perception += 1
 	
 	if e is Enemy:
 		# base stats
 		stats.stamina += stats.level
 		stats.strength += stats.level
-		stats.agility += stats.level
+		stats.perception += stats.level
 
 	# stamina-based
 	stats.max_health = stats.base_health + (stats.stamina * 20)
@@ -51,8 +51,8 @@ func _calculate_attributes(e: Entity) -> Dictionary:
 	# strength-based
 	stats.attack = stats.base_attack + (stats.strength * 2)
 	# agility-based
-	stats.crit_chance += (stats.agility * 0.0001)
-	stats.dodge_chance += (stats.agility * 0.0001)
+	stats.crit_chance += (stats.perception * 0.0001)
+	stats.dodge_chance += (stats.perception * 0.0001)
 	
 	# return stats
 	return stats
@@ -77,6 +77,7 @@ func evaluate_combat(attack: AttackAction):
 	var target_health = attack.target.data.stats.health
 	var target_dodge = attack.target.data.stats.dodge_chance
 
+	# weapon damage
 	var weapon_equipped = false
 	var equipped_weapon = null
 	if attack.src is Player:
@@ -84,9 +85,12 @@ func evaluate_combat(attack: AttackAction):
 		if weapon_equipped:
 			# calculate attack damage factoring weapon
 			equipped_weapon = attack.src.data.inventory.equipped.weapon
-			var weapon_dmg = equipped_weapon.data.stats.damage
-			var weapon_bonus = weapon_dmg / 2
-			src_attack += weapon_bonus
+			var weapon_dmg = equipped_weapon.data.stats.damage / 2
+			src_attack += weapon_dmg
+	
+	# attack type damage
+	var attack_dmg = src_attack * attack.data.multi
+	src_attack = attack_dmg
 
 	# evaluate if enemy attack is hit
 	var r = randf_range(0, 1)

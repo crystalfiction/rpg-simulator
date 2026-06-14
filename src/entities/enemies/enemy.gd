@@ -18,12 +18,17 @@ var init_data: Dictionary = {
 		"dodge_chance": 0.05,
 		"stamina": 0,
 		"strength": 0,
-		"agility": 0,
+		"perception": 0,
 	},
 	"actions": {
 		"controller": "",
 		"action": null,
-		"history": [],
+		"next": null,
+		"attacks": [
+			HeavyAttack,
+			BasicAttack,
+		],
+		"cooldown": []
 	},
 	"encounters": {
 		"active": false,

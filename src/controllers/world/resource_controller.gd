@@ -68,11 +68,11 @@ func _evaluate_terrain(tile_map: Array) -> Array:
 	
 	# print verbose metrics
 	var metrics = {
-		"avg_density": avg_density,
 		"avg_rainfall": avg_rainfall,
 		"avg_drainage": avg_drainage,
 		"avg_water": avg_water,
 		"avg_erosion": avg_erosion,
+		"avg_density": avg_density,
 	}
 	var keys = metrics.keys()
 	var metrics_v = ""

@@ -56,20 +56,17 @@ func _update_color(tile_data: Dictionary):
 	var gradients = [soil_10r, soil_5yr, soil_10yr]
 	var new_color = Color()
 	if "terrain" in keys:
-		if "weather" in tile_data && "water" in tile_data.weather:
-			# define water gradient
-			var water = tile_data.weather.water
-			
-			# define soil gradient
-			var new_gradient
-			if water >= 0 && water < 0.33:
-				new_gradient = gradients[0]
-			elif water >= 0.33 && water < 0.66:
-				new_gradient = gradients[1]
-			elif water >= 0.66 && water <= 1:
-				new_gradient = gradients[2]
-			# apply gradient based on water content
-			self.texture.gradient = new_gradient
+		# define soil gradient
+		var new_gradient
+		var d = self.get_parent().data.metrics.avg_density
+		if d >= 0 && d < 0.33:
+			new_gradient = gradients[0]
+		elif d >= 0.33 && d < 0.66:
+			new_gradient = gradients[1]
+		elif d >= 0.66 && d <= 1:
+			new_gradient = gradients[2]
+		# apply gradient based on soil density
+		self.texture.gradient = new_gradient
 				
 		if "density" in tile_data.terrain:
 			# sample gradient

@@ -1,8 +1,8 @@
 extends EntityController
 
-# references
-var player: Player
 # components
+var player: Player
+
 var exp_step: int = 1
 var exp_rate: int
 var exp_cap: int
@@ -24,6 +24,7 @@ func find_nearest_resource(p: Player, w: World) -> Tile:
 	var n_resource = n_resources.front()
 	return n_resource
 
+
 # Player Actions
 
 ## interacts with the current tile depending on resources, encounters
@@ -41,10 +42,7 @@ func interact_with_tile(p: Player, current_tile: Tile):
 		p.data.resources.surplus += 1
 	# if player health below max,
 	else:
-		# increase by regen_rate
-		var regen = p.data.stats.max_health * (p.data.stats.regen_rate)
-		var new_health = clamp(p.data.stats.health + regen, 0, p.data.stats.max_health)
-		p.data.stats.health = new_health
+		_check_resource_surplus(p)
 
 	# log resource acquisition
 	FileLogger.log_message(self , "Resource acquired.")
@@ -85,7 +83,34 @@ func move_towards_tile(p: Player, t: Tile) -> bool:
 	else:
 		return false
 
+
 # Player Stats
+
+## checks whether player has surplus resources
+## and evaluates rewards accordingly
+func _check_resource_surplus(p: Player):
+	# check if food surplus,
+	if p.data.resources.surplus > 0 && (
+			p.data.stats.health < p.data.stats.max_health):
+		# increase health by regen_rate
+		var regen_amt = p.data.stats.max_health * (p.data.stats.regen_rate)
+		# get # of times regen amt fits into missing health
+		var n_regen = ceil((p.data.stats.max_health - p.data.stats.health) / regen_amt)
+		# if regen times is more than surplus allows,
+		# but greater than 0,
+		if n_regen > player.data.resources.surplus:
+			var difference = player.data.resources.surplus - n_regen
+			n_regen += difference
+		# apply regen times to amount
+		regen_amt *= n_regen
+		var new_health = clamp(
+			p.data.stats.health + regen_amt, 0, p.data.stats.max_health)
+		p.data.stats.health = new_health
+		# reduce resource surplus by 1 if > 0
+		p.data.resources.surplus = (
+			(p.data.resources.surplus - n_regen) if (p.data.resources.surplus > 0
+			) else (p.data.resources.surplus)
+		)
 
 ## process stat rewards considering the cycle's encounter
 func _process_rewards(encounter: Dictionary):
@@ -122,31 +147,10 @@ func _process_rewards(encounter: Dictionary):
 		self.player.data.stats.health = self.player.data.stats.max_health
 		FileLogger.log_message(self , self.player.name + " is now level " + str(self.player.data.stats.level))
 	else:
-		# check if food surplus,
-		if self.player.data.resources.surplus > 0 && (
-				self.player.data.stats.health < self.player.data.stats.max_health):
-			# increase health by regen_rate
-			var regen_amt = self.player.data.stats.max_health * (self.player.data.stats.regen_rate)
-			# get # of times regen amt fits into missing health
-			var n_regen = ceil((self.player.data.stats.max_health - self.player.data.stats.health) / regen_amt)
-			# if regen times is more than surplus allows,
-			# but greater than 0,
-			if n_regen > player.data.resources.surplus:
-				var difference = player.data.resources.surplus - n_regen
-				n_regen += difference
-			# apply regen times to amount
-			regen_amt *= n_regen
-			var new_health = clamp(
-				self.player.data.stats.health + regen_amt, 0, self.player.data.stats.max_health)
-			self.player.data.stats.health = new_health
-			# reduce resource surplus by 1 if > 0
-			self.player.data.resources.surplus = (
-				(self.player.data.resources.surplus - n_regen) if (self.player.data.resources.surplus > 0
-				) else (self.player.data.resources.surplus)
-			)
+		_check_resource_surplus(self.player)
 
+	
 # Player Initialization
-
 ## initializes a new action controller for the given player entity
 func _init_action_controller(p: Player) -> ActionController:
 	# initialize the controller
@@ -171,12 +175,20 @@ func _init_player_entity():
 	new_player.data.stats = _calculate_stats(new_player)
 	# actions
 	new_player.data.actions.controller = _init_action_controller(new_player)
+
+	# TODO: give player weapon
+	var new_weapon = SwordWeapon.new()
+	new_player.data.inventory.equipped.weapon = new_weapon
+
+	# update uid ref
+	world_controller.uid_ref += 1
+	
+	# update player entity reference
+	self.player = new_player
+	self.world.data.player = self.player
 	
 	# add player to tree
 	self.add_child(new_player)
-	
-	# update uid ref
-	world_controller.uid_ref += 1
 
 	# return player
 	return new_player
@@ -190,16 +202,10 @@ func _ready() -> void:
 
 	# TODO: account for multiple players
 	# initialize the player entity as scene
-	self.player = _init_player_entity()
-
-	# TODO: give player weapon
-	var new_weapon = SwordWeapon.new()
-	self.player.data.inventory.equipped.weapon = new_weapon
-
-	# update player entity reference
-	self.world.data.player = self.player
+	_init_player_entity()
 	
 	FileLogger.log_message(self , "Player initialized.")
+
 
 # Player Processing
 

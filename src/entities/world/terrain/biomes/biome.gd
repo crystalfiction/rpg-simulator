@@ -27,6 +27,10 @@ var data = {
 }
 
 
+func get_biome_class() -> BiomeClass:
+	var curr_biome = self.Class
+	return curr_biome
+
 func get_biome_class_string() -> String:
 	var curr_biome = self.Class
 	var key = BiomeClass.find_key(curr_biome)

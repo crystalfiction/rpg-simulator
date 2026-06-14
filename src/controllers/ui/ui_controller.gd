@@ -19,6 +19,7 @@ var log_label_settings: LabelSettings
 @export var player_stats: GridContainer
 @export var player_health_bar: ProgressBar
 @export var player_exp_bar: ProgressBar
+@export var player_actions: GridContainer
 
 @export var enemy_panel: FoldableContainer
 @export var enemy_stats: GridContainer
@@ -72,7 +73,8 @@ func _update_labels(curr_labels: Array):
 			self.player_health_bar.max_value = p.data.stats.max_health
 			self.player_exp_bar.value = p.data.stats.exp
 			self.player_exp_bar.max_value = p.data.stats.exp_cap
-	
+			# update actions
+				
 	## TODO: make this account for multiple enemies
 	if enemy_controller:
 		var enemies = self.world.data.controller.enemy_controller.enemies
@@ -106,12 +108,8 @@ func _update_labels(curr_labels: Array):
 						data_string = _get_substring(str(l.obj.data[keys[0]][keys[1]][keys[2]]), self.string_n)
 					l.label.text = data_string
 			else:
-				if l.obj is Controller:
-					data_string = _get_substring(str(l.obj[l.key]), self.string_n)
-					l.label.text = data_string
-				else:
-					data_string = _get_substring(str(l.obj.data[l.key]), self.string_n)
-					l.label.text = data_string
+				data_string = _get_substring(str(l.obj.data[l.key]), self.string_n)
+				l.label.text = data_string
 	
 	# update labels
 	self.labels = curr_labels
@@ -184,7 +182,7 @@ func _make_data_labels(obj: Variant, container: String):
 		0: ["class_v", "ranges"]
 	}
 	var player_filter = {
-		0: ["stats", "skills", "resources", "inventory"]
+		0: ["stats", "resources", "inventory"]
 	}
 	var enemy_filter = {
 		0: ["stats", "inventory"]

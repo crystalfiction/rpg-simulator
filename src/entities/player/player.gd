@@ -19,7 +19,12 @@ var player_data: Dictionary = {
 	"actions": {
 		"controller": "",
 		"action": null,
-		"history": [],
+		"next": null,
+		"attacks": [
+			HeavyAttack,
+			BasicAttack,
+		],
+		"cooldown": [],
 	},
 	"resources": {
 		"food": 0,
