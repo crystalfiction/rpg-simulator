@@ -211,7 +211,6 @@ func _generate_terrain(curr_terrain: Terrain) -> void:
 	# TODO: add a way to reset terrain data without breaking dependencies
 	# reuse existing Terrain obj
 	var new_terrain = curr_terrain
-	new_terrain.data.map_complete = false
 
 	# reinitialize soil
 	new_terrain = _init_soil(new_terrain, curr_terrain.data.biome)
@@ -235,6 +234,9 @@ func _generate_terrain(curr_terrain: Terrain) -> void:
 	# log update
 	FileLogger.log_message(self , "Map " + str(new_terrain.data.map_count) + " generated.")
 	
+	# unflag map_complete
+	new_terrain.data.map_complete = false
+
 	# update world terrain to new terrain
 	self.world.data.terrain = new_terrain
 

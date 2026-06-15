@@ -1,4 +1,4 @@
-class_name BaseClass extends RefCounted
+class_name WandererClass extends RefCounted
 
 # components
 var stats = {

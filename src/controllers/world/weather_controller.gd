@@ -149,7 +149,7 @@ func _optimize_weather(curr_terrain: Terrain) -> Terrain:
 	self.weather_metrics = new_metrics
 	
 	# run weather erosion cycle
-	var n_cycles = 1
+	var n_cycles = 2
 	var total_erosion = 0
 	var final: Array = curr_terrain.data.tile_map
 	for i in range(n_cycles):

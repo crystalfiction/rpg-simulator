@@ -47,5 +47,4 @@ func init_scene() -> Sprite2D:
 ## initializes the entity
 func _init() -> void:
 	self.Type = EntityType.ENEMY
-	for k in self.init_data:
-		self.data[k] = init_data[k]
+	_traverse_data(self.data, self.init_data)

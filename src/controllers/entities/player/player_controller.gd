@@ -31,8 +31,7 @@ func find_nearest_resource(p: Player, w: World) -> Tile:
 func interact_with_tile(p: Player, current_tile: Tile):
 	# take resources from tile
 	current_tile.data.resources.food = false
-	# update world ref 
-	self.world.data.terrain.data.resources.count -= 1
+	
 	# give resources to player
 	p.data.resources.food += 1
 	p.data.resources.total += 1
@@ -43,8 +42,12 @@ func interact_with_tile(p: Player, current_tile: Tile):
 
 	# log resource acquisition
 	FileLogger.log_message(self , "Resource acquired.")
+	
 	# flag action as complete
 	p.data.actions.action.data.done = true
+
+	# update world ref 
+	self.world.data.terrain.data.resources.count -= 1
 
 ## moves the passed player to the passed tile and updates player grid_idx
 func move_to_tile(p: Player, t: Tile):
@@ -151,6 +154,7 @@ func _process_rewards(encounter: Dictionary):
 
 	
 # Player Initialization
+
 ## initializes a new action controller for the given player entity
 func _init_action_controller(p: Player) -> ActionController:
 	# initialize the controller
@@ -164,24 +168,40 @@ func _init_action_controller(p: Player) -> ActionController:
 
 ## initializes a new player entity
 func _init_player_entity():
-	var world_controller = self.world.data.controller
-	# create new player scene
-	var new_player = BaseClass.new().init_scene()
+	# create new player scene of class
+	var new_player_script = Player.new()
+	var new_player = new_player_script.init_scene()
+	
 	# metadata
-	new_player.data.uid = world_controller.uid_ref
+	new_player.data.uid = self.world.data.controller.uid_ref
 	new_player.data.world = self.world
 	new_player.data.controller = self
+	
+	# class
+	var p_class = Player.PlayerClass.WANDERER
+	new_player.Class = p_class
+	# spin up class script to get init class stats and abilities
+	var class_obj = new_player_script.PlayerClasses[p_class].new()
+	new_player.data.stats = class_obj.stats
+	new_player.data.actions.abilities.append_array(class_obj.class_abilities)
+	
 	# stats
 	new_player.data.stats = _calculate_stats(new_player)
+	
 	# actions
 	new_player.data.actions.controller = _init_action_controller(new_player)
 
-	# player starts unarmed
+	# start player unarmed
 	var new_weapon = UnarmedWeapon.new()
 	new_player.data.inventory.equipped.weapon = new_weapon
+	# TODO: start player armored according to class
+	# new_player.data.inventory.equipped.head = 
+	# new_player.data.inventory.equipped.chest = 
+	# new_player.data.inventory.equipped.legs = 
+	# new_player.data.inventory.equipped.feet = 
 
 	# update uid ref
-	world_controller.uid_ref += 1
+	self.world.data.controller.uid_ref += 1
 	
 	# update player entity reference
 	self.player = new_player
@@ -257,18 +277,19 @@ func _process_cycle(p: Player):
 	# if time cycling,
 	if time_controller:
 		if time_controller.cycling:
-			if not self.world.data.terrain.data.map_complete:
-				# check player health,
-				_check_player(p)
-				
-				# get player action for cycle
-				p.data.actions.controller.get_action()
-
 			# if terrain map complete,
-			else:
+			if self.world.data.terrain.data.map_complete:
 				# reset player health
 				# and wait for new map to be initialized
 				p.data.stats.health = p.data.stats.max_health
+				return
+
+			# check player health,
+			_check_player(p)
+			
+			# get player action for cycle
+			if not p.is_queued_for_deletion():
+				p.data.actions.controller.get_action()
 
 func _process(delta: float) -> void:
 	# if player is valid,

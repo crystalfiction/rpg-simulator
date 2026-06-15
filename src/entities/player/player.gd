@@ -6,22 +6,26 @@ var init_player: Resource = preload("res://src/entities/player/player.tscn")
 # components
 var Class: PlayerClass
 enum PlayerClass {
-	BASE
+	BASE,
+	WANDERER,
+}
+var PlayerClasses = {
+	0: BaseClass,
+	1: WandererClass,
 }
 
 var player_data: Dictionary = {
 	"world": "",
 	"grid_idx": Vector2i(0, 0),
-	"class": self.Class,
 	"stats": {
 		# initialized by PlayerClass
 	},
 	"actions": {
-		"controller": "",
+		"controller": null,
 		"action": null,
 		"abilities": [
 			HeavyAttack,
-			BasicAttack
+			BasicAttack,
 		]
 	},
 	"skills": {},
@@ -44,7 +48,12 @@ var player_data: Dictionary = {
 	}
 }
 
-func get_class_string() -> String:
+
+func get_player_class() -> PlayerClass:
+	var curr_class = self.Class
+	return curr_class
+
+func get_player_class_string() -> String:
 	var curr_class = self.Class
 	var key = PlayerClass.find_key(curr_class)
 	return key
@@ -58,5 +67,4 @@ func init_scene() -> Sprite2D:
 ## initializes the entity data
 func _init() -> void:
 	self.Type = EntityType.PLAYER
-	for k in self.player_data:
-		self.data[k] = player_data[k]
+	self.data = _traverse_data(self.data, self.player_data)

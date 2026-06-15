@@ -70,6 +70,11 @@ func _calculate_attributes(e: Entity) -> Dictionary:
 		stats.stamina += 1
 		stats.strength += 1
 		stats.perception += 1
+		
+		# if e.Class == Player.PlayerClass.WANDERER:
+		# 	stats.stamina += 1
+		# 	stats.strength += 0
+		# 	stats.perception += 0
 
 		# stamina-based
 		stats.regen_rate = clamp(stats.regen_rate + (stats.stamina * 0.0001), 0, 1)

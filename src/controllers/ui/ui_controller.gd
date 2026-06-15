@@ -19,7 +19,6 @@ var log_label_settings: LabelSettings
 @export var player_stats: GridContainer
 @export var player_health_bar: ProgressBar
 @export var player_exp_bar: ProgressBar
-@export var player_actions: GridContainer
 
 @export var enemy_panel: FoldableContainer
 @export var enemy_stats: GridContainer
@@ -67,13 +66,12 @@ func _update_labels(curr_labels: Array):
 		var p = self.world.data.controller.player_controller.player
 		if is_instance_valid(p):
 			# update class title
-			self.player_class.text = p.get_class_string()
+			self.player_class.text = p.get_player_class_string()
 			# update progress bars
 			self.player_health_bar.value = p.data.stats.health
 			self.player_health_bar.max_value = p.data.stats.max_health
 			self.player_exp_bar.value = p.data.stats.exp
 			self.player_exp_bar.max_value = p.data.stats.exp_cap
-			# update actions
 				
 	## TODO: make this account for multiple enemies
 	if enemy_controller:
@@ -98,7 +96,10 @@ func _update_labels(curr_labels: Array):
 			if keys.size() > 1:
 				n_keys += keys.size()
 				if n_keys == 2:
-					data_string = _get_substring(str(l.obj.data[keys[0]][keys[1]]), self.string_n)
+					if l.obj.data[keys[0]][keys[1]] is Action:
+						data_string = _get_substring(str(l.obj.data[keys[0]][keys[1]].get_script().get_global_name()), self.string_n)
+					else:
+						data_string = _get_substring(str(l.obj.data[keys[0]][keys[1]]), self.string_n)
 					l.label.text = data_string
 				elif n_keys == 3:
 					if l.obj.data[keys[0]][keys[1]][keys[2]] is Weapon:
@@ -182,7 +183,7 @@ func _make_data_labels(obj: Variant, container: String):
 		0: ["class_v", "ranges"]
 	}
 	var player_filter = {
-		0: ["stats", "skills", "resources", "inventory"]
+		0: ["stats", "skills", "actions", "resources", "inventory"]
 	}
 	var enemy_filter = {
 		0: ["stats", "inventory"]
