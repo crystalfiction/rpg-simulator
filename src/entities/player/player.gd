@@ -19,12 +19,10 @@ var player_data: Dictionary = {
 	"actions": {
 		"controller": "",
 		"action": null,
-		"next": null,
-		"attacks": [
+		"abilities": [
 			HeavyAttack,
-			BasicAttack,
-		],
-		"cooldown": [],
+			BasicAttack
+		]
 	},
 	"skills": {},
 	"resources": {
@@ -38,6 +36,10 @@ var player_data: Dictionary = {
 	"inventory": {
 		"equipped": {
 			"weapon": null,
+			"head": null,
+			"chest": null,
+			"legs": null,
+			"feet": null
 		},
 	}
 }

@@ -8,9 +8,11 @@ enum ActionType {
 	ATTACK,
 }
 
-var src = null # the source of the action
-var target = null # the target of the action
-var done: bool = false # the completion state of the action
+var data: Dictionary = {
+	"src": null,
+	"target": null,
+	"done": false
+}
 
 # returns the current Action's ActionType value for type validation
 func get_action_type() -> ActionType:

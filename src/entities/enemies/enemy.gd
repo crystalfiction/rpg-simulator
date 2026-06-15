@@ -23,12 +23,6 @@ var init_data: Dictionary = {
 	"actions": {
 		"controller": "",
 		"action": null,
-		"next": null,
-		"attacks": [
-			HeavyAttack,
-			BasicAttack,
-		],
-		"cooldown": []
 	},
 	"encounters": {
 		"active": false,
@@ -36,7 +30,11 @@ var init_data: Dictionary = {
 	"inventory": {
 		"equipped": {
 			"weapon": null,
-		}
+			"head": null,
+			"chest": null,
+			"legs": null,
+			"feet": null
+		},
 	}
 }
 

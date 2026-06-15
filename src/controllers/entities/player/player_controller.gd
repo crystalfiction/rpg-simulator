@@ -44,7 +44,7 @@ func interact_with_tile(p: Player, current_tile: Tile):
 	# log resource acquisition
 	FileLogger.log_message(self , "Resource acquired.")
 	# flag action as complete
-	p.data.actions.action.done = true
+	p.data.actions.action.data.done = true
 
 ## moves the passed player to the passed tile and updates player grid_idx
 func move_to_tile(p: Player, t: Tile):
@@ -176,7 +176,7 @@ func _init_player_entity():
 	# actions
 	new_player.data.actions.controller = _init_action_controller(new_player)
 
-	# TODO: give player weapon
+	# player starts unarmed
 	var new_weapon = UnarmedWeapon.new()
 	new_player.data.inventory.equipped.weapon = new_weapon
 
@@ -257,14 +257,15 @@ func _process_cycle(p: Player):
 	# if time cycling,
 	if time_controller:
 		if time_controller.cycling:
-			# check player health,
-			_check_player(p)
-			
-			# get player action for cycle
-			p.data.actions.controller.get_action()
+			if not self.world.data.terrain.data.map_complete:
+				# check player health,
+				_check_player(p)
+				
+				# get player action for cycle
+				p.data.actions.controller.get_action()
 
 			# if terrain map complete,
-			if self.world.data.terrain.data.map_complete:
+			else:
 				# reset player health
 				# and wait for new map to be initialized
 				p.data.stats.health = p.data.stats.max_health

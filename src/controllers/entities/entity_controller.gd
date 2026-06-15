@@ -104,31 +104,30 @@ func _calculate_stats(e: Entity) -> Dictionary:
 
 ## evaluates combat between a source and target entity
 func evaluate_combat(attack: AttackAction):
-	## TODO: account for attack type
-	var src_attack = attack.src.data.stats.attack
-	var src_hit = attack.src.data.stats.hit_chance
-	var src_crit = attack.src.data.stats.crit_chance
-	var src_crit_bonus = attack.src.data.stats.crit_bonus
-	var target_health = attack.target.data.stats.health
-	var target_dodge = attack.target.data.stats.dodge_chance
+	var src_attack = attack.data.src.data.stats.attack
+	var src_hit = attack.data.src.data.stats.hit_chance
+	var src_crit = attack.data.src.data.stats.crit_chance
+	var src_crit_bonus = attack.data.src.data.stats.crit_bonus
+	var target_health = attack.data.target.data.stats.health
+	var target_dodge = attack.data.target.data.stats.dodge_chance
 
 	# WEAPONS
-	var weapon_equipped = attack.src.data.inventory.equipped.weapon != null
+	var weapon_equipped = attack.data.src.data.inventory.equipped.weapon != null
 	var equipped_weapon = null
 	# check if weapon equipped,
 	if weapon_equipped:
-		equipped_weapon = attack.src.data.inventory.equipped.weapon
+		equipped_weapon = attack.data.src.data.inventory.equipped.weapon
 		# calculate weapon damage
 		var weapon_dmg = snapped(
 			equipped_weapon.data.stats.damage + (src_attack * 0.50) / 2,
 			0.01)
 		# if entity has skills,
-		if "skills" in attack.src.data:
+		if "skills" in attack.data.src.data:
 			# calculate skill damage bonus
 			var weapon_string = equipped_weapon.get_weapon_class_string()
-			var skill_level = attack.src.data.skills[weapon_string].level
+			var skill_level = attack.data.src.data.skills[weapon_string].level
 			var skill_bonus = snapped(skill_level * 1.5 / ((weapon_dmg / 2) + 1), 0.01)
-			attack.src.data.skills[weapon_string].bonus = skill_bonus
+			attack.data.src.data.skills[weapon_string].bonus = skill_bonus
 			weapon_dmg += skill_bonus
 
 		# add weapon damage to attack damage
@@ -164,44 +163,44 @@ func evaluate_combat(attack: AttackAction):
 	
 	# update target health
 	target_health -= floor(src_attack)
-	attack.target.data.stats.health = target_health
+	attack.data.target.data.stats.health = target_health
 
 	# update player damage done/taken metrics
 	if result == "HITS":
-		if attack.src is Player:
-			var p = attack.src
+		if attack.data.src is Player:
+			var p = attack.data.src
 			if src_attack >= p.data.stats.largest_hit:
 				p.data.stats.largest_hit = snapped(src_attack, 0.01)
 	
-	if attack.target is Player:
-		var p = attack.target
+	if attack.data.target is Player:
+		var p = attack.data.target
 		if src_attack >= p.data.stats.largest_taken:
 			p.data.stats.largest_taken = snapped(src_attack, 0.01)
 
 	# log results
 	if result == "DODGES":
 		FileLogger.log_message(self ,
-			attack.target.name + " " + result + " " + attack.src.name + "'s attack",
+			attack.data.target.name + " " + result + " " + attack.data.src.name + "'s attack",
 		"COMBAT")
 	else:
 		if result == "MISSES":
 			FileLogger.log_message(self ,
-				attack.src.name + " " + result + " " + attack.target.name,
+				attack.data.src.name + " " + result + " " + attack.data.target.name,
 			"COMBAT")
 		else:
 			FileLogger.log_message(self ,
-				attack.src.name + " " + result + " " + attack.target.name + " for " +
+				attack.data.src.name + " " + result + " " + attack.data.target.name + " for " +
 				str(src_attack) + " with " + str(attack.get_attack_type_string()) + " attack" +
 				(" using " + equipped_weapon.get_weapon_class_string() if weapon_equipped else ""),
 			"COMBAT")
 	
 	# process weapon skill
-	if "skills" in attack.src.data && (
+	if "skills" in attack.data.src.data && (
 		result == "HITS" || result == "CRITS"):
-		_progress_skill(attack.src, equipped_weapon.get_weapon_class_string())
+		_progress_skill(attack.data.src, equipped_weapon.get_weapon_class_string())
 
 	# flag action complete
-	attack.done = true
+	attack.data.done = true
 
 
 func _ready() -> void:

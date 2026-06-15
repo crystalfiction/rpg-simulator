@@ -208,8 +208,7 @@ func _optimize_terrain(terrain: Terrain) -> Terrain:
 ## generates new terrain object and saves to world.data.terrain
 ## called when player has completed all conditions on a map
 func _generate_terrain(curr_terrain: Terrain) -> void:
-	## TODO: account for existing terrain classification data
-	## when generating new maps
+	# TODO: add a way to reset terrain data without breaking dependencies
 	# reuse existing Terrain obj
 	var new_terrain = curr_terrain
 	new_terrain.data.map_complete = false

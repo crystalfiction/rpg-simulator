@@ -76,7 +76,7 @@ func _calculate_erosion(curr_terrain: Array) -> Dictionary:
 				((w.data.weather.water) *
 				(1 + w.data.weather.rainfall) *
 				(1 - w.data.weather.drainage) *
-				(1 - w.data.terrain.density ** 2)) * erosion_factor
+				(1 - w.data.terrain.density)) * erosion_factor
 			)
 			w.data.weather.erosion = erosion
 			# update metrics
@@ -143,7 +143,7 @@ func _optimize_weather(curr_terrain: Terrain) -> Terrain:
 	var erosion_metrics = _calculate_erosion(tile_map)
 	new_metrics.merge(erosion_metrics)
 	
-	## TODO: optimize features with metrics
+	#get metrics
 	for m in new_metrics:
 		new_metrics[m] = snapped(new_metrics[m], 0.001)
 	self.weather_metrics = new_metrics

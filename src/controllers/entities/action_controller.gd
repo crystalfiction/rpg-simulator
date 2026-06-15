@@ -2,11 +2,80 @@ class_name ActionController extends Controller
 
 # refs
 var entity: Entity
+var on_cooldown: Array = []
 
+
+# Cooldowns
+
+## gets the next available attack in entity abilities queue
+func _get_attack() -> AttackAction:
+	var new_action = null
+	# if abilities array,
+	if "abilities" in self.entity.data.actions:
+		var abilities = self.entity.data.actions.abilities
+		for a in abilities:
+			var new_a = a.new()
+			var exists = _check_cooldowns(new_a, self.on_cooldown)
+			if not exists:
+				new_action = new_a
+				# return first available
+				return new_action
+
+	# if no abilities array,
+	else:
+		# assign basic attack
+		new_action = BasicAttack.new()
+
+	return new_action
+
+## checks whether or not the passed action exists in any context
+## (instance, type) in cooldowns array
+func _check_cooldowns(action: AttackAction, cooldowns: Array) -> bool:
+	var type = action.get_attack_type()
+	var exists = cooldowns.filter(
+		func(a): return a.get_attack_type() == type
+	).size() > 0 && action not in cooldowns
+	return exists
+
+## puts an action on cooldown by adding to on_cooldown array
+func _add_cooldown(action: AttackAction, cooldowns: Array):
+	# going on cooldown,
+	if "cooldown" in action.data:
+		var exists = _check_cooldowns(action, cooldowns)
+		if (
+			action.data.cooldown > 0 &&
+			not exists
+		):
+			# cooldown exists,
+			# add to on_cooldown
+			cooldowns.append(action)
+
+## handles on_cooldown array
+func _handle_cooldowns(cooldowns: Array) -> Array:
+	# on cooldown,
+	if cooldowns.size() > 0:
+		for c in cooldowns:
+			# reduce each cycle until == 0
+			if c.data.cooldown > 0:
+				c.data.cooldown -= 1
+			
+			# if cooldown 0,
+			elif c.data.cooldown == 0:
+				# remove from on_cooldown
+				var idx = cooldowns.find(c)
+				cooldowns.pop_at(idx)
+			
+	return cooldowns
+
+
+# Action Processing
 
 ## gets a new action for parent entity,
 ## to be evaluated over one or more cycles by evaluate_action
 func get_action():
+	# handle action cooldowns every cycle
+	self.on_cooldown = _handle_cooldowns(self.on_cooldown)
+
 	# if Player entity,
 	if self.entity is Player:
 		# if resources exist and player not in encounter,
@@ -29,7 +98,7 @@ func get_action():
 						## INTERACT
 						var target_type = InteractAction.InteractTarget.RESOURCE
 						var new_action = InteractAction.new(target_type)
-						new_action.src = self.entity
+						new_action.data.src = self.entity
 						self.entity.data.actions.action = new_action
 				
 				# if current tile has no resources,
@@ -39,8 +108,8 @@ func get_action():
 					## FIND
 					var objective = FindAction.FindType.RESOURCE
 					var new_action = FindAction.new(objective)
-					new_action.src = self.entity
-					new_action.target = n_resource
+					new_action.data.src = self.entity
+					new_action.data.target = n_resource
 					self.entity.data.actions.action = new_action
 			
 			# if resources exist and player in encounter,
@@ -52,7 +121,7 @@ func get_action():
 						## INTERACT
 						var target_type = InteractAction.InteractTarget.RESOURCE
 						var new_action = InteractAction.new(target_type)
-						new_action.src = self.entity
+						new_action.data.src = self.entity
 						self.entity.data.actions.action = new_action
 					
 					# if encounter not done,
@@ -62,19 +131,14 @@ func get_action():
 						var encounter_controller = self.world.data.controller.terrain_controller.encounter_controller
 						var active_encounter = encounter_controller.encounter
 						var enemies = active_encounter.enemies.filter(func(e): return is_instance_valid(e) && e != null)
-						## TODO: choose and maintain target instead of random
+						## TODO: if multiple enemies, choose and maintain target instead of random
 						var target = enemies.pick_random()
 						# if target is valid, 
 						if is_instance_valid(target):
-							# TODO: add attack functional queue
-							# assign next available attack ability
-							var attacks = self.entity.data.actions.attacks
-							var next = attacks.pop_front()
-							self.entity.data.actions.next = next
-							self.entity.data.actions.attacks = attacks
-							var new_action = next.new()
-							new_action.src = self.entity
-							new_action.target = target
+							# TODO: add functional attack queue
+							var new_action = _get_attack()
+							new_action.data.src = self.entity
+							new_action.data.target = target
 							self.entity.data.actions.action = new_action
 	
 	# if enemy entity,
@@ -90,15 +154,10 @@ func get_action():
 			var target = player
 			# if target is valid, 
 			if is_instance_valid(target):
-				# TODO: add attack functional queue
-				# assign next available attack ability
-				var attacks = self.entity.data.actions.attacks
-				var next = attacks.pop_front()
-				self.entity.data.actions.next = next
-				self.entity.data.actions.attacks = attacks
-				var new_action = next.new()
-				new_action.src = self.entity
-				new_action.target = target
+				# TODO: add functional attack queue
+				var new_action = _get_attack()
+				new_action.data.src = self.entity
+				new_action.data.target = target
 				self.entity.data.actions.action = new_action
 		
 		# if encounter not active,
@@ -127,13 +186,13 @@ func _evaluate_action():
 		# FIND
 		Action.ActionType.FIND:
 			# move towards resource tile
-			var action_target = current_action.target
+			var action_target = current_action.data.target
 			var result = self.entity.data.controller.move_towards_tile(
 				self.entity, action_target)
 			# if player is at find target,
 			if result:
 				# action done
-				current_action.done = true
+				current_action.data.done = true
 			else:
 				# log update
 				var action_v = current_action.get_action_string()
@@ -155,26 +214,21 @@ func _evaluate_action():
 		
 		# ATTACK
 		Action.ActionType.ATTACK:
-			# do attack action to action.target
-			if is_instance_valid(current_action.target):
+			# do attack action to action.data.target
+			if is_instance_valid(current_action.data.target):
 				self.entity.data.controller.evaluate_combat(
 					current_action)
 	
 	# if current action done,
-	if current_action.done:
+	if current_action.data.done:
 		if current_action is AttackAction:
-			self.entity.data.actions.attacks.append(
-				self.entity.data.actions.next
-			)
+			# TODO: process cooldown
+			_add_cooldown(current_action, self.on_cooldown)
 
-		# null action in player data
-		self.entity.data.actions.action = null
+
+# Action Initialization
 
 ## called on script initialization
 func _init(new_entity: Entity) -> void:
 	# define controller entity on initialization
 	self.entity = new_entity
-
-
-func _process(delta: float) -> void:
-	pass

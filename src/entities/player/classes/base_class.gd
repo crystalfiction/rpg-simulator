@@ -19,9 +19,9 @@ var class_data: Dictionary = {
 		"crit_chance": 0.11,
 		"crit_bonus": 1.50,
 		"dodge_chance": 0.05,
-		"stamina": 1,
-		"strength": 1,
-		"perception": 1,
+		"stamina": 0,
+		"strength": 0,
+		"perception": 0,
 	},
 }
 
