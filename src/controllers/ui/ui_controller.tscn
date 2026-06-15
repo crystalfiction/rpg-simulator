@@ -11,7 +11,7 @@ bg_color = Color(0.3882353, 0.5294118, 0.16862746, 1)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fsh7l"]
 bg_color = Color(0.3882353, 0.5294118, 0.16862746, 1)
 
-[node name="UiController" type="Control" unique_id=694900400 node_paths=PackedStringArray("world_panel", "world_stats", "party_inventory", "player_panel", "player_class", "player_stats", "player_health_bar", "player_exp_bar", "player_actions", "enemy_panel", "enemy_stats", "enemy_health_bar")]
+[node name="UiController" type="Control" unique_id=694900400 node_paths=PackedStringArray("world_panel", "world_stats", "party_inventory", "player_panel", "player_class", "player_stats", "player_health_bar", "player_exp_bar", "enemy_panel", "enemy_stats", "enemy_health_bar")]
 top_level = true
 layout_mode = 3
 anchors_preset = 15
@@ -28,7 +28,6 @@ player_class = NodePath("Main/BoxContainer/BoxContainer/PlayerPanel/MarginContai
 player_stats = NodePath("Main/BoxContainer/BoxContainer/PlayerPanel/MarginContainer/VBoxContainer/PartyContainer/PlayerContainer/PlayerStats")
 player_health_bar = NodePath("Main/BoxContainer/BoxContainer/PlayerPanel/MarginContainer/VBoxContainer/PartyContainer/PlayerContainer/Vitals/Health")
 player_exp_bar = NodePath("Main/BoxContainer/BoxContainer/PlayerPanel/MarginContainer/VBoxContainer/PartyContainer/PlayerContainer/Vitals/Exp")
-player_actions = NodePath("")
 enemy_panel = NodePath("Main/BoxContainer/EnemyPanel")
 enemy_stats = NodePath("Main/BoxContainer/EnemyPanel/MarginContainer/VBoxContainer/EnemyContainer/EnemyStats")
 enemy_health_bar = NodePath("Main/BoxContainer/EnemyPanel/MarginContainer/VBoxContainer/EnemyContainer/Vitals/Health")

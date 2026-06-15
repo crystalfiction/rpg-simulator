@@ -10,7 +10,6 @@ enum WeaponClass {
 }
 
 var weapon_data = {
-	"class": Class,
 	"stats": {
 		"damage": 0,
 	}

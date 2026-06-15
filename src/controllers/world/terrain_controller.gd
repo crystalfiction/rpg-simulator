@@ -213,7 +213,7 @@ func _generate_terrain(curr_terrain: Terrain) -> void:
 	# reuse existing Terrain obj
 	var new_terrain = curr_terrain
 	new_terrain.data.map_complete = false
-	
+
 	# reinitialize soil
 	new_terrain = _init_soil(new_terrain, curr_terrain.data.biome)
 

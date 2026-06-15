@@ -14,7 +14,6 @@ var init_terrain = {
 	"encounters": {}
 }
 
-
 func get_terrain_biome() -> Biome:
 	var biome_data = {
 		"avg_density": self.data.metrics.avg_density,

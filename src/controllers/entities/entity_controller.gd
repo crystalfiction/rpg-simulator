@@ -3,6 +3,38 @@ class_name EntityController extends Controller
 # components
 
 
+func _calculate_skill(skill: Dictionary):
+	var step = 10
+	var cap = floor((step) * (skill.level ** 2))
+	skill.step = step
+	skill.cap = cap
+	return skill
+
+func _progress_skill(entity: Entity, skill: String):
+	if skill not in entity.data.skills:
+		var new_skill = {
+			"level": 1,
+			"exp": 0,
+			"step": 0,
+			"cap": 0,
+			"bonus": 0.0,
+			
+		}
+		entity.data.skills[skill] = new_skill
+		entity.data.skills[skill] = _calculate_skill(
+			entity.data.skills[skill])
+	
+	if skill in entity.data.skills:
+		entity.data.skills[skill].exp += entity.data.skills[skill].step
+		entity.data.skills[skill] = _check_skill(entity.data.skills[skill])
+
+func _check_skill(skill: Dictionary):
+	if skill.exp >= skill.cap:
+		skill.level += 1
+		skill = _calculate_skill(skill)
+	return skill
+
+
 ## calculates base experience values for a given stats dictionary
 ## returns updated stats dictionary
 func _calculate_exp(e: Entity) -> Dictionary:
@@ -12,9 +44,9 @@ func _calculate_exp(e: Entity) -> Dictionary:
 		stats.level += 1
 		self.exp_step = 10
 		# quadratic formula
-		# self.exp_cap = self.exp_step * (stats.level ** 2)
+		self.exp_cap = self.exp_step * (stats.level ** 2)
 		# exponential formula
-		self.exp_cap = (self.exp_step) * (stats.level - 1) ** 1.5
+		# self.exp_cap = (self.exp_step) * (stats.level - 1) ** 1.5
 
 		stats.exp_step = self.exp_step
 		stats.exp_cap = self.exp_cap
@@ -38,6 +70,9 @@ func _calculate_attributes(e: Entity) -> Dictionary:
 		stats.stamina += 1
 		stats.strength += 1
 		stats.perception += 1
+
+		# stamina-based
+		stats.regen_rate = clamp(stats.regen_rate + (stats.stamina * 0.0001), 0, 1)
 	
 	if e is Enemy:
 		# base stats
@@ -77,22 +112,33 @@ func evaluate_combat(attack: AttackAction):
 	var target_health = attack.target.data.stats.health
 	var target_dodge = attack.target.data.stats.dodge_chance
 
-	# weapon damage
-	var weapon_equipped = false
+	# WEAPONS
+	var weapon_equipped = attack.src.data.inventory.equipped.weapon != null
 	var equipped_weapon = null
-	if attack.src is Player:
-		weapon_equipped = attack.src.data.inventory.equipped.weapon != null
-		if weapon_equipped:
-			# calculate attack damage factoring weapon
-			equipped_weapon = attack.src.data.inventory.equipped.weapon
-			var weapon_dmg = equipped_weapon.data.stats.damage / 2
-			src_attack += weapon_dmg
-	
-	# attack type damage
-	var attack_dmg = src_attack * attack.data.multi
-	src_attack = attack_dmg
+	# check if weapon equipped,
+	if weapon_equipped:
+		equipped_weapon = attack.src.data.inventory.equipped.weapon
+		# calculate weapon damage
+		var weapon_dmg = snapped(
+			equipped_weapon.data.stats.damage + (src_attack * 0.50) / 2,
+			0.01)
+		# if entity has skills,
+		if "skills" in attack.src.data:
+			# calculate skill damage bonus
+			var weapon_string = equipped_weapon.get_weapon_class_string()
+			var skill_level = attack.src.data.skills[weapon_string].level
+			var skill_bonus = snapped(skill_level * 1.5 / ((weapon_dmg / 2) + 1), 0.01)
+			attack.src.data.skills[weapon_string].bonus = skill_bonus
+			weapon_dmg += skill_bonus
 
-	# evaluate if enemy attack is hit
+		# add weapon damage to attack damage
+		src_attack += weapon_dmg
+	
+	# factor in ability damage multiplier
+	var ability_multi = attack.data.multi
+	src_attack = src_attack * ability_multi
+
+	# evaluate result
 	var r = randf_range(0, 1)
 	# if random number r is below hit threshold
 	var result = ""
@@ -120,11 +166,17 @@ func evaluate_combat(attack: AttackAction):
 	target_health -= floor(src_attack)
 	attack.target.data.stats.health = target_health
 
-	# update last hit taken amount if Player
+	# update player damage done/taken metrics
+	if result == "HITS":
+		if attack.src is Player:
+			var p = attack.src
+			if src_attack >= p.data.stats.largest_hit:
+				p.data.stats.largest_hit = snapped(src_attack, 0.01)
+	
 	if attack.target is Player:
 		var p = attack.target
-		if src_attack >= p.data.stats.largest_hit:
-			p.data.stats.largest_hit = src_attack
+		if src_attack >= p.data.stats.largest_taken:
+			p.data.stats.largest_taken = snapped(src_attack, 0.01)
 
 	# log results
 	if result == "DODGES":
@@ -143,6 +195,11 @@ func evaluate_combat(attack: AttackAction):
 				(" using " + equipped_weapon.get_weapon_class_string() if weapon_equipped else ""),
 			"COMBAT")
 	
+	# process weapon skill
+	if "skills" in attack.src.data && (
+		result == "HITS" || result == "CRITS"):
+		_progress_skill(attack.src, equipped_weapon.get_weapon_class_string())
+
 	# flag action complete
 	attack.done = true
 

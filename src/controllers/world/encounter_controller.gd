@@ -10,7 +10,7 @@ var init_encounter = {
 	"enemies": [],
 	"n_enemies": 0,
 }
-var encounter_chance: float = 0.50
+var encounter_chance: float = 0.55
 var encounter_count: int = 0
 
 var encountering = false
@@ -26,6 +26,9 @@ func _spawn_encounter(p: Player, tile: Tile) -> bool:
 	var current_encounter = self.init_encounter # initialize encounter data
 	# if tile has resources,
 	if tile.data.resources.food:
+		# don't spawn encounter for first 5 food tiles
+		# if p.data.encounters.done.size() == 0 && p.data.resources.food < 5:
+		# 	return self.encountering
 		# generate random number r
 		var r = randf_range(0, 1)
 		if r <= self.encounter_chance:

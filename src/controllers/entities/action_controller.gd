@@ -66,6 +66,7 @@ func get_action():
 						var target = enemies.pick_random()
 						# if target is valid, 
 						if is_instance_valid(target):
+							# TODO: add attack functional queue
 							# assign next available attack ability
 							var attacks = self.entity.data.actions.attacks
 							var next = attacks.pop_front()
@@ -89,6 +90,7 @@ func get_action():
 			var target = player
 			# if target is valid, 
 			if is_instance_valid(target):
+				# TODO: add attack functional queue
 				# assign next available attack ability
 				var attacks = self.entity.data.actions.attacks
 				var next = attacks.pop_front()

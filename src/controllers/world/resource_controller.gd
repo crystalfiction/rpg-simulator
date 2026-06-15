@@ -8,7 +8,7 @@ var resource_iterations: int
 var resources_optimized = null
 var resource_count = 0
 
-var food_factor = 0.22 # chance to generate food on a given tile
+var food_factor = 0.33 # chance to generate food on a given tile
 
 
 # Resource Generation
@@ -25,7 +25,7 @@ func _evaluate_resources(tile: Tile) -> Tile:
 			var food_conditions = true if (
 				(tile.data.terrain.density >= 0.44 && tile.data.terrain.density <= 0.66)
 				&& (tile.data.weather.rainfall >= 0.22 && tile.data.weather.rainfall <= 1)
-				&& (tile.data.weather.drainage >= 0.22 && tile.data.weather.drainage <= 0.88)
+				&& (tile.data.weather.drainage >= 0.33 && tile.data.weather.drainage <= 0.88)
 				&& (rand_f <= food_factor)
 			) else false
 			if food_conditions:
@@ -95,6 +95,7 @@ func init_controller() -> void:
 	var tile_map = _evaluate_terrain(self.terrain.data.tile_map)
 	# update world resource count if valid
 	self.terrain.data.resources.count = self.resource_count
+	self.terrain.data.resources.factor = self.food_factor
 	self.resource_count = 0
 	self.terrain.data.tile_map = tile_map
 	self.terrain.data.on_change.call()

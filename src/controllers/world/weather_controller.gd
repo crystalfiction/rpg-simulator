@@ -15,7 +15,7 @@ var rainfall_max = 1.00
 var drainage_min = 0.00
 var drainage_max = 1.00
 
-var erosion_factor = 0.011
+var erosion_factor = 0.01
 
 var weather_metrics: Dictionary
 
@@ -76,7 +76,7 @@ func _calculate_erosion(curr_terrain: Array) -> Dictionary:
 				((w.data.weather.water) *
 				(1 + w.data.weather.rainfall) *
 				(1 - w.data.weather.drainage) *
-				(1 - w.data.terrain.density)) * erosion_factor
+				(1 - w.data.terrain.density ** 2)) * erosion_factor
 			)
 			w.data.weather.erosion = erosion
 			# update metrics
@@ -149,7 +149,7 @@ func _optimize_weather(curr_terrain: Terrain) -> Terrain:
 	self.weather_metrics = new_metrics
 	
 	# run weather erosion cycle
-	var n_cycles = 3
+	var n_cycles = 1
 	var total_erosion = 0
 	var final: Array = curr_terrain.data.tile_map
 	for i in range(n_cycles):
@@ -158,15 +158,7 @@ func _optimize_weather(curr_terrain: Terrain) -> Terrain:
 		var results = _apply_erosion(final)
 		final = results[0]
 		total_erosion += results[1]
-		# log metrics if complete
-		var msg = (
-			"avg_rainfall: " + str(snapped(new_metrics.avg_rainfall, 0.001)) + " | " +
-			"avg_drainage: " + str(snapped(new_metrics.avg_drainage, 0.001)) + " | " +
-			"avg_water: " + str(snapped(new_metrics.avg_water, 0.001)) + " | " +
-			"avg_erosion: " + str(snapped(new_metrics.avg_erosion, 0.0001)) + " | " +
-			"erosion_cycles: " + str(snapped(self.erosion_cycle, 0.001))
-		)
-		FileLogger.log_message(self , msg)
+	
 	
 	# curr_terrain is optimized and valid
 	self.erosion_complete = true
@@ -175,6 +167,16 @@ func _optimize_weather(curr_terrain: Terrain) -> Terrain:
 	
 	self.weather_iterations += 1
 	self.weather_optimized = true
+
+	# log metrics if complete
+	var msg = (
+		"avg_rainfall: " + str(snapped(new_metrics.avg_rainfall, 0.001)) + " | " +
+		"avg_drainage: " + str(snapped(new_metrics.avg_drainage, 0.001)) + " | " +
+		"avg_water: " + str(snapped(new_metrics.avg_water, 0.001)) + " | " +
+		"avg_erosion: " + str(snapped(new_metrics.avg_erosion, 0.0001)) + " | " +
+		"erosion_cycles: " + str(snapped(self.erosion_cycle, 0.001))
+	)
+	FileLogger.log_message(self , msg)
 
 	tile_map = final
 	curr_terrain.data.tile_map = tile_map
@@ -214,7 +216,7 @@ func init_controller() -> void:
 				var drainage = ((1 - t.data.terrain.density) + (rand_r)) / 2 # invert density
 				drainage = clamp(drainage, drainage_min, drainage_max)
 				t.data.weather = {
-					"rainfall": rainfall,
+					"rainfall": self.rainfall,
 					"drainage": drainage,
 					"water": 0.0,
 					"erosion": 0.0
@@ -228,7 +230,7 @@ func init_controller() -> void:
 					biome.data.ranges.drainage[1]
 				)
 				t.data.weather = {
-					"rainfall": rainfall,
+					"rainfall": self.rainfall,
 					"drainage": drainage,
 					"water": t.data.weather.water,
 					"erosion": t.data.weather.erosion

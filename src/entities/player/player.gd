@@ -26,9 +26,10 @@ var player_data: Dictionary = {
 		],
 		"cooldown": [],
 	},
+	"skills": {},
 	"resources": {
 		"food": 0,
-		"surplus": 0,
+		"total": 0
 	},
 	"encounters": {
 		"active": false,

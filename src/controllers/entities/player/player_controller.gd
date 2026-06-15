@@ -35,13 +35,10 @@ func interact_with_tile(p: Player, current_tile: Tile):
 	self.world.data.terrain.data.resources.count -= 1
 	# give resources to player
 	p.data.resources.food += 1
+	p.data.resources.total += 1
 	
-	# if player health already max,
-	if p.data.stats.health == p.data.stats.max_health:
-		# add to food surplus
-		p.data.resources.surplus += 1
-	# if player health below max,
-	else:
+	# if player health not at max,
+	if p.data.stats.health < p.data.stats.max_health:
 		_check_resource_surplus(p)
 
 	# log resource acquisition
@@ -89,34 +86,37 @@ func move_towards_tile(p: Player, t: Tile) -> bool:
 ## checks whether player has surplus resources
 ## and evaluates rewards accordingly
 func _check_resource_surplus(p: Player):
+	# get # of times regen amt fits into missing health
+	var regen_amt = p.data.stats.max_health * (p.data.stats.regen_rate)
+	var n_regen = ceil((p.data.stats.max_health - p.data.stats.health) / regen_amt)
 	# check if food surplus,
-	if p.data.resources.surplus > 0 && (
-			p.data.stats.health < p.data.stats.max_health):
-		# increase health by regen_rate
-		var regen_amt = p.data.stats.max_health * (p.data.stats.regen_rate)
-		# get # of times regen amt fits into missing health
-		var n_regen = ceil((p.data.stats.max_health - p.data.stats.health) / regen_amt)
-		# if regen times is more than surplus allows,
-		# but greater than 0,
-		if n_regen > player.data.resources.surplus:
-			var difference = player.data.resources.surplus - n_regen
-			n_regen += difference
-		# apply regen times to amount
-		regen_amt *= n_regen
-		var new_health = clamp(
-			p.data.stats.health + regen_amt, 0, p.data.stats.max_health)
-		p.data.stats.health = new_health
-		# reduce resource surplus by 1 if > 0
-		p.data.resources.surplus = (
-			(p.data.resources.surplus - n_regen) if (p.data.resources.surplus > 0
-			) else (p.data.resources.surplus)
+	if p.data.resources.food > 0 && (
+			p.data.stats.health < p.data.stats.max_health
+	):
+		if p.data.resources.food > 0:
+			# if regen times is more than surplus allows,
+			if n_regen > player.data.resources.food:
+				# get the difference
+				var difference = player.data.resources.food - n_regen
+				n_regen += difference
+			# apply regen times to amount
+			regen_amt *= n_regen
+			var new_health = clamp(
+				p.data.stats.health + regen_amt, 0, p.data.stats.max_health)
+			p.data.stats.health = new_health
+			# reduce resource surplus by n_regen if surplus > 0
+			# else reduce food by n_regen
+			p.data.resources.food = (
+				(p.data.resources.food - n_regen) if (p.data.resources.food > 0
+				) else (p.data.resources.food)
 		)
+		
 
 ## process stat rewards considering the cycle's encounter
 func _process_rewards(encounter: Dictionary):
 	# reward player exp
 	var map_count = self.world.data.terrain.data.map_count
-	var enemy_exp = floori(encounter.n_enemies * (map_count / PI))
+	var enemy_exp = encounter.n_enemies * map_count
 	self.player.data.stats.exp += self.exp_step + enemy_exp
 
 	FileLogger.log_message(self ,
@@ -177,7 +177,7 @@ func _init_player_entity():
 	new_player.data.actions.controller = _init_action_controller(new_player)
 
 	# TODO: give player weapon
-	var new_weapon = SwordWeapon.new()
+	var new_weapon = UnarmedWeapon.new()
 	new_player.data.inventory.equipped.weapon = new_weapon
 
 	# update uid ref
@@ -204,6 +204,11 @@ func _ready() -> void:
 	# initialize the player entity as scene
 	_init_player_entity()
 	
+	# progress player skill before processing
+	EntityController.new()._progress_skill(
+		self.player,
+		self.player.data.inventory.equipped.weapon.get_weapon_class_string())
+	
 	FileLogger.log_message(self , "Player initialized.")
 
 
@@ -217,6 +222,12 @@ func _check_player(p: Player):
 		if !p.is_queued_for_deletion():
 			FileLogger.log_message(self ,
 				str(self.player.data.stats)
+			)
+			FileLogger.log_message(self ,
+				str(self.player.data.skills)
+			)
+			FileLogger.log_message(self ,
+				str(self.player.data.resources)
 			)
 			# queue for deletion
 			p.queue_free()
@@ -248,7 +259,7 @@ func _process_cycle(p: Player):
 		if time_controller.cycling:
 			# check player health,
 			_check_player(p)
-
+			
 			# get player action for cycle
 			p.data.actions.controller.get_action()
 

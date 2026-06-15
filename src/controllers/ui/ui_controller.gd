@@ -182,7 +182,7 @@ func _make_data_labels(obj: Variant, container: String):
 		0: ["class_v", "ranges"]
 	}
 	var player_filter = {
-		0: ["stats", "resources", "inventory"]
+		0: ["stats", "skills", "resources", "inventory"]
 	}
 	var enemy_filter = {
 		0: ["stats", "inventory"]
