@@ -24,13 +24,13 @@ Create a procedurally generated RPG simulation that embraces chaos and instabili
     - [ ] *skill system*: players accumulate skill points for specific skills by doing specific actions
         - [x] weapon skills accumulated in combat while using a particular weapon type
         - [ ] stat skills accumulated in combat i.e. defense on damage taken, resilience on crit taken, etc. 
-    - [ ] *inventory system*: players can manage their own inventory items
-        - [ ] equipping and unequipping equippable items
-        - [ ] deleting items
-        - [ ] reordering items
+    - [x] *inventory system*: players can manage their own inventory items
+        - [x] equipping and unequipping equippable items
+        - [x] deleting items
+        - [x] reordering items
     - [ ] *item system*: players have a chance to randomly find items including weapons, armor
         - [x] *weapons*: any class can equip any type of weapon; the only determinant is weapon skills
-        - [ ] *armor*: any class can equip any armor type, but each armor type has benefits and drawbacks, relying mainly on armor skill of that particular type
+        - [x] *armor*: any class can equip any armor type, but each armor type has benefits and drawbacks, relying mainly on armor skill of that particular type
         - [ ] all items are generated randomly, according to a pool of base-types and stat modifiers 
     - [ ] *party system*: player has a random chance to encounter neutral entities, within particular progress thresholds, that can be adopted into the player's party
         - [ ] progress thresholds are determined by player : enemy stat ratios
@@ -42,7 +42,7 @@ Create a procedurally generated RPG simulation that embraces chaos and instabili
     - [x] finish implementing basic erosion
 
 
-#### DevOps
+#### Tasks
 
 - [ ] 
 
@@ -98,3 +98,18 @@ Create a procedurally generated RPG simulation that embraces chaos and instabili
         - [x] start processing ONLY IF all data + parent entity data is validated
 
 </details>
+
+#### Copilot Sessions
+
+**Session: Fundamental Systems Implementation**
+
+Implemented core RPG systems and hardened architecture:
+
+- **Controller Architecture**: Fixed initialization order and reference assignment for WorldController, TimeController, and dependency controllers
+- **Time System**: Refactored to use delta-time, robust cycle timing, and configurable frame rates
+- **Combat & Abilities**: Added cycle-based action durations (BasicAttack: 1 cycle, HeavyAttack: 2 cycles), cooldown management, and attack queueing
+- **Inventory System**: Created InventoryManager for equip/unequip, add/remove, and reorder operations on Player and Enemy inventories
+- **Resource & Encounter**: Validated procedural resource generation and encounter spawning logic
+- **Logging**: Confirmed robust file logging with timestamps
+- **Procedural World**: Verified terrain generation with soil composition, erosion simulation, normalization, and biome detection
+- **Code Quality**: Fixed all compilation errors and standardized GDScript patterns
