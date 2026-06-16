@@ -10,31 +10,28 @@
 
 Create a procedurally generated RPG simulation that embraces chaos and instability, balanced by user input and natural in-game forces
 
-- [ ] *meta systems*:
-    - [ ] decide on and implement actual screen dimensions
-        - !! **this directly impacts performance**
-    - [ ] create a functional ui for dev
-        - [ ] data panels
-            - [x] world data
-            - [ ] party data
-                - [x] player data
-                - [ ] multiple player data
-                - [ ] party inventory
-            - [x] enemy data
-            - [x] time data
-
 - [ ] *player systems*
     - [ ] *class system*: allow player to choose a player class that forms a unique, distinct way of interacting with the world
-        - [ ] *subclass system*: once a particular stance threshold is reached, player can choose to specialize in an associated subclas
-            - [ ] *style system*: each base class has 3 "styles" that can be cycled through, allowing experience to be accumulated for that particular style
-                - [ ] styles represent strategy/role types: defensive, offensive, utility
-                - [ ] only one style can be active at a time, but players can switch styles when a new party member is acquired
+        - [ ] *ability system*: players/enemies utilize an ability-based combat system
+            - [x] neutral abilities: BasicAttack, HeavyAttack
+            - [ ] class-specific
+            - [x] abilities incur a cycle-based cooldown and are used in order of priority within the player's abilities table
+            - [ ] player can re-order ability priorites at any time
+        - [ ] *subclass system*: once a particular stance threshold is reached, player can choose to specialize in an associated subclass
+            - [ ] *stance system*: each base class has 3 "stances" that can be cycled through, allowing experience to be accumulated for that particular stance
+                - [ ] stances represent strategy/role types: defensive, offensive, utility
+                - [ ] only one stance can be active at a time, but players can switch stance when a new party member is acquired
     - [ ] *skill system*: players accumulate skill points for specific skills by doing specific actions
-        - [ ] weapon skills accumulated in combat while using a particular weapon type
+        - [x] weapon skills accumulated in combat while using a particular weapon type
         - [ ] stat skills accumulated in combat i.e. defense on damage taken, resilience on crit taken, etc. 
+    - [ ] *inventory system*: players can manage their own inventory items
+        - [ ] equipping and unequipping equippable items
+        - [ ] deleting items
+        - [ ] reordering items
     - [ ] *item system*: players have a chance to randomly find items including weapons, armor
-        - [ ] *weapons*: any class can equip any type of weapon; the only determinant is weapon skills
+        - [x] *weapons*: any class can equip any type of weapon; the only determinant is weapon skills
         - [ ] *armor*: any class can equip any armor type, but each armor type has benefits and drawbacks, relying mainly on armor skill of that particular type
+        - [ ] all items are generated randomly, according to a pool of base-types and stat modifiers 
     - [ ] *party system*: player has a random chance to encounter neutral entities, within particular progress thresholds, that can be adopted into the player's party
         - [ ] progress thresholds are determined by player : enemy stat ratios
             - thresholds act primarily as a way to smooth out world randomness by giving agency to the player at specific progress levels
