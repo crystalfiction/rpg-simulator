@@ -11,9 +11,4 @@ var staff_data = {
 func _init() -> void:
 	self.Class = WeaponClass.STAFF
 	super ()
-	for k in self.staff_data:
-		if k is Dictionary:
-			for k_n in self.staff_data[k]:
-				self.data[k][k_n] = staff_data[k][k_n]
-		else:
-			self.data[k] = staff_data[k]
+	_traverse_data(self.data, self.staff_data)

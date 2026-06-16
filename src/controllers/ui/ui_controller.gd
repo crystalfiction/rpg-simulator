@@ -177,16 +177,16 @@ func _make_data_labels(obj: Variant, container: String):
 		0: ["uid"]
 	}
 	var terrain_filter = {
-		0: ["map_count", "metrics", "weather", "resources"],
+		0: ["map_count", "map_complete", "metrics", "weather", "resources"],
 	}
 	var biome_filter = {
 		0: ["class_v", "ranges"]
 	}
 	var player_filter = {
-		0: ["stats", "skills", "actions", "resources", "inventory"]
+		0: ["stats", "skills", "actions", "resources", "encounters", "inventory"]
 	}
 	var enemy_filter = {
-		0: ["stats", "inventory"]
+		0: ["stats", "skills", "actions"]
 	}
 	for k in obj.data:
 		if (

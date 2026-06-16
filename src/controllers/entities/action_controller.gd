@@ -15,10 +15,9 @@ func _get_attack() -> AttackAction:
 		var abilities = self.entity.data.actions.abilities
 		for a in abilities:
 			var new_a = a.new()
-			var exists = _check_cooldowns(new_a, self.on_cooldown)
-			if not exists:
+			# only select ability if same-type not on cooldown
+			if not _check_cooldowns(new_a, self.on_cooldown):
 				new_action = new_a
-				# return first available
 				return new_action
 
 	# if no abilities array,
@@ -31,39 +30,39 @@ func _get_attack() -> AttackAction:
 ## checks whether or not the passed action exists in any context
 ## (instance, type) in cooldowns array
 func _check_cooldowns(action: AttackAction, cooldowns: Array) -> bool:
-	var type = action.get_attack_type()
-	var exists = cooldowns.filter(
-		func(a): return a.get_attack_type() == type
-	).size() > 0 && action not in cooldowns
-	return exists
+	# return true if any cooldown entry matches the action type
+	var atype = action.get_attack_type()
+	for c in cooldowns:
+		if c.get_attack_type() == atype:
+			return true
+	return false
 
 ## puts an action on cooldown by adding to on_cooldown array
 func _add_cooldown(action: AttackAction, cooldowns: Array):
 	# going on cooldown,
 	if "cooldown" in action.data:
 		var exists = _check_cooldowns(action, cooldowns)
-		if (
-			action.data.cooldown > 0 &&
-			not exists
-		):
-			# cooldown exists,
-			# add to on_cooldown
+		if action.data.cooldown > 0 and not exists:
+			# set remaining cooldown counter on the action instance
+			action.data.cooldown_remaining = int(action.data.cooldown)
 			cooldowns.append(action)
 
 ## handles on_cooldown array
 func _handle_cooldowns(cooldowns: Array) -> Array:
 	# on cooldown,
 	if cooldowns.size() > 0:
-		for c in cooldowns:
-			# reduce each cycle until == 0
-			if c.data.cooldown > 0:
-				c.data.cooldown -= 1
-			
-			# if cooldown 0,
-			elif c.data.cooldown == 0:
-				# remove from on_cooldown
-				var idx = cooldowns.find(c)
-				cooldowns.pop_at(idx)
+		# iterate backwards so removals are safe
+		for i in range(cooldowns.size() - 1, -1, -1):
+			var c = cooldowns[i]
+			if "cooldown_remaining" in c.data:
+				c.data.cooldown_remaining = int(c.data.cooldown_remaining) - 1
+				if c.data.cooldown_remaining <= 0:
+					cooldowns.remove_at(i)
+			# fallback: legacy "cooldown" field
+			elif "cooldown" in c.data:
+				c.data.cooldown = int(c.data.cooldown) - 1
+				if c.data.cooldown <= 0:
+					cooldowns.remove_at(i)
 			
 	return cooldowns
 
@@ -73,6 +72,11 @@ func _handle_cooldowns(cooldowns: Array) -> Array:
 ## gets a new action for parent entity,
 ## to be evaluated over one or more cycles by evaluate_action
 func get_action():
+	# action is null if world complete
+	if self.world.data.terrain.data.map_complete:
+		self.entity.actions.action = null
+		return
+
 	# handle action cooldowns every cycle
 	self.on_cooldown = _handle_cooldowns(self.on_cooldown)
 

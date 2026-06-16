@@ -14,5 +14,4 @@ var item_data = {
 ## initializes the entity data
 func _init() -> void:
 	self.Type = EntityType.ITEM
-	for k in self.item_data:
-		self.data[k] = item_data[k]
+	_traverse_data(self.data, self.item_data)

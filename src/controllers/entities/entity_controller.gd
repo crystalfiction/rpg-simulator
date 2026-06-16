@@ -54,8 +54,10 @@ func _calculate_exp(e: Entity) -> Dictionary:
 	
 	# if enemy,
 	if e is Enemy:
+		var enemy_controller = self.world.data.controller.enemy_controller
 		var map_level = self.world.data.terrain.data.map_count
-		stats.level = map_level
+		var enemy_scaling = enemy_controller.enemy_scaling
+		stats.level = floori(map_level * enemy_scaling)
 
 	# return stats dict
 	return stats
@@ -65,19 +67,24 @@ func _calculate_exp(e: Entity) -> Dictionary:
 func _calculate_attributes(e: Entity) -> Dictionary:
 	var stats = e.data.stats
 	if e is Player:
-		# BASE
-		# base stats
+		# BASE STATS
 		stats.stamina += 1
 		stats.strength += 1
 		stats.perception += 1
-		
-		# if e.Class == Player.PlayerClass.WANDERER:
-		# 	stats.stamina += 1
-		# 	stats.strength += 0
-		# 	stats.perception += 0
 
 		# stamina-based
-		stats.regen_rate = clamp(stats.regen_rate + (stats.stamina * 0.0001), 0, 1)
+		var regen_step = clamp(stats.stamina * 0.0001, 0, 1)
+		stats.regen_rate += regen_step
+		
+		# CLASS BONUSES
+		match e.Class:
+			Player.PlayerClass.WANDERER:
+				stats.stamina += 0
+				stats.strength += 0
+				stats.perception += 0
+				# double regen_rate scaling
+				# stats.regen_rate += regen_step
+				
 	
 	if e is Enemy:
 		# base stats
@@ -86,10 +93,10 @@ func _calculate_attributes(e: Entity) -> Dictionary:
 		stats.perception += stats.level
 
 	# stamina-based
-	stats.max_health = stats.base_health + (stats.stamina * 20)
+	stats.max_health = stats.base_health + (stats.stamina * 10)
 	stats.health = stats.max_health
 	# strength-based
-	stats.attack = stats.base_attack + (stats.strength * 2)
+	stats.attack = stats.base_attack + (stats.strength * 1.5)
 	# agility-based
 	stats.crit_chance += (stats.perception * 0.0001)
 	stats.dodge_chance += (stats.perception * 0.0001)
@@ -109,11 +116,13 @@ func _calculate_stats(e: Entity) -> Dictionary:
 
 ## evaluates combat between a source and target entity
 func evaluate_combat(attack: AttackAction):
+	var src_level = attack.data.src.data.stats.level
 	var src_attack = attack.data.src.data.stats.attack
 	var src_hit = attack.data.src.data.stats.hit_chance
 	var src_crit = attack.data.src.data.stats.crit_chance
 	var src_crit_bonus = attack.data.src.data.stats.crit_bonus
 	var target_health = attack.data.target.data.stats.health
+	var target_armor = attack.data.target.data.stats.armor
 	var target_dodge = attack.data.target.data.stats.dodge_chance
 
 	# WEAPONS
@@ -131,17 +140,31 @@ func evaluate_combat(attack: AttackAction):
 			# calculate skill damage bonus
 			var weapon_string = equipped_weapon.get_weapon_class_string()
 			var skill_level = attack.data.src.data.skills[weapon_string].level
-			var skill_bonus = snapped(skill_level * 1.5 / ((weapon_dmg / 2) + 1), 0.01)
-			attack.data.src.data.skills[weapon_string].bonus = skill_bonus
+			var skill_bonus = snapped((skill_level / 2) / ((weapon_dmg / 2) + 1), 0.01)
+			# update attack src weapon skill bonus data
+			attack.data.src.data.skills[weapon_string].bonus = skill_bonus + weapon_dmg
 			weapon_dmg += skill_bonus
 
 		# add weapon damage to attack damage
 		src_attack += weapon_dmg
 	
+	# ABILITIES
 	# factor in ability damage multiplier
 	var ability_multi = attack.data.multi
 	src_attack = src_attack * ability_multi
 
+	# ARMOR
+	# reduce attack by target armor reduction
+	var base_health = attack.data.target.data.stats.base_health
+	var armor_factor = target_armor + (base_health * 10) + src_level
+	var armor_reduc = snapped(
+		(float(target_armor) / float(armor_factor)),
+		0.01
+	)
+	attack.data.target.data.stats.armor_reduc = armor_reduc
+	src_attack -= (src_attack * armor_reduc)
+
+	# EVALUATE
 	# evaluate result
 	var r = randf_range(0, 1)
 	# if random number r is below hit threshold
@@ -176,7 +199,6 @@ func evaluate_combat(attack: AttackAction):
 			var p = attack.data.src
 			if src_attack >= p.data.stats.largest_hit:
 				p.data.stats.largest_hit = snapped(src_attack, 0.01)
-	
 	if attack.data.target is Player:
 		var p = attack.data.target
 		if src_attack >= p.data.stats.largest_taken:

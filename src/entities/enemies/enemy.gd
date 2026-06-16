@@ -16,10 +16,12 @@ var init_data: Dictionary = {
 		"crit_chance": 0.11,
 		"crit_bonus": 1.50,
 		"dodge_chance": 0.05,
+		"armor": 0,
 		"stamina": 0,
 		"strength": 0,
 		"perception": 0,
 	},
+	"skills": {},
 	"actions": {
 		"controller": "",
 		"action": null,
@@ -42,6 +44,7 @@ var init_data: Dictionary = {
 ## initializes the entity scene
 func init_scene() -> Sprite2D:
 	var new_scene = self.init_enemy.instantiate()
+	new_scene.data = self.data
 	return new_scene
 
 ## initializes the entity

@@ -18,6 +18,8 @@ var stats = {
 	"crit_chance": 0.11,
 	"crit_bonus": 1.50,
 	"dodge_chance": 0.05,
+	"armor": 0,
+	"armor_reduc": 0.0,
 	"stamina": 0,
 	"strength": 0,
 	"perception": 0,

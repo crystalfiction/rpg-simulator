@@ -47,7 +47,10 @@ func interact_with_tile(p: Player, current_tile: Tile):
 	p.data.actions.action.data.done = true
 
 	# update world ref 
-	self.world.data.terrain.data.resources.count -= 1
+	if self.world.data.terrain.data.resources.count == 0:
+		self.world.data.terrain.data.map_complete = true
+	else:
+		self.world.data.terrain.data.resources.count -= 1
 
 ## moves the passed player to the passed tile and updates player grid_idx
 func move_to_tile(p: Player, t: Tile):
@@ -90,8 +93,8 @@ func move_towards_tile(p: Player, t: Tile) -> bool:
 ## and evaluates rewards accordingly
 func _check_resource_surplus(p: Player):
 	# get # of times regen amt fits into missing health
-	var regen_amt = p.data.stats.max_health * (p.data.stats.regen_rate)
-	var n_regen = ceil((p.data.stats.max_health - p.data.stats.health) / regen_amt)
+	var regen_amt: float = p.data.stats.max_health * float(p.data.stats.regen_rate)
+	var n_regen = snapped((p.data.stats.max_health - p.data.stats.health) / regen_amt, 0.01)
 	# check if food surplus,
 	if p.data.resources.food > 0 && (
 			p.data.stats.health < p.data.stats.max_health
@@ -123,7 +126,7 @@ func _process_rewards(encounter: Dictionary):
 	self.player.data.stats.exp += self.exp_step + enemy_exp
 
 	FileLogger.log_message(self ,
-		str(self.exp_step * (encounter.n_enemies)) + " exp rewarded."
+		str(self.exp_step + enemy_exp) + " exp rewarded."
 	)
 	
 	# check if level_up
@@ -178,7 +181,7 @@ func _init_player_entity():
 	new_player.data.controller = self
 	
 	# class
-	var p_class = Player.PlayerClass.WANDERER
+	var p_class = Player.PlayerClass.BASE
 	new_player.Class = p_class
 	# spin up class script to get init class stats and abilities
 	var class_obj = new_player_script.PlayerClasses[p_class].new()
@@ -191,14 +194,14 @@ func _init_player_entity():
 	# actions
 	new_player.data.actions.controller = _init_action_controller(new_player)
 
-	# start player unarmed
+	# weapon
+	# var n_weapons = Weapon.WeaponClass.size() - 1 # account for unarmed
+	# var i = randi_range(0, n_weapons)
+	# var new_weapon = Weapon.WeaponClasses[i].new()
 	var new_weapon = UnarmedWeapon.new()
 	new_player.data.inventory.equipped.weapon = new_weapon
-	# TODO: start player armored according to class
-	# new_player.data.inventory.equipped.head = 
-	# new_player.data.inventory.equipped.chest = 
-	# new_player.data.inventory.equipped.legs = 
-	# new_player.data.inventory.equipped.feet = 
+	_progress_skill(new_player, new_weapon.get_weapon_class_string())
+	new_player.data.inventory.equipped.weapon = new_weapon
 
 	# update uid ref
 	self.world.data.controller.uid_ref += 1
@@ -224,11 +227,6 @@ func _ready() -> void:
 	# initialize the player entity as scene
 	_init_player_entity()
 	
-	# progress player skill before processing
-	EntityController.new()._progress_skill(
-		self.player,
-		self.player.data.inventory.equipped.weapon.get_weapon_class_string())
-	
 	FileLogger.log_message(self , "Player initialized.")
 
 
@@ -241,13 +239,7 @@ func _check_player(p: Player):
 		# if enemy isn't already queued for deletion,
 		if !p.is_queued_for_deletion():
 			FileLogger.log_message(self ,
-				str(self.player.data.stats)
-			)
-			FileLogger.log_message(self ,
-				str(self.player.data.skills)
-			)
-			FileLogger.log_message(self ,
-				str(self.player.data.resources)
+				str(self.player.data)
 			)
 			# queue for deletion
 			p.queue_free()
@@ -257,14 +249,14 @@ func check_encounter(p: Player) -> bool:
 	# get encounter controller,
 	var world_controller = self.world.data.controller
 	var encounter_controller = world_controller.terrain_controller.encounter_controller
-	# if encounter controller is not processing an encounter,
+	# Aif encounter controller is not processing an encounter,
 	var result = false
 	if !encounter_controller.encountering:
 		# get player rewards with active encounter
 		var current_encounter = encounter_controller.encounter
 		_process_rewards(current_encounter)
 		# move active encounter to done and set active null
-		p.data.encounters.done.append(current_encounter)
+		p.data.encounters.done += 1
 		p.data.encounters.active = false
 		result = true
 	

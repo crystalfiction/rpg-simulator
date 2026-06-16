@@ -35,7 +35,7 @@ var player_data: Dictionary = {
 	},
 	"encounters": {
 		"active": false,
-		"done": []
+		"done": 0
 	},
 	"inventory": {
 		"equipped": {

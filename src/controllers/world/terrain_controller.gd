@@ -234,12 +234,12 @@ func _generate_terrain(curr_terrain: Terrain) -> void:
 	# log update
 	FileLogger.log_message(self , "Map " + str(new_terrain.data.map_count) + " generated.")
 	
-	# unflag map_complete
-	new_terrain.data.map_complete = false
 
 	# update world terrain to new terrain
 	self.world.data.terrain = new_terrain
 
+	# unflag map_complete
+	self.world.data.terrain.data.map_complete = false
 
 # Terrain Initialization
 
@@ -453,7 +453,10 @@ func _process_cycle(curr_world: Sprite2D):
 		# if no resources left in terrain,
 		var current_terrain = curr_world.data.terrain
 		var resources = self.Utils.get_resources(current_terrain.data.tile_map)
-		var is_resources = !resources.is_empty()
+		var is_resources = (
+			not resources.is_empty() ||
+			not curr_world.data.terrain.data.resources.count <= 0
+		)
 		if !is_resources:
 			# flag terrain map complete
 			curr_world.data.terrain.data.map_complete = true

@@ -25,7 +25,10 @@ func _init_ui() -> Control:
 	var new_ui = ui_scene.instantiate()
 	new_ui.name = "UiController"
 	new_ui.world = self.world
-	self.FileLogger.ui_controller = self.ui_controller
+	# assign to controller reference before wiring logger
+	self.ui_controller = new_ui
+	if self.FileLogger:
+		self.FileLogger.ui_controller = self.ui_controller
 	add_child(new_ui)
 	return new_ui
 
@@ -35,6 +38,8 @@ func _init_enemy_controller() -> Controller:
 	new_enemy_controller.name = "EnemyController"
 	new_enemy_controller.world = self.world
 	new_enemy_controller.parent = self
+	# assign controller reference early
+	self.enemy_controller = new_enemy_controller
 	add_child(new_enemy_controller)
 	return new_enemy_controller
 
@@ -44,6 +49,8 @@ func _init_player_controller() -> Controller:
 	new_player_controller.name = "PlayerController"
 	new_player_controller.world = self.world
 	new_player_controller.parent = self
+	# assign controller reference early
+	self.player_controller = new_player_controller
 	add_child(new_player_controller)
 	return new_player_controller
 
@@ -53,6 +60,8 @@ func _init_time_controller() -> Controller:
 	new_time_controller.name = "TimeController"
 	new_time_controller.world = self.world
 	new_time_controller.parent = self
+	# assign controller reference early
+	self.time_controller = new_time_controller
 	add_child(new_time_controller)
 	return new_time_controller
 
@@ -62,6 +71,8 @@ func _init_terrain_controller() -> Controller:
 	new_terrain_controller.name = "TerrainController"
 	new_terrain_controller.world = self.world
 	new_terrain_controller.parent = self
+	# assign controller reference early
+	self.terrain_controller = new_terrain_controller
 	add_child(new_terrain_controller)
 	return new_terrain_controller
 

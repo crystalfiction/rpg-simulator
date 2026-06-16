@@ -1,6 +1,7 @@
 extends EntityController
 
 # components
+var enemy_scaling: float = 1
 var enemies: Array = []
 
 # Enemy Initialization
@@ -14,7 +15,11 @@ func spawn_enemies(n: int = 1) -> Array:
 		var new_weapon = UnarmedWeapon.new()
 		new_enemy.data.inventory.equipped.weapon = new_weapon
 		new_enemies.append(new_enemy)
-		
+		# initialize weapon skill
+		EntityController.new()._progress_skill(
+			new_enemy,
+			new_enemy.data.inventory.equipped.weapon.get_weapon_class_string())
+			
 	self.enemies = new_enemies
 	return new_enemies
 

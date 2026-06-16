@@ -213,8 +213,8 @@ func init_controller() -> void:
 			# initialize weather data
 			if biome == null:
 				var rand_r = randf_range(drainage_min, drainage_max)
-				var drainage = ((1 - t.data.terrain.density) + (rand_r)) / 2 # invert density
-				drainage = clamp(drainage, drainage_min, drainage_max)
+				var drainage = rand_r
+				# drainage = clamp(drainage, drainage_min, drainage_max)
 				t.data.weather = {
 					"rainfall": self.rainfall,
 					"drainage": drainage,

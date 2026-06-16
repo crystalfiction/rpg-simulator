@@ -8,13 +8,14 @@ var encounter_controller: Controller
 # components
 var frames: float = 0.0
 var time_scale: float = 60.0
-var frame_rate: int = 5
 var frame_rates: Array = [
 	15, # default
 	8,
 	5,
 	1
 ]
+# default to middle index if available
+var frame_rate: int = frame_rates[2] if frame_rates.size() > 2 else frame_rates[0]
 
 var cycling: bool = false
 var cycles: int = 0
@@ -92,28 +93,32 @@ func _check_cycle_conditions() -> bool:
 	return true if conditions else false
 
 ## process time-level data for cycle
-func _process_cycle():
+func _process_cycle(delta: float):
 	# only process cycle if tree !paused
 	var cycle_conditions = _check_cycle_conditions()
-	if !get_tree().paused && cycle_conditions:
-		# update frames
-		frames += time_scale
-		# if frame interval,
-		if int(self.frames) % int(self.frame_rate * time_scale) == 0:
-			# update cycle count
-			self.cycles += 1
-			# flag time as cycling
-			self.cycling = true
-			# process time stats
-			_update_time_stats(self.cycles)
-			FileLogger.log_message(self , "Starting cycle " + str(self.cycles))
+	if get_tree().paused or not cycle_conditions:
+		self.cycling = false
+		return
 
-		# if not frame interval,
-		else:
-			# not cycling
-			self.cycling = false
+	# accumulate frames using delta to be framerate-independent
+	frames += delta * time_scale
+
+	var interval = float(self.frame_rate)
+	# if we've reached or passed the interval, consume interval and advance cycle
+	if frames >= interval:
+		# consume the interval (allow leftover for next interval)
+		frames -= interval
+		self.cycles += 1
+		self.cycling = true
+		_update_time_stats(self.cycles)
+		if self.FileLogger:
+			FileLogger.log_message(self , "Starting cycle " + str(self.cycles))
+	else:
+		self.cycling = false
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
-	# process cycle
-	_process_cycle()
+	# keep data.frame_rate up-to-date
+	self.data["frame_rate"] = self.frame_rate
+	# process cycle with delta
+	_process_cycle(delta)

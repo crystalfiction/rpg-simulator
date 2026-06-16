@@ -8,6 +8,12 @@ enum WeaponClass {
 	BOW,
 	STAFF,
 }
+static var WeaponClasses = [
+	UnarmedWeapon,
+	SwordWeapon,
+	BowWeapon,
+	StaffWeapon
+]
 
 var weapon_data = {
 	"stats": {
@@ -23,7 +29,6 @@ func get_weapon_class_string() -> String:
 
 ## initializes the entity data
 func _init() -> void:
-	self.Slot = EquipmentSlot.WEAPON
+	self.EquipType = EquipmentType.WEAPON
 	super ()
-	for k in self.weapon_data:
-		self.data[k] = weapon_data[k]
+	_traverse_data(self.data, self.weapon_data)

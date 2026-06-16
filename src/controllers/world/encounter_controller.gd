@@ -10,7 +10,7 @@ var init_encounter = {
 	"enemies": [],
 	"n_enemies": 0,
 }
-var encounter_chance: float = 0.55
+var encounter_chance: float = 0.50
 var encounter_count: int = 0
 
 var encountering = false
