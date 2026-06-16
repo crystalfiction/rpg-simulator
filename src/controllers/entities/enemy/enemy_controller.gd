@@ -1,5 +1,8 @@
 extends EntityController
 
+# scripts
+var inventory_manager_script = preload("res://src/controllers/entities/player/inventory_manager.gd")
+
 # components
 var enemy_scaling: float = 1
 var enemies: Array = []
@@ -44,6 +47,9 @@ func _init_enemy_entity():
 	new_enemy.data.controller = self
 	# actions
 	new_enemy.data.actions.controller = _init_action_controller(new_enemy)
+	# inventory
+	var new_inventory_manager = inventory_manager_script.new(new_enemy)
+	new_enemy.data.inventory.manager = new_inventory_manager
 
 	add_child(new_enemy)
 	
@@ -82,11 +88,14 @@ func _process_cycle(enemy_array: Array):
 		if time_controller.cycling && self.world:
 			# check enemies for defeat conditions
 			_check_enemies(enemy_array)
-			# get action for each enemy
+			# process each enemy's action
 			for e in enemies:
+				if not is_instance_valid(e):
+					continue
+				# process their action immediately
 				e.data.actions.controller.get_action()
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	# process enemy cycle
 	_process_cycle(self.enemies)

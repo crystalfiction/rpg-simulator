@@ -8,6 +8,18 @@ var on_cooldown: Array = []
 # Cooldowns
 
 ## gets the next available attack in entity abilities queue
+func _cooldown_summary() -> String:
+	var entries: Array = []
+	for c in self.on_cooldown:
+		var remaining = c.data.cooldown_remaining if "cooldown_remaining" in c.data else c.data.cooldown
+		entries.append(c.get_attack_type_string() + "(" + str(remaining) + ")")
+	var summary = ""
+	for i in range(entries.size()):
+		summary += entries[i]
+		if i < entries.size() - 1:
+			summary += ", "
+	return summary
+
 func _get_attack() -> AttackAction:
 	var new_action = null
 	# if abilities array,
@@ -20,6 +32,11 @@ func _get_attack() -> AttackAction:
 				new_action = new_a
 				return new_action
 
+		# if we reached here no ability was selectable (all on cooldown)
+		# fallback to a BasicAttack so entity still has an action
+		new_action = BasicAttack.new()
+		return new_action
+
 	# if no abilities array,
 	else:
 		# assign basic attack
@@ -30,6 +47,9 @@ func _get_attack() -> AttackAction:
 ## checks whether or not the passed action exists in any context
 ## (instance, type) in cooldowns array
 func _check_cooldowns(action: AttackAction, cooldowns: Array) -> bool:
+	# Basic attacks are always available; never considered on cooldown
+	if action.get_attack_type() == AttackAction.AttackType.BASIC:
+		return false
 	# return true if any cooldown entry matches the action type
 	var atype = action.get_attack_type()
 	for c in cooldowns:
@@ -39,12 +59,15 @@ func _check_cooldowns(action: AttackAction, cooldowns: Array) -> bool:
 
 ## puts an action on cooldown by adding to on_cooldown array
 func _add_cooldown(action: AttackAction, cooldowns: Array):
+	# Basic attacks should never be put on cooldown
+	if action.get_attack_type() == AttackAction.AttackType.BASIC:
+		return
 	# going on cooldown,
 	if "cooldown" in action.data:
 		var exists = _check_cooldowns(action, cooldowns)
 		if action.data.cooldown > 0 and not exists:
-			# set remaining cooldown counter on the action instance
-			action.data.cooldown_remaining = int(action.data.cooldown)
+			# cooldown should block the next N cycles after this action completes
+			action.data.cooldown_remaining = int(action.data.cooldown) + 1
 			cooldowns.append(action)
 
 ## handles on_cooldown array
@@ -63,22 +86,22 @@ func _handle_cooldowns(cooldowns: Array) -> Array:
 				c.data.cooldown = int(c.data.cooldown) - 1
 				if c.data.cooldown <= 0:
 					cooldowns.remove_at(i)
-			
 	return cooldowns
 
-
-# Action Processing
-
-## gets a new action for parent entity,
-## to be evaluated over one or more cycles by evaluate_action
 func get_action():
 	# action is null if world complete
 	if self.world.data.terrain.data.map_complete:
-		self.entity.actions.action = null
+		self.entity.data.actions.action = null
 		return
 
+	# debug: trace action cycle entry
 	# handle action cooldowns every cycle
 	self.on_cooldown = _handle_cooldowns(self.on_cooldown)
+
+	# if there's already an active action, evaluate it and don't replace
+	if "actions" in self.entity.data and self.entity.data.actions.action != null:
+		_evaluate_action()
+		return
 
 	# if Player entity,
 	if self.entity is Player:
@@ -116,34 +139,34 @@ func get_action():
 					new_action.data.target = n_resource
 					self.entity.data.actions.action = new_action
 			
-			# if resources exist and player in encounter,
-			elif resources_exist && self.entity.data.encounters.active:
-					# check if encounter is complete
-					var done = self.entity.data.controller.check_encounter(self.entity)
-					# if encounter done,
-					if done:
-						## INTERACT
-						var target_type = InteractAction.InteractTarget.RESOURCE
-						var new_action = InteractAction.new(target_type)
+			# if player in encounter, regardless of remaining resource count
+			elif self.entity.data.encounters.active:
+				# check if encounter is complete
+				var done = self.entity.data.controller.check_encounter(self.entity)
+				# if encounter done,
+				if done:
+					## INTERACT
+					var target_type = InteractAction.InteractTarget.RESOURCE
+					var new_action = InteractAction.new(target_type)
+					new_action.data.src = self.entity
+					self.entity.data.actions.action = new_action
+				
+				# if still encountering,
+				else:
+					## ATTACK
+					# evaluate combat
+					var encounter_controller = self.world.data.controller.terrain_controller.encounter_controller
+					var active_encounter = encounter_controller.encounter
+					var enemies = active_encounter.enemies.filter(func(e): return is_instance_valid(e) && e != null)
+					## TODO: if multiple enemies, choose and maintain target instead of random
+					var target = enemies.pick_random()
+					# if target is valid, 
+					if is_instance_valid(target):
+						# TODO: add functional attack queue
+						var new_action = _get_attack()
 						new_action.data.src = self.entity
+						new_action.data.target = target
 						self.entity.data.actions.action = new_action
-					
-					# if encounter not done,
-					else:
-						## ATTACK
-						# evaluate combat
-						var encounter_controller = self.world.data.controller.terrain_controller.encounter_controller
-						var active_encounter = encounter_controller.encounter
-						var enemies = active_encounter.enemies.filter(func(e): return is_instance_valid(e) && e != null)
-						## TODO: if multiple enemies, choose and maintain target instead of random
-						var target = enemies.pick_random()
-						# if target is valid, 
-						if is_instance_valid(target):
-							# TODO: add functional attack queue
-							var new_action = _get_attack()
-							new_action.data.src = self.entity
-							new_action.data.target = target
-							self.entity.data.actions.action = new_action
 	
 	# if enemy entity,
 	elif self.entity is Enemy:
@@ -163,8 +186,6 @@ func get_action():
 				new_action.data.src = self.entity
 				new_action.data.target = target
 				self.entity.data.actions.action = new_action
-		
-		# if encounter not active,
 		else:
 			## !! forcing enemy to avoid attacking until the action
 			## !! cycle AFTER they have spawned ensures enemy/target
@@ -179,10 +200,12 @@ func get_action():
 func _evaluate_action():
 	# get current action
 	var current_action = self.entity.data.actions.action
-	# don't process action if null
-	# !! this means the only indication of a failed action
-	# !! this should only happen if no valid action exists this cycle
+	# if an action is null, no action to be evaluated
 	if current_action == null:
+		return
+	# if an attack has no valid target, clear it so a new one can be chosen
+	if current_action.get_action_type() == Action.ActionType.ATTACK and not is_instance_valid(current_action.data.target):
+		current_action.data.done = true
 		return
 	
 	# match Action.Type
@@ -220,18 +243,34 @@ func _evaluate_action():
 		Action.ActionType.ATTACK:
 			# do attack action to action.data.target
 			if is_instance_valid(current_action.data.target):
-				self.entity.data.controller.evaluate_combat(
-					current_action)
-	
+				# Basic attacks should resolve immediately and never occupy multiple cycles
+				if current_action.get_attack_type() == AttackAction.AttackType.BASIC:
+					self.entity.data.controller.evaluate_combat(current_action)
+				else:
+					# determine duration (require explicit duration)
+					var dur = null
+					if "duration" in current_action.data:
+						dur = ceil(current_action.data.duration)
+					if dur != null:
+						if "duration_remaining" not in current_action.data:
+							current_action.data.duration_remaining = int(dur)
+						current_action.data.duration_remaining = int(current_action.data.duration_remaining) - 1
+						if current_action.data.duration_remaining <= 0:
+							self.entity.data.controller.evaluate_combat(current_action)
+
 	# if current action done,
 	if current_action.data.done:
+		# record last action performed for UI visibility (helps 1-cycle actions)
+		if "last_action" in self.entity.data.actions:
+			# store readable script name
+			self.entity.data.actions.last_action = current_action.get_script().get_global_name()
 		if current_action is AttackAction:
-			# TODO: process cooldown
 			_add_cooldown(current_action, self.on_cooldown)
 
+		# clear action so next cycle can select a new one
+		self.entity.data.actions.action = null
 
 # Action Initialization
-
 ## called on script initialization
 func _init(new_entity: Entity) -> void:
 	# define controller entity on initialization

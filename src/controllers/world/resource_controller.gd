@@ -8,7 +8,7 @@ var resource_iterations: int
 var resources_optimized = null
 var resource_count = 0
 
-var food_factor = 0.33 # chance to generate food on a given tile
+var food_factor = 0.22 # chance to generate food on a given tile
 
 
 # Resource Generation
@@ -113,5 +113,5 @@ func _ready() -> void:
 # Resource Processing
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	pass

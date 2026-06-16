@@ -469,6 +469,6 @@ func _process_cycle(curr_world: Sprite2D):
 			_generate_terrain(curr_terrain)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	# process terrain cycle
 	_process_cycle(self.world)

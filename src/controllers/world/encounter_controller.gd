@@ -26,21 +26,19 @@ func _spawn_encounter(p: Player, tile: Tile) -> bool:
 	var current_encounter = self.init_encounter # initialize encounter data
 	# if tile has resources,
 	if tile.data.resources.food:
-		# don't spawn encounter for first 5 food tiles
-		# if p.data.encounters.done.size() == 0 && p.data.resources.food < 5:
-		# 	return self.encountering
 		# generate random number r
 		var r = randf_range(0, 1)
 		if r <= self.encounter_chance:
 			# encounter spawned,
 			# spawn enemies,
-			var map_count = self.terrain.data.map_count
-			# var n_enemies = ceil(map_count / 2.5)
+			var _map_count = self.terrain.data.map_count
+			# var n_enemies = ceil(_map_count / 2.5)
 			new_enemies = enemy_controller.spawn_enemies(1) # only spawn 1 enemy
 			# prepare new encounter for processing
 			current_encounter.player = p
 			current_encounter.enemies = new_enemies
 			current_encounter.n_enemies = new_enemies.size()
+		
 			self.encounter = current_encounter
 			self.encountering = true
 			var msg = (
@@ -123,6 +121,6 @@ func _process_cycle():
 			if self.encountering:
 				_process_encounter(self.encounter)
 
-## Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
+## Called every frame. '_delta' is the elapsed time since the previous frame.
+func _process(_delta: float) -> void:
 	_process_cycle()

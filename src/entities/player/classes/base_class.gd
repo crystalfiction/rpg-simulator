@@ -9,7 +9,7 @@ var stats = {
 	"health": 0,
 	"max_health": 0,
 	"base_health": 100,
-	"regen_rate": 0.165,
+	"regen_rate": 0.20,
 	"attack": 0,
 	"base_attack": 5,
 	"largest_hit": 0,

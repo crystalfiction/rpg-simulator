@@ -1,5 +1,8 @@
 extends EntityController
 
+# scripts
+var inventory_manager_script = preload("res://src/controllers/entities/player/inventory_manager.gd")
+
 # components
 var player: Player
 
@@ -194,6 +197,10 @@ func _init_player_entity():
 	# actions
 	new_player.data.actions.controller = _init_action_controller(new_player)
 
+	# inventory
+	var new_inventory_manager = inventory_manager_script.new(new_player)
+	new_player.data.inventory.manager = new_inventory_manager
+
 	# weapon
 	# var n_weapons = Weapon.WeaponClass.size() - 1 # account for unarmed
 	# var i = randi_range(0, n_weapons)
@@ -283,7 +290,7 @@ func _process_cycle(p: Player):
 			if not p.is_queued_for_deletion():
 				p.data.actions.controller.get_action()
 
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	# if player is valid,
 	if is_instance_valid(self.player):
 		# process player cycle

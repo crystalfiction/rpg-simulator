@@ -9,13 +9,12 @@ var encounter_controller: Controller
 var frames: float = 0.0
 var time_scale: float = 60.0
 var frame_rates: Array = [
-	15, # default
-	8,
+	10,
 	5,
 	1
 ]
 # default to middle index if available
-var frame_rate: int = frame_rates[2] if frame_rates.size() > 2 else frame_rates[0]
+var frame_rate: int = frame_rates[floor(frame_rates.size() / 2.0)] if frame_rates.size() > 2 else frame_rates[0]
 
 var cycling: bool = false
 var cycles: int = 0

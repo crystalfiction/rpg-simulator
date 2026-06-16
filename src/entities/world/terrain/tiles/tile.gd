@@ -97,8 +97,8 @@ func _update_label_text(tile_data: Dictionary):
 					new_text = "+"
 				l.text = new_text
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
+# Called every frame. '_delta' is the elapsed time since the previous frame.
+func _process(_delta: float) -> void:
 	# update label text/color if data changes
 	_update_color(self.data)
 	_update_label_text(self.data)

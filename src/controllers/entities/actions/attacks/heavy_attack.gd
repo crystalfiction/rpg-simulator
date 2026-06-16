@@ -4,6 +4,7 @@ class_name HeavyAttack extends AttackAction
 var init_data = {
     "multi": 1.5,
     "cooldown": 2,
+    "duration": 0,
 }
 
 # initialize data before _ready

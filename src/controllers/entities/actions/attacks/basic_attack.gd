@@ -4,6 +4,7 @@ class_name BasicAttack extends AttackAction
 var init_data = {
     "multi": 1.0,
     "cooldown": 0,
+    "duration": 0,
 }
 
 

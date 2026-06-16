@@ -66,7 +66,6 @@ func _apply_erosion(curr_terrain: Array) -> Array:
 ## calculates erosion values per tile given water values
 func _calculate_erosion(curr_terrain: Array) -> Dictionary:
 	var avg_erosion = 0.0
-	var avg_soil_density = 0.0
 	var count = 0
 	for x in range(curr_terrain.size()):
 		for y in range(curr_terrain[x].size()):
@@ -81,12 +80,10 @@ func _calculate_erosion(curr_terrain: Array) -> Dictionary:
 			w.data.weather.erosion = erosion
 			# update metrics
 			avg_erosion += w.data.weather.erosion
-			avg_soil_density += w.data.terrain.density
 			count += 1
 			
 	# update metrics
 	avg_erosion /= count
-	avg_soil_density /= count
 	var metrics = {
 		"avg_erosion": avg_erosion
 	}
@@ -275,6 +272,6 @@ func _process_weather():
 			# self.terrain.data.on_change.call()
 			pass
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
+# Called every frame. '_delta' is the elapsed time since the previous frame.
+func _process(_delta: float) -> void:
 	_process_weather()

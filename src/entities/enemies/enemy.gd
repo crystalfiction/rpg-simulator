@@ -25,11 +25,13 @@ var init_data: Dictionary = {
 	"actions": {
 		"controller": "",
 		"action": null,
+		"last_action": null,
 	},
 	"encounters": {
 		"active": false,
 	},
 	"inventory": {
+		"manager": null,
 		"equipped": {
 			"weapon": null,
 			"head": null,

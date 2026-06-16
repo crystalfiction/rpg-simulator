@@ -23,6 +23,7 @@ var player_data: Dictionary = {
 	"actions": {
 		"controller": null,
 		"action": null,
+		"last_action": "",
 		"abilities": [
 			HeavyAttack,
 			BasicAttack,
@@ -38,6 +39,7 @@ var player_data: Dictionary = {
 		"done": 0
 	},
 	"inventory": {
+		"manager": null,
 		"equipped": {
 			"weapon": null,
 			"head": null,

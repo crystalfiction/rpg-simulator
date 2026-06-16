@@ -183,7 +183,7 @@ func _make_data_labels(obj: Variant, container: String):
 		0: ["class_v", "ranges"]
 	}
 	var player_filter = {
-		0: ["stats", "skills", "actions", "resources", "encounters", "inventory"]
+		0: ["stats", "skills", "actions", "resources", "inventory"]
 	}
 	var enemy_filter = {
 		0: ["stats", "skills", "actions"]
@@ -307,7 +307,7 @@ func _ready() -> void:
 	_init_player_stats()
 	_init_world_stats()
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
+# Called every frame. '_delta' is the elapsed time since the previous frame.
+func _process(_delta: float) -> void:
 	_init_enemy_stats(self.labels)
 	_update_labels(self.labels)
