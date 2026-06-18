@@ -12,6 +12,7 @@ func _init(new_entity: Entity) -> void:
 
 ## adds an item to the inventory backpack
 func add_item(item: Item) -> bool:
+	# TODO: connect this to inventory backpack when added
 	if item == null:
 		return false
 	items.append(item)

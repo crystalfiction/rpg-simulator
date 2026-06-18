@@ -1,6 +1,7 @@
 class_name EntityController extends Controller
 
 # components
+var skill_chance: float = 0.25
 
 
 func _calculate_skill(skill: Dictionary):
@@ -75,17 +76,19 @@ func _calculate_attributes(e: Entity) -> Dictionary:
 		# stamina-based
 		var regen_step = clamp(stats.stamina * 0.0001, 0, 1)
 		stats.regen_rate += regen_step
+
+		# perception-based
+		# var crit_dodge_step = stats.perception * 0.0001
 		
 		# CLASS BONUSES
 		match e.Class:
 			Player.PlayerClass.WANDERER:
-				stats.stamina += 0
-				stats.strength += 0
-				stats.perception += 0
-				# double regen_rate scaling
-				# stats.regen_rate += regen_step
-				
-	
+				stats.stamina += 1
+			Player.PlayerClass.BRUTE:
+				stats.strength += 1
+			Player.PlayerClass.TACTICIAN:
+				stats.perception += 1
+
 	if e is Enemy:
 		# base stats
 		stats.stamina += stats.level
@@ -140,7 +143,7 @@ func evaluate_combat(attack: AttackAction):
 			# calculate skill damage bonus
 			var weapon_string = equipped_weapon.get_weapon_class_string()
 			var skill_level = attack.data.src.data.skills[weapon_string].level
-			var skill_bonus = snapped((skill_level / 2) / ((weapon_dmg / 2) + 1), 0.01)
+			var skill_bonus = snapped((skill_level) / ((weapon_dmg / 2) + 1), 0.01)
 			# update attack src weapon skill bonus data
 			attack.data.src.data.skills[weapon_string].bonus = skill_bonus + weapon_dmg
 			weapon_dmg += skill_bonus
@@ -150,7 +153,14 @@ func evaluate_combat(attack: AttackAction):
 	
 	# ABILITIES
 	# factor in ability damage multiplier
-	var ability_multi = attack.data.multi
+	if attack.has_method("calculate_multiplier"):
+		attack.calculate_multiplier()
+	var ability_multi = attack.data.multiplier
+	FileLogger.log_message(self ,
+		str(attack.data.src.name) +
+		"::ability=" + str(attack.get_attack_type_string()) + "," +
+		"multiplier=" + str(ability_multi),
+		"COMBAT")
 	src_attack = src_attack * ability_multi
 
 	# ARMOR
@@ -188,32 +198,52 @@ func evaluate_combat(attack: AttackAction):
 		# no hit
 		result = "MISSES"
 		src_attack = 0
-	
-	# update target health
-	target_health -= floor(src_attack)
-	attack.data.target.data.stats.health = target_health
+
+	# apply attack
+	target_health -= src_attack
+	attack.data.target.data.stats.health = snapped(target_health, 0.01)
+
+	# check for ability effects
+	if result == "HITS" or result == "CRITS":
+		if attack.get_attack_type() == AttackAction.AttackType.GAMBLE:
+			# apply 'extra' attack
+			src_attack *= 2
+			target_health -= src_attack
 
 	# update player damage done/taken metrics
+	# both hits and crits
+	if result == "HITS" || result == "CRITS":
+		if attack.data.src is Player:
+			var p = attack.data.src
+			var avg_dealt: float = p.data.stats.avg_dealt
+			var new_avg: float = (avg_dealt + float(src_attack)) / 2
+			p.data.stats.avg_dealt = snapped(new_avg, 0.01)
+	# only hits
 	if result == "HITS":
 		if attack.data.src is Player:
 			var p = attack.data.src
 			if src_attack >= p.data.stats.largest_hit:
 				p.data.stats.largest_hit = snapped(src_attack, 0.01)
+	# any result
 	if attack.data.target is Player:
 		var p = attack.data.target
-		if src_attack >= p.data.stats.largest_taken:
+		if src_attack > p.data.stats.largest_taken:
 			p.data.stats.largest_taken = snapped(src_attack, 0.01)
 
 	# log results
+	# dodge,
 	if result == "DODGES":
 		FileLogger.log_message(self ,
 			attack.data.target.name + " " + result + " " + attack.data.src.name + "'s attack",
 		"COMBAT")
+	# miss, hit, crit
 	else:
+		# miss,
 		if result == "MISSES":
 			FileLogger.log_message(self ,
 				attack.data.src.name + " " + result + " " + attack.data.target.name,
 			"COMBAT")
+		# hit, crit
 		else:
 			FileLogger.log_message(self ,
 				attack.data.src.name + " " + result + " " + attack.data.target.name + " for " +
@@ -224,7 +254,8 @@ func evaluate_combat(attack: AttackAction):
 	# process weapon skill
 	if "skills" in attack.data.src.data && (
 		result == "HITS" || result == "CRITS"):
-		_progress_skill(attack.data.src, equipped_weapon.get_weapon_class_string())
+		if r <= self.skill_chance:
+			_progress_skill(attack.data.src, equipped_weapon.get_weapon_class_string())
 
 	# flag action complete
 	attack.data.done = true

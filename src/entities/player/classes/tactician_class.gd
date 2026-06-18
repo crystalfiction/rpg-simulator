@@ -1,4 +1,4 @@
-class_name WandererClass extends Resource
+class_name TacticianClass extends Resource
 
 # components
 var stats = {
@@ -26,5 +26,5 @@ var stats = {
 	"perception": 0,
 }
 var class_abilities = [
-	PersistAttack
+	GambleAttack
 ]

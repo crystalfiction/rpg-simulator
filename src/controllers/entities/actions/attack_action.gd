@@ -4,11 +4,15 @@ var Attack: AttackType
 enum AttackType {
 	BASIC,
 	HEAVY,
+	PERSIST,
+	FRENZY,
+	GAMBLE,
 }
 
 var attack_data: Dictionary = {
-    "multi": 0.0,
-    "cooldown": 0
+    "multiplier": 0.0,
+    "cooldown": 0,
+	"duration": 0,
 }
 
 

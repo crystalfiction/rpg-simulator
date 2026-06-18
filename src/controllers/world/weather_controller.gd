@@ -15,7 +15,7 @@ var rainfall_max = 1.00
 var drainage_min = 0.00
 var drainage_max = 1.00
 
-var erosion_factor = 0.01
+var erosion_factor = 0.006
 
 var weather_metrics: Dictionary
 
@@ -146,7 +146,7 @@ func _optimize_weather(curr_terrain: Terrain) -> Terrain:
 	self.weather_metrics = new_metrics
 	
 	# run weather erosion cycle
-	var n_cycles = 2
+	var n_cycles = 3
 	var total_erosion = 0
 	var final: Array = curr_terrain.data.tile_map
 	for i in range(n_cycles):

@@ -41,7 +41,7 @@ func interact_with_tile(p: Player, current_tile: Tile):
 	
 	# if player health not at max,
 	if p.data.stats.health < p.data.stats.max_health:
-		_check_resource_surplus(p)
+		check_resource_surplus(p)
 
 	# log resource acquisition
 	FileLogger.log_message(self , "Resource acquired.")
@@ -94,7 +94,7 @@ func move_towards_tile(p: Player, t: Tile) -> bool:
 
 ## checks whether player has surplus resources
 ## and evaluates rewards accordingly
-func _check_resource_surplus(p: Player):
+func check_resource_surplus(p: Player):
 	# get # of times regen amt fits into missing health
 	var regen_amt: float = p.data.stats.max_health * float(p.data.stats.regen_rate)
 	var n_regen = snapped((p.data.stats.max_health - p.data.stats.health) / regen_amt, 0.01)
@@ -106,17 +106,19 @@ func _check_resource_surplus(p: Player):
 			# if regen times is more than surplus allows,
 			if n_regen > player.data.resources.food:
 				# get the difference
-				var difference = player.data.resources.food - n_regen
+				var difference: float = snapped(player.data.resources.food - float(n_regen), 0.01)
 				n_regen += difference
 			# apply regen times to amount
 			regen_amt *= n_regen
-			var new_health = clamp(
-				p.data.stats.health + regen_amt, 0, p.data.stats.max_health)
+			var new_health = snapped(
+				clamp(
+					p.data.stats.health + float(regen_amt), 0, p.data.stats.max_health),
+					0.01)
 			p.data.stats.health = new_health
 			# reduce resource surplus by n_regen if surplus > 0
 			# else reduce food by n_regen
 			p.data.resources.food = (
-				(p.data.resources.food - n_regen) if (p.data.resources.food > 0
+				snapped(p.data.resources.food - n_regen, 0.01) if (p.data.resources.food > 0
 				) else (p.data.resources.food)
 		)
 		
@@ -155,8 +157,14 @@ func _process_rewards(encounter: Dictionary):
 		# reset player health to max if level up
 		self.player.data.stats.health = self.player.data.stats.max_health
 		FileLogger.log_message(self , self.player.name + " is now level " + str(self.player.data.stats.level))
+	
+	# if no level up,
 	else:
-		_check_resource_surplus(self.player)
+		# # check if last stand used
+		# if self.player.data.actions.last_stand == true:
+		# 	self.player.data.actions.last_stand = false
+		# check surplus
+		check_resource_surplus(self.player)
 
 	
 # Player Initialization
@@ -184,15 +192,21 @@ func _init_player_entity():
 	new_player.data.controller = self
 	
 	# class
-	var p_class = Player.PlayerClass.BASE
+	var p_class = Player.PlayerClass.TACTICIAN
 	new_player.Class = p_class
+	new_player.data.class = new_player.Class
+	new_player.data.class_v = new_player.get_player_class_string()
 	# spin up class script to get init class stats and abilities
-	var class_obj = new_player_script.PlayerClasses[p_class].new()
+	var class_obj: Resource = new_player_script.PlayerClasses[p_class].new()
 	new_player.data.stats = class_obj.stats
-	new_player.data.actions.abilities.append_array(class_obj.class_abilities)
-	
+	var abilities: Array = new_player.data.actions.abilities
+	for a in class_obj.class_abilities:
+		abilities.push_front(a)
+	new_player.data.actions.abilities = abilities
+
 	# stats
-	new_player.data.stats = _calculate_stats(new_player)
+	var new_stats = _calculate_stats(new_player)
+	new_player.data.stats.merge(new_stats)
 	
 	# actions
 	new_player.data.actions.controller = _init_action_controller(new_player)
@@ -220,9 +234,6 @@ func _init_player_entity():
 	# add player to tree
 	self.add_child(new_player)
 
-	# return player
-	return new_player
-
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	# get file logger
@@ -241,15 +252,41 @@ func _ready() -> void:
 
 ## checks player defeat conditions and deletes entity object if met
 func _check_player(p: Player):
-	# if player health is 0 or below
+	# if player health is 0 or below and last_stand remaining,
 	if p.data.stats.health <= 0:
-		# if enemy isn't already queued for deletion,
-		if !p.is_queued_for_deletion():
-			FileLogger.log_message(self ,
-				str(self.player.data)
-			)
-			# queue for deletion
-			p.queue_free()
+		if not p.data.actions.last_stand:
+			if p.data.resources.food > 0:
+				p.data.resources.food = 0
+				p.data.stats.health = p.data.stats.max_health
+				p.data.actions.last_stand = true
+				FileLogger.log_message(self , self.player.name +
+					" is taking a last stand!")
+			
+			# no food for last stand, player is dead
+			else:
+				# if player isn't already queued for deletion,
+				if !p.is_queued_for_deletion():
+					FileLogger.log_message(self ,
+						str(self.player.data),
+						"INFO",
+						FileLogger.Outputs.find_key(
+							FileLogger.Outputs.GAME_LOG_PATH))
+
+					# queue for deletion
+					p.queue_free()
+
+		# no last stand remaining, player is dead
+		else:
+			# if player isn't already queued for deletion,
+			if !p.is_queued_for_deletion():
+				FileLogger.log_message(self ,
+					str(self.player.data),
+					"INFO",
+					FileLogger.Outputs.find_key(
+						FileLogger.Outputs.GAME_LOG_PATH))
+
+				# queue for deletion
+				p.queue_free()
 
 # checks if an active encounter is complete and rewards player if so
 func check_encounter(p: Player) -> bool:

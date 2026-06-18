@@ -8,15 +8,21 @@ var Class: PlayerClass
 enum PlayerClass {
 	BASE,
 	WANDERER,
+	BRUTE,
+	TACTICIAN,
 }
 var PlayerClasses = {
 	0: BaseClass,
 	1: WandererClass,
+	2: BruteClass,
+	3: TacticianClass,
 }
 
 var player_data: Dictionary = {
 	"world": "",
 	"grid_idx": Vector2i(0, 0),
+	"class": null,
+	"class_v": "",
 	"stats": {
 		# initialized by PlayerClass
 	},
@@ -26,8 +32,8 @@ var player_data: Dictionary = {
 		"last_action": "",
 		"abilities": [
 			HeavyAttack,
-			BasicAttack,
-		]
+		],
+		"last_stand": false,
 	},
 	"skills": {},
 	"resources": {
@@ -42,10 +48,10 @@ var player_data: Dictionary = {
 		"manager": null,
 		"equipped": {
 			"weapon": null,
-			"head": null,
-			"chest": null,
-			"legs": null,
-			"feet": null
+			# "head": null,
+			# "chest": null,
+			# "legs": null,
+			# "feet": null
 		},
 	}
 }
@@ -63,10 +69,10 @@ func get_player_class_string() -> String:
 ## initializes the entity as scene
 func init_scene() -> Sprite2D:
 	var new_scene: Sprite2D = self.init_player.instantiate()
-	new_scene.data = self.data
 	return new_scene
 
 ## initializes the entity data
 func _init() -> void:
 	self.Type = EntityType.PLAYER
+
 	self.data = _traverse_data(self.data, self.player_data)

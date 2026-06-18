@@ -40,41 +40,33 @@ func _calculate_biome_data() -> Dictionary:
 	var density = [0.00, 0.00]
 	var rainfall = [0.00, 0.00]
 	var drainage = [0.00, 0.00]
-	var rainfall_chance = 0.0
 	match self.Class:
 		BiomeClass.DESERT:
-			rainfall_chance = 0.22
+			density = [0.00, 0.66]
 			rainfall = [0.22, 0.44]
-			density = [0.00, 1.00]
 			drainage = [0.44, 1.00]
 		BiomeClass.SHRUBLAND:
-			rainfall_chance = 0.44
-			rainfall = [0.22, 0.44]
 			density = [0.33, 0.66]
+			rainfall = [0.22, 0.44]
 			drainage = [0.00, 1.00]
 		BiomeClass.GRASSLAND:
-			rainfall_chance = 0.66
-			rainfall = [0.22, 0.66]
 			density = [0.33, 0.66]
+			rainfall = [0.22, 0.66]
 			drainage = [0.22, 0.88]
 		BiomeClass.FOREST:
-			rainfall_chance = 0.66
-			rainfall = [0.44, 0.66]
 			density = [0.33, 0.88]
+			rainfall = [0.44, 0.66]
 			drainage = [0.44, 0.88]
 		BiomeClass.TROPICAL:
-			rainfall_chance = 0.88
-			rainfall = [0.88, 1.00]
 			density = [0.33, 1.00]
+			rainfall = [0.88, 1.00]
 			drainage = [0.44, 1.00]
 		BiomeClass.SWAMP:
-			rainfall_chance = 0.88
-			rainfall = [0.44, 1.00]
 			density = [0.33, 1.00]
+			rainfall = [0.44, 1.00]
 			drainage = [0.00, 0.44]
 
 	var new_ranges = {
-		"rainfall_chance": rainfall_chance,
 		"density": density,
 		"rainfall": rainfall,
 		"drainage": drainage

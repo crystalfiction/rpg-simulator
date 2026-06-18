@@ -2,7 +2,7 @@ class_name BasicAttack extends AttackAction
 
 # components
 var init_data = {
-    "multi": 1.0,
+    "multiplier": 1.0,
     "cooldown": 0,
     "duration": 0,
 }
