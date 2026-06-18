@@ -5,3 +5,6 @@
 **/*.tmp
 
 **/world_log.txt
+
+# Python
+.venv/

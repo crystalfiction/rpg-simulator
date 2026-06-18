@@ -156,7 +156,7 @@ func evaluate_combat(attack: AttackAction):
 	if attack.has_method("calculate_multiplier"):
 		attack.calculate_multiplier()
 	var ability_multi = attack.data.multiplier
-	FileLogger.log_message(self ,
+	FileLogger.log_message(self,
 		str(attack.data.src.name) +
 		"::ability=" + str(attack.get_attack_type_string()) + "," +
 		"multiplier=" + str(ability_multi),
@@ -233,19 +233,19 @@ func evaluate_combat(attack: AttackAction):
 	# log results
 	# dodge,
 	if result == "DODGES":
-		FileLogger.log_message(self ,
+		FileLogger.log_message(self,
 			attack.data.target.name + " " + result + " " + attack.data.src.name + "'s attack",
 		"COMBAT")
 	# miss, hit, crit
 	else:
 		# miss,
 		if result == "MISSES":
-			FileLogger.log_message(self ,
+			FileLogger.log_message(self,
 				attack.data.src.name + " " + result + " " + attack.data.target.name,
 			"COMBAT")
 		# hit, crit
 		else:
-			FileLogger.log_message(self ,
+			FileLogger.log_message(self,
 				attack.data.src.name + " " + result + " " + attack.data.target.name + " for " +
 				str(src_attack) + " with " + str(attack.get_attack_type_string()) + " attack" +
 				(" using " + equipped_weapon.get_weapon_class_string() if weapon_equipped else ""),
