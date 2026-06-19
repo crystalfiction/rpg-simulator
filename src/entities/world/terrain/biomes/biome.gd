@@ -12,7 +12,7 @@ enum BiomeClass {
 }
 
 var data = {
-	"class": null,
+	"class": self.Class,
 	"class_v": "",
 	"avg_texture": "",
 	"avg_density": 0.0,
@@ -73,7 +73,7 @@ func _calculate_biome_data() -> Dictionary:
 	}
 	return new_ranges
 
-func _evaluate_biome_class(biome_data: Dictionary):
+func evaluate_biome_class(biome_data: Dictionary):
 	if biome_data.avg_texture == "sand":
 		# sand
 		self.Class = BiomeClass.DESERT
@@ -119,14 +119,9 @@ func _evaluate_biome_class(biome_data: Dictionary):
 				# high drainage
 				self.Class = BiomeClass.TROPICAL
 
-func _init(biome_data: Dictionary) -> void:
+func _init(biome_class: BiomeClass) -> void:
 	# initialize data
-	for k in biome_data:
-		self.data[k] = biome_data[k]
-	
-	# evaluate and update biome class data
-	_evaluate_biome_class(biome_data)
-	self.data.class = self.Class
+	self.Class = biome_class
 	self.data.class_v = get_biome_class_string()
 	# calculate biome terrain ranges
 	self.data.ranges = _calculate_biome_data()

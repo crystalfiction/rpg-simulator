@@ -130,7 +130,7 @@ func _calculate_water(curr_terrain: Array) -> Dictionary:
 
 ## processes weather for the current weather_map
 func _optimize_weather(curr_terrain: Terrain) -> Terrain:
-	FileLogger.log_message(self , "Optimizing weather...")
+	FileLogger.log_message(self, "Optimizing weather...")
 	
 	# calculate features
 	var tile_map = curr_terrain.data.tile_map
@@ -173,7 +173,7 @@ func _optimize_weather(curr_terrain: Terrain) -> Terrain:
 		"avg_erosion: " + str(snapped(new_metrics.avg_erosion, 0.0001)) + " | " +
 		"erosion_cycles: " + str(snapped(self.erosion_cycle, 0.001))
 	)
-	FileLogger.log_message(self , msg)
+	FileLogger.log_message(self, msg)
 
 	tile_map = final
 	curr_terrain.data.tile_map = tile_map
@@ -208,30 +208,20 @@ func init_controller() -> void:
 		for y in range(len(tile_map[x])):
 			var t = tile_map[x][y]
 			# initialize weather data
-			if biome == null:
-				var rand_r = randf_range(drainage_min, drainage_max)
-				var drainage = rand_r
-				# drainage = clamp(drainage, drainage_min, drainage_max)
-				t.data.weather = {
-					"rainfall": self.rainfall,
-					"drainage": drainage,
-					"water": 0.0,
-					"erosion": 0.0
-				}
-			# if biome passed,
-			else:
-				var drainage = 1 - t.data.terrain.density # invert density
-				drainage = clamp(
-					drainage,
-					biome.data.ranges.drainage[0],
-					biome.data.ranges.drainage[1]
-				)
-				t.data.weather = {
-					"rainfall": self.rainfall,
-					"drainage": drainage,
-					"water": t.data.weather.water,
-					"erosion": t.data.weather.erosion
-				}
+			var rand_r = randf_range(biome.data.ranges.drainage[0], biome.data.ranges.drainage[1])
+			var drainage = rand_r
+			var water = 0.0
+			var erosion = 0.0
+			if "water" in t.data.weather:
+				water = t.data.weather.water
+			if "erosion" in t.data.weather:
+				erosion = t.data.weather.erosion
+			t.data.weather = {
+				"rainfall": self.rainfall,
+				"drainage": drainage,
+				"water": water,
+				"erosion": erosion
+			}
 	
 	# optimize weather
 	self.terrain = _optimize_weather(self.terrain)

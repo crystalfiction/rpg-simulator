@@ -100,13 +100,13 @@ func _init_controllers() -> void:
 	var new_terrain_controller = _init_terrain_controller()
 	self.terrain_controller = new_terrain_controller
 
-	# players
-	var new_player_controller = _init_player_controller()
-	self.player_controller = new_player_controller
+	# # players
+	# var new_player_controller = _init_player_controller()
+	# self.player_controller = new_player_controller
 
-	# enemies
-	var new_enemy_controller = _init_enemy_controller()
-	self.enemy_controller = new_enemy_controller
+	# # enemies
+	# var new_enemy_controller = _init_enemy_controller()
+	# self.enemy_controller = new_enemy_controller
 	
 	# time
 	var new_time_controller = _init_time_controller()
@@ -124,12 +124,12 @@ func _ready() -> void:
 	# get utils
 	self.Utils = $"/root/Utils"
 	
-	FileLogger.log_message(self , "Initializing world...")
+	FileLogger.log_message(self, "Initializing world...")
 	
 	# initialize controller dependencies
 	_init_controllers()
 	
-	FileLogger.log_message(self , "World initialized.")
+	FileLogger.log_message(self, "World initialized.")
 
 
 # World Processing
@@ -144,16 +144,16 @@ func _process_cycle(current_world: Sprite2D):
 			if is_instance_valid(current_world):
 				## process world state conditions
 				# if player_controller exists, but player is invalid
-				if player_controller && ! self.world.data.player:
+				if player_controller && !self.world.data.player:
 					# reload game if only Map 1,
 					if current_world.data.terrain.data.map_count == 1:
-						FileLogger.log_message(self ,
+						FileLogger.log_message(self,
 							"Player died on Map 1, reloading world..."
 						)
 						get_tree().reload_current_scene()
 					else:
 						# otherwise end game
-						FileLogger.log_message(self ,
+						FileLogger.log_message(self,
 							"Player died on Map " + str(current_world.data.terrain.data.map_count)
 						)
 						get_tree().quit()
@@ -161,7 +161,7 @@ func _process_cycle(current_world: Sprite2D):
 			# if world invalid,
 			else:
 				# world is not valid,
-				FileLogger.log_message(self , "World is invalid, ending game.")
+				FileLogger.log_message(self, "World is invalid, ending game.")
 				# quit game, world invalid
 				get_tree().quit()
 

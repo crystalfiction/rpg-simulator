@@ -165,7 +165,7 @@ func _optimize_soil(terrain: Terrain) -> Array:
 			"threshold " + str(snapped(threshold, 0.0001))
 
 		)
-		FileLogger.log_message(self , msg)
+		FileLogger.log_message(self, msg)
 		# stop optimizing,
 		result = true
 	
@@ -180,7 +180,7 @@ func _optimize_soil(terrain: Terrain) -> Array:
 ## optimizes terrain in the world tile map
 ## returns optimized flag
 func _optimize_terrain(terrain: Terrain) -> Terrain:
-	FileLogger.log_message(self , "Optimizing terrain...")
+	FileLogger.log_message(self, "Optimizing terrain...")
 
 	# run terrain optimization cycle
 	var optimized = false
@@ -205,41 +205,6 @@ func _optimize_terrain(terrain: Terrain) -> Terrain:
 	# return optimization results
 	return terrain
 
-## generates new terrain object and saves to world.data.terrain
-## called when player has completed all conditions on a map
-func _generate_terrain(curr_terrain: Terrain) -> void:
-	# TODO: add a way to reset terrain data without breaking dependencies
-	# reuse existing Terrain obj
-	var new_terrain = curr_terrain
-
-	# reinitialize soil
-	new_terrain = _init_soil(new_terrain, curr_terrain.data.biome)
-
-	# optimize terrain
-	new_terrain = _optimize_terrain(new_terrain)
-
-	# add callback to terrain for calling on data change
-	new_terrain.data.on_change = _handle_terrain.bind(new_terrain)
-
-	# generate weather on terrain
-	self.weather_controller.terrain = new_terrain
-	self.weather_controller.init_controller()
-	# generate resources after weather
-	self.resource_controller.terrain = new_terrain
-	self.resource_controller.init_controller()
-	# generate encounters on terrain
-	self.encounter_controller.terrain = new_terrain
-	self.encounter_controller.init_controller()
-
-	# log update
-	FileLogger.log_message(self , "Map " + str(new_terrain.data.map_count) + " generated.")
-	
-
-	# update world terrain to new terrain
-	self.world.data.terrain = new_terrain
-
-	# unflag map_complete
-	self.world.data.terrain.data.map_complete = false
 
 # Terrain Initialization
 
@@ -386,9 +351,11 @@ func _init_weather(terrain: Terrain) -> Controller:
 
 ## initializes the world terrain with init terrain data,
 ## returns error flag
-func _init_terrain() -> Terrain:
+func _init_terrain(biome: Biome = null) -> Terrain:
 	# create new Terrain obj
 	var new_terrain = Terrain.new()
+	if not biome == null:
+		new_terrain.data.biome = biome
 
 	# initialize world grid
 	var new_grid = _init_grid(self.grid_scale)
@@ -413,8 +380,17 @@ func _ready() -> void:
 	# get utils
 	self.Utils = $"/root/Utils"
 
+	# DEV: get random biome
+	# var biomes = Biome.BiomeClass
+	# var r_biome = biomes.values().pick_random()
+	# var new_biome = biomes.get(r_biome)
+
+	# DEV: set biome manually
+	var biome_n = Biome.BiomeClass.DESERT
+	var biome = Biome.new(biome_n)
+
 	# initialize terrain entity
-	var new_terrain = _init_terrain()
+	var new_terrain = _init_terrain(biome)
 	# optimize terrain
 	new_terrain = _optimize_terrain(new_terrain)
 
@@ -430,13 +406,6 @@ func _ready() -> void:
 	var new_encounter_controller = _init_encounters(new_terrain)
 	self.encounter_controller = new_encounter_controller
 
-	# determine biome
-	if not "weather" in new_terrain.data:
-		while new_terrain.data.weather.is_empty():
-			pass
-	
-	new_terrain.data.biome = new_terrain.get_terrain_biome()
-
 	# update world terrain to new terrain
 	self.world.data.terrain = new_terrain
 	# add terrain to world tree
@@ -444,6 +413,42 @@ func _ready() -> void:
 
 
 # Terrain Processing
+
+## generates new terrain object and saves to world.data.terrain
+## called when player has completed all conditions on a map
+func _generate_terrain(curr_terrain: Terrain) -> void:
+	# TODO: add a way to reset terrain data without breaking dependencies
+	# reuse existing Terrain obj
+	var new_terrain = curr_terrain
+
+	# reinitialize soil
+	new_terrain = _init_soil(new_terrain, curr_terrain.data.biome)
+
+	# optimize terrain
+	new_terrain = _optimize_terrain(new_terrain)
+
+	# add callback to terrain for calling on data change
+	new_terrain.data.on_change = _handle_terrain.bind(new_terrain)
+
+	# generate weather on terrain
+	self.weather_controller.terrain = new_terrain
+	self.weather_controller.init_controller()
+	# generate resources after weather
+	self.resource_controller.terrain = new_terrain
+	self.resource_controller.init_controller()
+	# generate encounters on terrain
+	self.encounter_controller.terrain = new_terrain
+	self.encounter_controller.init_controller()
+
+	# log update
+	FileLogger.log_message(self, "Map " + str(new_terrain.data.map_count) + " generated.")
+	
+
+	# update world terrain to new terrain
+	self.world.data.terrain = new_terrain
+
+	# unflag map_complete
+	self.world.data.terrain.data.map_complete = false
 
 ## processes the controller's time cycle
 func _process_cycle(curr_world: Sprite2D):
@@ -460,7 +465,7 @@ func _process_cycle(curr_world: Sprite2D):
 		if !is_resources:
 			# flag terrain map complete
 			curr_world.data.terrain.data.map_complete = true
-			FileLogger.log_message(self , "No resources found, initializing new map.")
+			FileLogger.log_message(self, "No resources found, initializing new map.")
 		
 		# check map completion regardless of time cycle state
 		if curr_world.data.terrain.data.map_complete:

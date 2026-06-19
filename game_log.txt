@@ -2,3 +2,18 @@
 { "uid": 0, "controller": PlayerController:<Node#243487748887>, "world": World:<Sprite2D#49895441868>, "grid_idx": (16, 18), "class": 2, "class_v": "BRUTE", "stats": { "level": 15, "exp": 1168, "exp_cap": 2250, "exp_step": 10, "health": -6.27, "max_health": 250, "base_health": 100, "regen_rate": 0.177, "attack": 50.0, "base_attack": 5, "avg_dealt": 80.78, "largest_hit": 120.03, "largest_taken": 46.68, "hit_chance": 0.66, "crit_chance": 0.122, "crit_bonus": 1.5, "dodge_chance": 0.062, "armor": 0, "armor_reduc": 0.0, "stamina": 15, "strength": 30, "perception": 15 }, "actions": { "controller": ActionController:<Node#243588412189>, "action": <null>, "last_action": &"FrenzyAttack", "abilities": [(res://src/controllers/entities/actions/attacks/brute/frenzy_attack.gd):<GDScript#-9223371993603111412>, (res://src/controllers/entities/actions/attacks/heavy_attack.gd):<GDScript#-9223371994274200056>], "metrics": { "DODGES": 351, "HITS": 3200, "MISSES": 1903, "CRITS": 327 }, "last_stand": true }, "skills": { "UNARMED": { "level": 26, "exp": 6370, "step": 10, "cap": 6760, "bonus": 16.09 } }, "resources": { "food": 19.75, "total": 1311 }, "encounters": { "active": true, "done": 671 }, "inventory": { "manager": <RefCounted#-9223371793249586402>, "equipped": { "weapon": <Node2D#243621966623> } } }
 [2026-06-18 18:45:13] --- [res://game_log.txt] Initialized ---
 { "uid": 0, "controller": PlayerController:<Node#243487748887>, "world": World:<Sprite2D#49895441868>, "grid_idx": (21, 7), "class": 2, "class_v": "BRUTE", "stats": { "level": 20, "exp": 0, "exp_cap": 4000, "exp_step": 10, "health": -36.81, "max_health": 300, "base_health": 100, "regen_rate": 0.186, "attack": 65.0, "base_attack": 5, "avg_dealt": 122.46, "largest_hit": 147.38, "largest_taken": 66.18, "hit_chance": 0.66, "crit_chance": 0.131, "crit_bonus": 1.5, "dodge_chance": 0.071, "armor": 0, "armor_reduc": 0.0, "stamina": 20, "strength": 40, "perception": 20 }, "actions": { "controller": ActionController:<Node#243588412189>, "action": <null>, "last_action": &"FrenzyAttack", "abilities": [(res://src/controllers/entities/actions/attacks/brute/frenzy_attack.gd):<GDScript#-9223371993603111412>, (res://src/controllers/entities/actions/attacks/heavy_attack.gd):<GDScript#-9223371994274200056>], "metrics": { "HITS": 5490, "MISSES": 3438, "CRITS": 648, "DODGES": 608 }, "last_stand": true }, "skills": { "UNARMED": { "level": 34, "exp": 11340, "step": 10, "cap": 11560, "bonus": 19.98 } }, "resources": { "food": 81.77, "total": 2396 }, "encounters": { "active": true, "done": 1220 }, "inventory": { "manager": <RefCounted#-9223371793249586402>, "equipped": { "weapon": <Node2D#243621966623> } } }
+[2026-06-19 12:13:13] --- [res://game_log.txt] Initialized ---
+[2026-06-19 12:20:10] --- [res://game_log.txt] Initialized ---
+[2026-06-19 12:22:21] --- [res://game_log.txt] Initialized ---
+[2026-06-19 12:26:12] --- [res://game_log.txt] Initialized ---
+[2026-06-19 12:27:08] --- [res://game_log.txt] Initialized ---
+[2026-06-19 12:28:24] --- [res://game_log.txt] Initialized ---
+[2026-06-19 12:29:10] --- [res://game_log.txt] Initialized ---
+[2026-06-19 12:35:34] --- [res://game_log.txt] Initialized ---
+[2026-06-19 12:39:27] --- [res://game_log.txt] Initialized ---
+[2026-06-19 12:40:18] --- [res://game_log.txt] Initialized ---
+[2026-06-19 12:40:28] --- [res://game_log.txt] Initialized ---
+[2026-06-19 12:40:49] --- [res://game_log.txt] Initialized ---
+[2026-06-19 12:42:10] --- [res://game_log.txt] Initialized ---
+[2026-06-19 12:43:00] --- [res://game_log.txt] Initialized ---
+[2026-06-19 12:43:36] --- [res://game_log.txt] Initialized ---

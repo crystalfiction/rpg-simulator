@@ -196,8 +196,10 @@ layout_mode = 2
 size_flags_horizontal = 8
 size_flags_vertical = 0
 theme_override_fonts/font = ExtResource("2_1mjrn")
+folded = true
 
 [node name="MarginContainer" type="MarginContainer" parent="Main/BoxContainer/EnemyPanel" unique_id=394116400]
+visible = false
 layout_mode = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Main/BoxContainer/EnemyPanel/MarginContainer" unique_id=1250108174]
