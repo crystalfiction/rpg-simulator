@@ -26,5 +26,5 @@ var stats = {
 	"perception": 0,
 }
 var class_abilities = [
-	GambleAttack
+	SwayOddsAttack
 ]

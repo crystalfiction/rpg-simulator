@@ -6,7 +6,7 @@ enum AttackType {
 	HEAVY,
 	PERSIST,
 	FRENZY,
-	GAMBLE,
+	SWAYODDS,
 }
 
 var attack_data: Dictionary = {

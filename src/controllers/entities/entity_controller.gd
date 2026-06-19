@@ -205,7 +205,7 @@ func evaluate_combat(attack: AttackAction):
 
 	# check for ability effects
 	if result == "HITS" or result == "CRITS":
-		if attack.get_attack_type() == AttackAction.AttackType.GAMBLE:
+		if attack.get_attack_type() == AttackAction.AttackType.SWAYODDS:
 			# apply 'extra' attack
 			src_attack *= 2
 			target_health -= src_attack
@@ -224,11 +224,20 @@ func evaluate_combat(attack: AttackAction):
 			var p = attack.data.src
 			if src_attack >= p.data.stats.largest_hit:
 				p.data.stats.largest_hit = snapped(src_attack, 0.01)
-	# any result
+	# p target
 	if attack.data.target is Player:
+		if not result in attack.data.target.data.actions.metrics:
+			attack.data.target.data.actions.metrics[result] = 0
+		attack.data.target.data.actions.metrics[result] += 1
 		var p = attack.data.target
 		if src_attack > p.data.stats.largest_taken:
 			p.data.stats.largest_taken = snapped(src_attack, 0.01)
+
+	# p source
+	if attack.data.src is Player:
+		if not result in attack.data.src.data.actions.metrics:
+			attack.data.src.data.actions.metrics[result] = 0
+		attack.data.src.data.actions.metrics[result] += 1
 
 	# log results
 	# dodge,

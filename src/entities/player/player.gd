@@ -33,6 +33,12 @@ var player_data: Dictionary = {
 		"abilities": [
 			HeavyAttack,
 		],
+		"metrics": {
+			# "HITS": 0,
+			# "MISSES": 0,
+			# "CRITS": 0,
+			# "DODGES": 0,
+		},
 		"last_stand": false,
 	},
 	"skills": {},

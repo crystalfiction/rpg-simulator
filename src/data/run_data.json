@@ -272,5 +272,1100 @@
         }
       }
     }
+  ],
+  "2026-06-18 16:04:02": [
+    {
+      "uid": 0,
+      "controller": "PlayerController:<Node#243487748887>",
+      "world": "World:<Sprite2D#49895441868>",
+      "grid_idx": [
+        4,
+        6
+      ],
+      "class": 3,
+      "class_v": "TACTICIAN",
+      "stats": {
+        "level": 4,
+        "exp": 148,
+        "exp_cap": 160,
+        "exp_step": 10,
+        "health": -1.24,
+        "max_health": 140,
+        "base_health": 100,
+        "regen_rate": 0.166,
+        "attack": 11.0,
+        "base_attack": 5,
+        "avg_dealt": 30.75,
+        "largest_hit": 40.69,
+        "largest_taken": 16.5,
+        "hit_chance": 0.66,
+        "crit_chance": 0.112,
+        "crit_bonus": 1.5,
+        "dodge_chance": 0.052,
+        "armor": 0,
+        "armor_reduc": 0.0,
+        "stamina": 4,
+        "strength": 4,
+        "perception": 8
+      },
+      "actions": {
+        "controller": "ActionController:<Node#243588412189>",
+        "action": null,
+        "last_action": "HeavyAttack",
+        "abilities": [
+          "(res://src/controllers/entities/actions/attacks/tactician/gamble_attack.gd):<GDScript#-9223371993334675955>",
+          "(res://src/controllers/entities/actions/attacks/heavy_attack.gd):<GDScript#-9223371994274200056>"
+        ],
+        "last_stand": false
+      },
+      "skills": {
+        "UNARMED": {
+          "level": 9,
+          "exp": 700,
+          "step": 10,
+          "cap": 810,
+          "bonus": 6.54
+        }
+      },
+      "resources": {
+        "food": 0.0,
+        "total": 54
+      },
+      "encounters": {
+        "active": true,
+        "done": 27
+      },
+      "inventory": {
+        "manager": "<RefCounted#-9223371793249586402>",
+        "equipped": {
+          "weapon": "<Node2D#243621966623>"
+        }
+      }
+    }
+  ],
+  "2026-06-18 16:19:29": [
+    {
+      "uid": 0,
+      "controller": "PlayerController:<Node#243487748887>",
+      "world": "World:<Sprite2D#49895441868>",
+      "grid_idx": [
+        6,
+        3
+      ],
+      "class": 3,
+      "class_v": "TACTICIAN",
+      "stats": {
+        "level": 2,
+        "exp": 22,
+        "exp_cap": 40,
+        "exp_step": 10,
+        "health": -7.56,
+        "max_health": 120,
+        "base_health": 100,
+        "regen_rate": 0.1653,
+        "attack": 8.0,
+        "base_attack": 5,
+        "avg_dealt": 27.28,
+        "largest_hit": 32.43,
+        "largest_taken": 9.78,
+        "hit_chance": 0.66,
+        "crit_chance": 0.1106,
+        "crit_bonus": 1.5,
+        "dodge_chance": 0.0506,
+        "armor": 0,
+        "armor_reduc": 0.0,
+        "stamina": 2,
+        "strength": 2,
+        "perception": 4
+      },
+      "actions": {
+        "controller": "ActionController:<Node#243588412189>",
+        "action": null,
+        "last_action": "GambleAttack",
+        "abilities": [
+          "(res://src/controllers/entities/actions/attacks/tactician/gamble_attack.gd):<GDScript#-9223371993334675955>",
+          "(res://src/controllers/entities/actions/attacks/heavy_attack.gd):<GDScript#-9223371994274200056>"
+        ],
+        "last_stand": false
+      },
+      "skills": {
+        "UNARMED": {
+          "level": 3,
+          "exp": 70,
+          "step": 10,
+          "cap": 90,
+          "bonus": 3.5
+        }
+      },
+      "resources": {
+        "food": 0.0,
+        "total": 4
+      },
+      "encounters": {
+        "active": true,
+        "done": 3
+      },
+      "inventory": {
+        "manager": "<RefCounted#-9223371793249586402>",
+        "equipped": {
+          "weapon": "<Node2D#243621966623>"
+        }
+      }
+    },
+    {
+      "uid": 0,
+      "controller": "PlayerController:<Node#466574390795>",
+      "world": "World:<Sprite2D#272982083020>",
+      "grid_idx": [
+        8,
+        18
+      ],
+      "class": 3,
+      "class_v": "TACTICIAN",
+      "stats": {
+        "level": 16,
+        "exp": 958,
+        "exp_cap": 2560,
+        "exp_step": 10,
+        "health": -6.44,
+        "max_health": 260,
+        "base_health": 100,
+        "regen_rate": 0.1786,
+        "attack": 29.0,
+        "base_attack": 5,
+        "avg_dealt": 129.01,
+        "largest_hit": 126.06,
+        "largest_taken": 46.68,
+        "hit_chance": 0.66,
+        "crit_chance": 0.1372,
+        "crit_bonus": 1.5,
+        "dodge_chance": 0.0772,
+        "armor": 0,
+        "armor_reduc": 0.0,
+        "stamina": 16,
+        "strength": 16,
+        "perception": 32
+      },
+      "actions": {
+        "controller": "ActionController:<Node#466675054097>",
+        "action": null,
+        "last_action": "GambleAttack",
+        "abilities": [
+          "(res://src/controllers/entities/actions/attacks/tactician/gamble_attack.gd):<GDScript#-9223371993334675955>",
+          "(res://src/controllers/entities/actions/attacks/heavy_attack.gd):<GDScript#-9223371994274200056>"
+        ],
+        "last_stand": true
+      },
+      "skills": {
+        "UNARMED": {
+          "level": 32,
+          "exp": 10200,
+          "step": 10,
+          "cap": 10240,
+          "bonus": 14.17
+        }
+      },
+      "resources": {
+        "food": 0.0,
+        "total": 1576
+      },
+      "encounters": {
+        "active": true,
+        "done": 810
+      },
+      "inventory": {
+        "manager": "<RefCounted#-9223371570162944494>",
+        "equipped": {
+          "weapon": "<Node2D#466708608531>"
+        }
+      }
+    }
+  ],
+  "2026-06-18 16:30:19": [
+    {
+      "uid": 0,
+      "controller": "PlayerController:<Node#243487748887>",
+      "world": "World:<Sprite2D#49895441868>",
+      "grid_idx": [
+        19,
+        17
+      ],
+      "class": 3,
+      "class_v": "TACTICIAN",
+      "stats": {
+        "level": 3,
+        "exp": 66,
+        "exp_cap": 90,
+        "exp_step": 10,
+        "health": -7.99,
+        "max_health": 130,
+        "base_health": 100,
+        "regen_rate": 0.1656,
+        "attack": 9.5,
+        "base_attack": 5,
+        "avg_dealt": 20.41,
+        "largest_hit": 41.23,
+        "largest_taken": 14.67,
+        "hit_chance": 0.66,
+        "crit_chance": 0.1121,
+        "crit_bonus": 1.5,
+        "dodge_chance": 0.0521,
+        "armor": 0,
+        "armor_reduc": 0.0,
+        "stamina": 3,
+        "strength": 3,
+        "perception": 6
+      },
+      "actions": {
+        "controller": "ActionController:<Node#243588412189>",
+        "action": null,
+        "last_action": "BasicAttack",
+        "abilities": [
+          "(res://src/controllers/entities/actions/attacks/tactician/gamble_attack.gd):<GDScript#-9223371993334675955>",
+          "(res://src/controllers/entities/actions/attacks/heavy_attack.gd):<GDScript#-9223371994274200056>"
+        ],
+        "last_stand": false
+      },
+      "skills": {
+        "UNARMED": {
+          "level": 6,
+          "exp": 280,
+          "step": 10,
+          "cap": 360,
+          "bonus": 5.12
+        }
+      },
+      "resources": {
+        "food": 0.0,
+        "total": 20
+      },
+      "encounters": {
+        "active": true,
+        "done": 11
+      },
+      "inventory": {
+        "manager": "<RefCounted#-9223371793249586402>",
+        "equipped": {
+          "weapon": "<Node2D#243621966623>"
+        }
+      }
+    },
+    {
+      "uid": 0,
+      "controller": "PlayerController:<Node#502880286262>",
+      "world": "World:<Sprite2D#309287978444>",
+      "grid_idx": [
+        3,
+        7
+      ],
+      "class": 3,
+      "class_v": "TACTICIAN",
+      "stats": {
+        "level": 2,
+        "exp": 22,
+        "exp_cap": 40,
+        "exp_step": 10,
+        "health": -3.52,
+        "max_health": 120,
+        "base_health": 100,
+        "regen_rate": 0.1653,
+        "attack": 8.0,
+        "base_attack": 5,
+        "avg_dealt": 29.87,
+        "largest_hit": 32.43,
+        "largest_taken": 14.67,
+        "hit_chance": 0.66,
+        "crit_chance": 0.111,
+        "crit_bonus": 1.5,
+        "dodge_chance": 0.051,
+        "armor": 0,
+        "armor_reduc": 0.0,
+        "stamina": 2,
+        "strength": 2,
+        "perception": 4
+      },
+      "actions": {
+        "controller": "ActionController:<Node#502980949564>",
+        "action": null,
+        "last_action": "HeavyAttack",
+        "abilities": [
+          "(res://src/controllers/entities/actions/attacks/tactician/gamble_attack.gd):<GDScript#-9223371993334675955>",
+          "(res://src/controllers/entities/actions/attacks/heavy_attack.gd):<GDScript#-9223371994274200056>"
+        ],
+        "last_stand": true
+      },
+      "skills": {
+        "UNARMED": {
+          "level": 3,
+          "exp": 80,
+          "step": 10,
+          "cap": 90,
+          "bonus": 3.5
+        }
+      },
+      "resources": {
+        "food": 0.0,
+        "total": 4
+      },
+      "encounters": {
+        "active": true,
+        "done": 3
+      },
+      "inventory": {
+        "manager": "<RefCounted#-9223371533857049027>",
+        "equipped": {
+          "weapon": "<Node2D#503014503998>"
+        }
+      }
+    }
+  ],
+  "2026-06-18 16:32:29": [
+    {
+      "uid": 0,
+      "controller": "PlayerController:<Node#243487748887>",
+      "world": "World:<Sprite2D#49895441868>",
+      "grid_idx": [
+        32,
+        0
+      ],
+      "class": 3,
+      "class_v": "TACTICIAN",
+      "stats": {
+        "level": 16,
+        "exp": 1808,
+        "exp_cap": 2560,
+        "exp_step": 10,
+        "health": -7.94,
+        "max_health": 260,
+        "base_health": 100,
+        "regen_rate": 0.1786,
+        "attack": 29.0,
+        "base_attack": 5,
+        "avg_dealt": 101.97,
+        "largest_hit": 130.17,
+        "largest_taken": 49.46,
+        "hit_chance": 0.66,
+        "crit_chance": 0.1572,
+        "crit_bonus": 1.5,
+        "dodge_chance": 0.0972,
+        "armor": 0,
+        "armor_reduc": 0.0,
+        "stamina": 16,
+        "strength": 16,
+        "perception": 32
+      },
+      "actions": {
+        "controller": "ActionController:<Node#243588412189>",
+        "action": null,
+        "last_action": "GambleAttack",
+        "abilities": [
+          "(res://src/controllers/entities/actions/attacks/tactician/gamble_attack.gd):<GDScript#-9223371993334675955>",
+          "(res://src/controllers/entities/actions/attacks/heavy_attack.gd):<GDScript#-9223371994274200056>"
+        ],
+        "last_stand": true
+      },
+      "skills": {
+        "UNARMED": {
+          "level": 33,
+          "exp": 10770,
+          "step": 10,
+          "cap": 10890,
+          "bonus": 14.39
+        }
+      },
+      "resources": {
+        "food": 0.0,
+        "total": 1619
+      },
+      "encounters": {
+        "active": true,
+        "done": 834
+      },
+      "inventory": {
+        "manager": "<RefCounted#-9223371793249586402>",
+        "equipped": {
+          "weapon": "<Node2D#243621966623>"
+        }
+      }
+    }
+  ],
+  "2026-06-18 16:44:32": [
+    {
+      "uid": 0,
+      "controller": "PlayerController:<Node#243487748887>",
+      "world": "World:<Sprite2D#49895441868>",
+      "grid_idx": [
+        34,
+        16
+      ],
+      "class": 3,
+      "class_v": "TACTICIAN",
+      "stats": {
+        "level": 15,
+        "exp": 1008,
+        "exp_cap": 2250,
+        "exp_step": 10,
+        "health": -16.41,
+        "max_health": 250,
+        "base_health": 100,
+        "regen_rate": 0.177,
+        "attack": 27.5,
+        "base_attack": 5,
+        "avg_dealt": 81.19,
+        "largest_hit": 124.91,
+        "largest_taken": 41.13,
+        "hit_chance": 0.66,
+        "crit_chance": 0.134,
+        "crit_bonus": 1.6,
+        "dodge_chance": 0.074,
+        "armor": 0,
+        "armor_reduc": 0.0,
+        "stamina": 15,
+        "strength": 15,
+        "perception": 30
+      },
+      "actions": {
+        "controller": "ActionController:<Node#243588412189>",
+        "action": null,
+        "last_action": "BasicAttack",
+        "abilities": [
+          "(res://src/controllers/entities/actions/attacks/tactician/gamble_attack.gd):<GDScript#-9223371993334675955>",
+          "(res://src/controllers/entities/actions/attacks/heavy_attack.gd):<GDScript#-9223371994274200056>"
+        ],
+        "last_stand": true
+      },
+      "skills": {
+        "UNARMED": {
+          "level": 31,
+          "exp": 9010,
+          "step": 10,
+          "cap": 9610,
+          "bonus": 13.86
+        }
+      },
+      "resources": {
+        "food": 0.0,
+        "total": 1467
+      },
+      "encounters": {
+        "active": true,
+        "done": 707
+      },
+      "inventory": {
+        "manager": "<RefCounted#-9223371793249586402>",
+        "equipped": {
+          "weapon": "<Node2D#243621966623>"
+        }
+      }
+    }
+  ],
+  "2026-06-18 17:10:41": [
+    {
+      "uid": 0,
+      "controller": "PlayerController:<Node#243487748887>",
+      "world": "World:<Sprite2D#49895441868>",
+      "grid_idx": [
+        10,
+        10
+      ],
+      "class": 3,
+      "class_v": "TACTICIAN",
+      "stats": {
+        "level": 16,
+        "exp": 575,
+        "exp_cap": 2560,
+        "exp_step": 10,
+        "health": -23.34,
+        "max_health": 260,
+        "base_health": 100,
+        "regen_rate": 0.1786,
+        "attack": 29.0,
+        "base_attack": 5,
+        "avg_dealt": 95.29,
+        "largest_hit": 126.7,
+        "largest_taken": 47.06,
+        "hit_chance": 0.66,
+        "crit_chance": 0.1372,
+        "crit_bonus": 1.5,
+        "dodge_chance": 0.0772,
+        "armor": 0,
+        "armor_reduc": 0.0,
+        "stamina": 16,
+        "strength": 16,
+        "perception": 32
+      },
+      "actions": {
+        "controller": "ActionController:<Node#243588412189>",
+        "action": null,
+        "last_action": "HeavyAttack",
+        "abilities": [
+          "(res://src/controllers/entities/actions/attacks/tactician/gamble_attack.gd):<GDScript#-9223371993334675955>",
+          "(res://src/controllers/entities/actions/attacks/heavy_attack.gd):<GDScript#-9223371994274200056>"
+        ],
+        "metrics": {
+          "CRITS": 588,
+          "MISSES": 3060,
+          "HITS": 5121,
+          "DODGES": 549
+        },
+        "last_stand": true
+      },
+      "skills": {
+        "UNARMED": {
+          "level": 33,
+          "exp": 10280,
+          "step": 10,
+          "cap": 10890,
+          "bonus": 14.39
+        }
+      },
+      "resources": {
+        "food": 0.0,
+        "total": 1576
+      },
+      "encounters": {
+        "active": true,
+        "done": 764
+      },
+      "inventory": {
+        "manager": "<RefCounted#-9223371793249586402>",
+        "equipped": {
+          "weapon": "<Node2D#243621966623>"
+        }
+      }
+    }
+  ],
+  "2026-06-18 17:20:24": [],
+  "2026-06-18 17:35:11": [
+    {
+      "uid": 0,
+      "controller": "PlayerController:<Node#243487748887>",
+      "world": "World:<Sprite2D#49895441868>",
+      "grid_idx": [
+        31,
+        12
+      ],
+      "class": 3,
+      "class_v": "TACTICIAN",
+      "stats": {
+        "level": 21,
+        "exp": 2787,
+        "exp_cap": 4410,
+        "exp_step": 10,
+        "health": -39.68,
+        "max_health": 310,
+        "base_health": 100,
+        "regen_rate": 0.1881,
+        "attack": 36.5,
+        "base_attack": 5,
+        "avg_dealt": 79.35,
+        "largest_hit": 135.2,
+        "largest_taken": 77.37,
+        "hit_chance": 0.66,
+        "crit_chance": 0.1562,
+        "crit_bonus": 1.5,
+        "dodge_chance": 0.0962,
+        "armor": 0,
+        "armor_reduc": 0.0,
+        "stamina": 21,
+        "strength": 21,
+        "perception": 42
+      },
+      "actions": {
+        "controller": "ActionController:<Node#243588412189>",
+        "action": null,
+        "last_action": "HeavyAttack",
+        "abilities": [
+          "(res://src/controllers/entities/actions/attacks/tactician/gamble_attack.gd):<GDScript#-9223371993334675955>",
+          "(res://src/controllers/entities/actions/attacks/heavy_attack.gd):<GDScript#-9223371994274200056>"
+        ],
+        "metrics": {
+          "HITS": 10648,
+          "MISSES": 6825,
+          "CRITS": 1275,
+          "DODGES": 1320
+        },
+        "last_stand": true
+      },
+      "skills": {
+        "UNARMED": {
+          "level": 47,
+          "exp": 21690,
+          "step": 10,
+          "cap": 22090,
+          "bonus": 17.58
+        }
+      },
+      "resources": {
+        "food": 444.31,
+        "total": 2908
+      },
+      "encounters": {
+        "active": true,
+        "done": 1408
+      },
+      "inventory": {
+        "manager": "<RefCounted#-9223371793249586402>",
+        "equipped": {
+          "weapon": "<Node2D#243621966623>"
+        }
+      }
+    }
+  ],
+  "2026-06-18 17:54:58": [
+    {
+      "uid": 0,
+      "controller": "PlayerController:<Node#243487748887>",
+      "world": "World:<Sprite2D#49895441868>",
+      "grid_idx": [
+        14,
+        3
+      ],
+      "class": 3,
+      "class_v": "TACTICIAN",
+      "stats": {
+        "level": 2,
+        "exp": 33,
+        "exp_cap": 40,
+        "exp_step": 10,
+        "health": -6.71,
+        "max_health": 120,
+        "base_health": 100,
+        "regen_rate": 0.1656,
+        "attack": 8.0,
+        "base_attack": 5,
+        "avg_dealt": 21.87,
+        "largest_hit": 35.25,
+        "largest_taken": 13.85,
+        "hit_chance": 0.66,
+        "crit_chance": 0.1106,
+        "crit_bonus": 1.5,
+        "dodge_chance": 0.0506,
+        "armor": 0,
+        "armor_reduc": 0.0,
+        "stamina": 2,
+        "strength": 2,
+        "perception": 4
+      },
+      "actions": {
+        "controller": "ActionController:<Node#243588412189>",
+        "action": null,
+        "last_action": "BasicAttack",
+        "abilities": [
+          "(res://src/controllers/entities/actions/attacks/tactician/sway_odds_attack.gd):<GDScript#-9223371993334675955>",
+          "(res://src/controllers/entities/actions/attacks/heavy_attack.gd):<GDScript#-9223371994274200056>"
+        ],
+        "metrics": {
+          "HITS": 64,
+          "CRITS": 5,
+          "MISSES": 37,
+          "DODGES": 6
+        },
+        "last_stand": false
+      },
+      "skills": {
+        "UNARMED": {
+          "level": 5,
+          "exp": 170,
+          "step": 10,
+          "cap": 250,
+          "bonus": 4.5
+        }
+      },
+      "resources": {
+        "food": 0.0,
+        "total": 7
+      },
+      "encounters": {
+        "active": true,
+        "done": 4
+      },
+      "inventory": {
+        "manager": "<RefCounted#-9223371793249586402>",
+        "equipped": {
+          "weapon": "<Node2D#243621966623>"
+        }
+      }
+    },
+    {
+      "uid": 0,
+      "controller": "PlayerController:<Node#471758550547>",
+      "world": "World:<Sprite2D#278166242764>",
+      "grid_idx": [
+        14,
+        3
+      ],
+      "class": 3,
+      "class_v": "TACTICIAN",
+      "stats": {
+        "level": 2,
+        "exp": 33,
+        "exp_cap": 40,
+        "exp_step": 10,
+        "health": -9.14,
+        "max_health": 120,
+        "base_health": 100,
+        "regen_rate": 0.1656,
+        "attack": 8.0,
+        "base_attack": 5,
+        "avg_dealt": 37.44,
+        "largest_hit": 32.43,
+        "largest_taken": 13.85,
+        "hit_chance": 0.66,
+        "crit_chance": 0.1106,
+        "crit_bonus": 1.5,
+        "dodge_chance": 0.0506,
+        "armor": 0,
+        "armor_reduc": 0.0,
+        "stamina": 2,
+        "strength": 2,
+        "perception": 4
+      },
+      "actions": {
+        "controller": "ActionController:<Node#471859213849>",
+        "action": null,
+        "last_action": "SwayOddsAttack",
+        "abilities": [
+          "(res://src/controllers/entities/actions/attacks/tactician/sway_odds_attack.gd):<GDScript#-9223371993334675955>",
+          "(res://src/controllers/entities/actions/attacks/heavy_attack.gd):<GDScript#-9223371994274200056>"
+        ],
+        "metrics": {
+          "HITS": 62,
+          "MISSES": 36,
+          "CRITS": 7,
+          "DODGES": 3
+        },
+        "last_stand": false
+      },
+      "skills": {
+        "UNARMED": {
+          "level": 4,
+          "exp": 90,
+          "step": 10,
+          "cap": 160,
+          "bonus": 3.5
+        }
+      },
+      "resources": {
+        "food": 0.0,
+        "total": 7
+      },
+      "encounters": {
+        "active": true,
+        "done": 4
+      },
+      "inventory": {
+        "manager": "<RefCounted#-9223371564978784742>",
+        "equipped": {
+          "weapon": "<Node2D#471892768283>"
+        }
+      }
+    },
+    {
+      "uid": 0,
+      "controller": "PlayerController:<Node#702982142209>",
+      "world": "World:<Sprite2D#509389833676>",
+      "grid_idx": [
+        34,
+        1
+      ],
+      "class": 3,
+      "class_v": "TACTICIAN",
+      "stats": {
+        "level": 4,
+        "exp": 121,
+        "exp_cap": 160,
+        "exp_step": 10,
+        "health": -1.13,
+        "max_health": 140,
+        "base_health": 100,
+        "regen_rate": 0.167,
+        "attack": 11.0,
+        "base_attack": 5,
+        "avg_dealt": 24.39,
+        "largest_hit": 47.09,
+        "largest_taken": 14.67,
+        "hit_chance": 0.66,
+        "crit_chance": 0.112,
+        "crit_bonus": 1.5,
+        "dodge_chance": 0.052,
+        "armor": 0,
+        "armor_reduc": 0.0,
+        "stamina": 4,
+        "strength": 4,
+        "perception": 8
+      },
+      "actions": {
+        "controller": "ActionController:<Node#703082805511>",
+        "action": null,
+        "last_action": "BasicAttack",
+        "abilities": [
+          "(res://src/controllers/entities/actions/attacks/tactician/sway_odds_attack.gd):<GDScript#-9223371993334675955>",
+          "(res://src/controllers/entities/actions/attacks/heavy_attack.gd):<GDScript#-9223371994274200056>"
+        ],
+        "metrics": {
+          "HITS": 264,
+          "DODGES": 23,
+          "MISSES": 177,
+          "CRITS": 33
+        },
+        "last_stand": false
+      },
+      "skills": {
+        "UNARMED": {
+          "level": 7,
+          "exp": 470,
+          "step": 10,
+          "cap": 490,
+          "bonus": 5.7
+        }
+      },
+      "resources": {
+        "food": 0.0,
+        "total": 45
+      },
+      "encounters": {
+        "active": true,
+        "done": 25
+      },
+      "inventory": {
+        "manager": "<RefCounted#-9223371333755193080>",
+        "equipped": {
+          "weapon": "<Node2D#703116359945>"
+        }
+      }
+    }
+  ],
+  "2026-06-18 17:57:20": [],
+  "2026-06-18 17:58:42": [],
+  "2026-06-18 18:00:58": [
+    {
+      "uid": 0,
+      "controller": "PlayerController:<Node#243487748887>",
+      "world": "World:<Sprite2D#49895441868>",
+      "grid_idx": [
+        7,
+        8
+      ],
+      "class": 3,
+      "class_v": "TACTICIAN",
+      "stats": {
+        "level": 17,
+        "exp": 2698,
+        "exp_cap": 2890,
+        "exp_step": 10,
+        "health": -14.02,
+        "max_health": 270,
+        "base_health": 100,
+        "regen_rate": 0.1803,
+        "attack": 30.5,
+        "base_attack": 5,
+        "avg_dealt": 104.89,
+        "largest_hit": 134.09,
+        "largest_taken": 55.35,
+        "hit_chance": 0.66,
+        "crit_chance": 0.1406,
+        "crit_bonus": 1.5,
+        "dodge_chance": 0.0806,
+        "armor": 0,
+        "armor_reduc": 0.0,
+        "stamina": 17,
+        "strength": 17,
+        "perception": 34
+      },
+      "actions": {
+        "controller": "ActionController:<Node#243588412189>",
+        "action": null,
+        "last_action": "SwayOddsAttack",
+        "abilities": [
+          "(res://src/controllers/entities/actions/attacks/tactician/sway_odds_attack.gd):<GDScript#-9223371993334675955>",
+          "(res://src/controllers/entities/actions/attacks/heavy_attack.gd):<GDScript#-9223371994274200056>"
+        ],
+        "metrics": {
+          "HITS": 6569,
+          "MISSES": 3990,
+          "CRITS": 722,
+          "DODGES": 751
+        },
+        "last_stand": true
+      },
+      "skills": {
+        "UNARMED": {
+          "level": 36,
+          "exp": 12590,
+          "step": 10,
+          "cap": 12960,
+          "bonus": 15.11
+        }
+      },
+      "resources": {
+        "food": 11.8,
+        "total": 2002
+      },
+      "encounters": {
+        "active": true,
+        "done": 968
+      },
+      "inventory": {
+        "manager": "<RefCounted#-9223371793249586402>",
+        "equipped": {
+          "weapon": "<Node2D#243621966623>"
+        }
+      }
+    }
+  ],
+  "2026-06-18 18:11:25": [],
+  "2026-06-18 18:14:56": [],
+  "2026-06-18 18:14:59": [
+    {
+      "uid": 0,
+      "controller": "PlayerController:<Node#243487748887>",
+      "world": "World:<Sprite2D#49895441868>",
+      "grid_idx": [
+        27,
+        2
+      ],
+      "class": 3,
+      "class_v": "TACTICIAN",
+      "stats": {
+        "level": 17,
+        "exp": 2040,
+        "exp_cap": 2890,
+        "exp_step": 10,
+        "health": -6.05,
+        "max_health": 270,
+        "base_health": 100,
+        "regen_rate": 0.1803,
+        "attack": 30.5,
+        "base_attack": 5,
+        "avg_dealt": 106.33,
+        "largest_hit": 133.48,
+        "largest_taken": 49.46,
+        "hit_chance": 0.66,
+        "crit_chance": 0.1406,
+        "crit_bonus": 1.5,
+        "dodge_chance": 0.0806,
+        "armor": 0,
+        "armor_reduc": 0.0,
+        "stamina": 17,
+        "strength": 17,
+        "perception": 34
+      },
+      "actions": {
+        "controller": "ActionController:<Node#243588412189>",
+        "action": null,
+        "last_action": "HeavyAttack",
+        "abilities": [
+          "(res://src/controllers/entities/actions/attacks/tactician/sway_odds_attack.gd):<GDScript#-9223371993334675955>",
+          "(res://src/controllers/entities/actions/attacks/heavy_attack.gd):<GDScript#-9223371994274200056>"
+        ],
+        "metrics": {
+          "HITS": 6295,
+          "CRITS": 706,
+          "MISSES": 3836,
+          "DODGES": 625
+        },
+        "last_stand": true
+      },
+      "skills": {
+        "UNARMED": {
+          "level": 35,
+          "exp": 12220,
+          "step": 10,
+          "cap": 12250,
+          "bonus": 14.9
+        }
+      },
+      "resources": {
+        "food": 20.52,
+        "total": 1915
+      },
+      "encounters": {
+        "active": true,
+        "done": 954
+      },
+      "inventory": {
+        "manager": "<RefCounted#-9223371793249586402>",
+        "equipped": {
+          "weapon": "<Node2D#243621966623>"
+        }
+      }
+    }
+  ],
+  "2026-06-18 18:26:54": [
+    {
+      "uid": 0,
+      "controller": "PlayerController:<Node#243487748887>",
+      "world": "World:<Sprite2D#49895441868>",
+      "grid_idx": [
+        26,
+        7
+      ],
+      "class": 1,
+      "class_v": "WANDERER",
+      "stats": {
+        "level": 17,
+        "exp": 104,
+        "exp_cap": 2890,
+        "exp_step": 10,
+        "health": -30.14,
+        "max_health": 440,
+        "base_health": 100,
+        "regen_rate": 0.1939,
+        "attack": 30.5,
+        "base_attack": 5,
+        "avg_dealt": 62.75,
+        "largest_hit": 84.51,
+        "largest_taken": 55.02,
+        "hit_chance": 0.66,
+        "crit_chance": 0.1253,
+        "crit_bonus": 1.5,
+        "dodge_chance": 0.0653,
+        "armor": 0,
+        "armor_reduc": 0.0,
+        "stamina": 34,
+        "strength": 17,
+        "perception": 17
+      },
+      "actions": {
+        "controller": "ActionController:<Node#243588412189>",
+        "action": null,
+        "last_action": "HeavyAttack",
+        "abilities": [
+          "(res://src/controllers/entities/actions/attacks/wanderer/persist_attack.gd):<GDScript#-9223371994005764598>",
+          "(res://src/controllers/entities/actions/attacks/heavy_attack.gd):<GDScript#-9223371994274200056>"
+        ],
+        "metrics": {
+          "HITS": 5579,
+          "MISSES": 3418,
+          "DODGES": 510,
+          "CRITS": 651
+        },
+        "last_stand": false
+      },
+      "skills": {
+        "UNARMED": {
+          "level": 34,
+          "exp": 11390,
+          "step": 10,
+          "cap": 11560,
+          "bonus": 14.69
+        }
+      },
+      "resources": {
+        "food": 0.0,
+        "total": 1605
+      },
+      "encounters": {
+        "active": true,
+        "done": 804
+      },
+      "inventory": {
+        "manager": "<RefCounted#-9223371793249586402>",
+        "equipped": {
+          "weapon": "<Node2D#243621966623>"
+        }
+      }
+    }
   ]
 }

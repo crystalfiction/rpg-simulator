@@ -44,7 +44,7 @@ func interact_with_tile(p: Player, current_tile: Tile):
 		check_resource_surplus(p)
 
 	# log resource acquisition
-	FileLogger.log_message(self , "Resource acquired.")
+	FileLogger.log_message(self, "Resource acquired.")
 	
 	# flag action as complete
 	p.data.actions.action.data.done = true
@@ -130,7 +130,7 @@ func _process_rewards(encounter: Dictionary):
 	var enemy_exp = encounter.n_enemies * map_count
 	self.player.data.stats.exp += self.exp_step + enemy_exp
 
-	FileLogger.log_message(self ,
+	FileLogger.log_message(self,
 		str(self.exp_step + enemy_exp) + " exp rewarded."
 	)
 	
@@ -150,13 +150,13 @@ func _process_rewards(encounter: Dictionary):
 			"exp_rate: " + str(self.exp_step) + " | " +
 			"exp_cap: " + str(self.exp_cap)
 		)
-		FileLogger.log_message(self , msg)
+		FileLogger.log_message(self, msg)
 
 	# log if level up
 	if level_up:
 		# reset player health to max if level up
 		self.player.data.stats.health = self.player.data.stats.max_health
-		FileLogger.log_message(self , self.player.name + " is now level " + str(self.player.data.stats.level))
+		FileLogger.log_message(self, self.player.name + " is now level " + str(self.player.data.stats.level))
 	
 	# if no level up,
 	else:
@@ -192,7 +192,7 @@ func _init_player_entity():
 	new_player.data.controller = self
 	
 	# class
-	var p_class = Player.PlayerClass.TACTICIAN
+	var p_class = Player.PlayerClass.BRUTE
 	new_player.Class = p_class
 	new_player.data.class = new_player.Class
 	new_player.data.class_v = new_player.get_player_class_string()
@@ -245,7 +245,7 @@ func _ready() -> void:
 	# initialize the player entity as scene
 	_init_player_entity()
 	
-	FileLogger.log_message(self , "Player initialized.")
+	FileLogger.log_message(self, "Player initialized.")
 
 
 # Player Processing
@@ -259,14 +259,14 @@ func _check_player(p: Player):
 				p.data.resources.food = 0
 				p.data.stats.health = p.data.stats.max_health
 				p.data.actions.last_stand = true
-				FileLogger.log_message(self , self.player.name +
+				FileLogger.log_message(self, self.player.name +
 					" is taking a last stand!")
 			
 			# no food for last stand, player is dead
 			else:
 				# if player isn't already queued for deletion,
 				if !p.is_queued_for_deletion():
-					FileLogger.log_message(self ,
+					FileLogger.log_message(self,
 						str(self.player.data),
 						"INFO",
 						FileLogger.Outputs.find_key(
@@ -279,7 +279,7 @@ func _check_player(p: Player):
 		else:
 			# if player isn't already queued for deletion,
 			if !p.is_queued_for_deletion():
-				FileLogger.log_message(self ,
+				FileLogger.log_message(self,
 					str(self.player.data),
 					"INFO",
 					FileLogger.Outputs.find_key(
