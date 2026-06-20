@@ -33,20 +33,26 @@ func _apply_erosion(curr_terrain: Array) -> Array:
 			var w = curr_terrain[x][y]
 			# apply erosion by sum
 			w.data.weather.erosion += w.data.weather.erosion
-			# reduce soil density by new erosion sum
+			# apply new erosion value to soil density
 			var new_soil_density = clamp(
 				w.data.terrain.density - w.data.weather.erosion,
-				self.parent.soil_density_min,
-				self.parent.soil_density_max
+				0, 1
 			)
 			w.data.terrain.density = new_soil_density
+			# get neighbors
+			var neighbors = self.Utils.get_neighbors(w, curr_terrain)
+			for n in neighbors:
+				n.data.terrain.density = clamp(
+					n.data.terrain.density - (w.data.weather.erosion * n.data.terrain.density), # 50% of source tile erosion value
+					0, 1
+				)
 			# update texture string
 			w.data.terrain.texture = self.Utils.get_soil_texture(w)
 			# update metrics
 			count += 1
 			avg_density += w.data.terrain.density
 			avg_erosion += w.data.weather.erosion
-			
+	
 	# update metrics
 	avg_erosion /= count
 	avg_density /= count
@@ -72,9 +78,8 @@ func _calculate_erosion(curr_terrain: Array) -> Dictionary:
 			# tile
 			var w = curr_terrain[x][y]
 			var erosion = (
-				((w.data.weather.water) *
-				(1 + w.data.weather.rainfall) *
-				(1 - w.data.weather.drainage) *
+				((w.data.weather.rainfall) *
+				(1 + w.data.weather.water) *
 				(1 - w.data.terrain.density)) * erosion_factor
 			)
 			w.data.weather.erosion = erosion
@@ -130,8 +135,6 @@ func _calculate_water(curr_terrain: Array) -> Dictionary:
 
 ## processes weather for the current weather_map
 func _optimize_weather(curr_terrain: Terrain) -> Terrain:
-	FileLogger.log_message(self, "Optimizing weather...")
-	
 	# calculate features
 	var tile_map = curr_terrain.data.tile_map
 	var new_metrics: Dictionary
@@ -156,22 +159,27 @@ func _optimize_weather(curr_terrain: Terrain) -> Terrain:
 		final = results[0]
 		total_erosion += results[1]
 	
+	# normalize terrain to biome range
+	tile_map = self.parent._normalize_soil(tile_map,
+		curr_terrain.data.biome.data.ranges.density[0],
+		curr_terrain.data.biome.data.ranges.density[1])
 	
 	# curr_terrain is optimized and valid
 	self.erosion_complete = true
 	total_erosion /= n_cycles
-	new_metrics.avg_erosion = snapped(total_erosion, 0.0001)
+	new_metrics.avg_erosion += snapped(total_erosion, 0.0001)
+	# var final = curr_terrain.data.tile_map
 	
 	self.weather_iterations += 1
 	self.weather_optimized = true
 
 	# log metrics if complete
 	var msg = (
-		"avg_rainfall: " + str(snapped(new_metrics.avg_rainfall, 0.001)) + " | " +
-		"avg_drainage: " + str(snapped(new_metrics.avg_drainage, 0.001)) + " | " +
-		"avg_water: " + str(snapped(new_metrics.avg_water, 0.001)) + " | " +
-		"avg_erosion: " + str(snapped(new_metrics.avg_erosion, 0.0001)) + " | " +
-		"erosion_cycles: " + str(snapped(self.erosion_cycle, 0.001))
+		"avg_rainfall=" + str(snapped(new_metrics.avg_rainfall, 0.001)) + ", " +
+		"avg_drainage=" + str(snapped(new_metrics.avg_drainage, 0.001)) + ", " +
+		"avg_water=" + str(snapped(new_metrics.avg_water, 0.001)) + ", " +
+		"avg_erosion=" + str(snapped(new_metrics.avg_erosion, 0.001)) + ", " +
+		"erosion_cycles=" + str(snapped(self.erosion_cycle, 0.001))
 	)
 	FileLogger.log_message(self, msg)
 

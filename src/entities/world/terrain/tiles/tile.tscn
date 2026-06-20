@@ -1,16 +1,18 @@
 [gd_scene format=3 uid="uid://gg1b5vs25d6r"]
 
-[ext_resource type="Script" uid="uid://cs6ty2gbfts44" path="res://src/entities/world/tiles/tile.gd" id="1_1rpgm"]
+[ext_resource type="Script" uid="uid://cs6ty2gbfts44" path="res://src/entities/world/terrain/tiles/tile.gd" id="1_1rpgm"]
 [ext_resource type="Gradient" uid="uid://chwasyj7f5pin" path="res://src/assets/world/tile/soil_5YR.tres" id="1_f75nv"]
 [ext_resource type="FontFile" uid="uid://dvjb12pu7hof1" path="res://src/assets/JetBrainsMono-Medium.ttf" id="3_mk1qm"]
 
 [sub_resource type="GradientTexture2D" id="GradientTexture2D_mk1qm"]
 gradient = ExtResource("1_f75nv")
 
-[node name="Tile" type="Sprite2D" unique_id=1023157020 node_paths=PackedStringArray("label_resources", "label_grid_x", "label_grid_y", "tile_terrain") groups=["tiles"]]
+[node name="Tile" type="Sprite2D" unique_id=1023157020 node_paths=PackedStringArray("label_density", "label_erosion", "label_resources", "label_grid_x", "label_grid_y", "tile_terrain") groups=["tiles"]]
 texture = SubResource("GradientTexture2D_mk1qm")
 centered = false
 script = ExtResource("1_1rpgm")
+label_density = NodePath("Terrain/Labels/TerrainData/Density")
+label_erosion = NodePath("Terrain/Labels/TerrainData/Erosion")
 label_resources = NodePath("Terrain/Labels/Interactables/Resources")
 label_grid_x = NodePath("Terrain/Labels/GridLabels/x")
 label_grid_y = NodePath("Terrain/Labels/GridLabels/y")
@@ -30,7 +32,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 0
+theme_override_constants/separation = -3
 alignment = 1
 
 [node name="GridLabels" type="HBoxContainer" parent="Terrain/Labels" unique_id=1984204596]
@@ -58,5 +60,26 @@ layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_constants/line_spacing = -6
 theme_override_fonts/font = ExtResource("3_mk1qm")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TerrainData" type="VBoxContainer" parent="Terrain/Labels" unique_id=1774146179]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = -3
+alignment = 1
+
+[node name="Density" type="Label" parent="Terrain/Labels/TerrainData" unique_id=1748745256]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_mk1qm")
+theme_override_font_sizes/font_size = 9
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Erosion" type="Label" parent="Terrain/Labels/TerrainData" unique_id=1368355900]
+visible = false
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_mk1qm")
+theme_override_font_sizes/font_size = 9
 horizontal_alignment = 1
 vertical_alignment = 1

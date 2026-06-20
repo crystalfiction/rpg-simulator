@@ -100,13 +100,13 @@ func _init_controllers() -> void:
 	var new_terrain_controller = _init_terrain_controller()
 	self.terrain_controller = new_terrain_controller
 
-	# # players
-	# var new_player_controller = _init_player_controller()
-	# self.player_controller = new_player_controller
+	# players
+	var new_player_controller = _init_player_controller()
+	self.player_controller = new_player_controller
 
-	# # enemies
-	# var new_enemy_controller = _init_enemy_controller()
-	# self.enemy_controller = new_enemy_controller
+	# enemies
+	var new_enemy_controller = _init_enemy_controller()
+	self.enemy_controller = new_enemy_controller
 	
 	# time
 	var new_time_controller = _init_time_controller()
@@ -124,12 +124,12 @@ func _ready() -> void:
 	# get utils
 	self.Utils = $"/root/Utils"
 	
-	FileLogger.log_message(self, "Initializing world...")
+	FileLogger.log_message(self, "::INITIALIZING::")
 	
 	# initialize controller dependencies
 	_init_controllers()
 	
-	FileLogger.log_message(self, "World initialized.")
+	FileLogger.log_message(self, "::INITIALIZED::")
 
 
 # World Processing

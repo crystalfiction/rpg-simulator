@@ -159,8 +159,8 @@ func _make_data_label(
 	
 	new_data_label.text = data_string
 	
-	self [container].add_child(new_name_label)
-	self [container].add_child(new_data_label)
+	self[container].add_child(new_name_label)
+	self[container].add_child(new_data_label)
 
 	var new_label_entry = label_entry.duplicate()
 	new_label_entry.obj = obj
@@ -244,7 +244,7 @@ func _check_obj_labels(obj: Variant, curr_labels: Array):
 
 ## removes lingering name labels in stats container
 func _remove_lingerers(container: String):
-	var lingering = self [container].get_children()
+	var lingering = self[container].get_children()
 	for l in lingering:
 		if is_instance_valid(l):
 			if !l.is_queued_for_deletion():
@@ -288,7 +288,8 @@ func _init_world_stats():
 	_make_data_labels(biome, "world_stats")
 	# time data
 	var t = self.world.data.controller.time_controller
-	_make_data_labels(t, "world_stats")
+	if t:
+		_make_data_labels(t, "world_stats")
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:

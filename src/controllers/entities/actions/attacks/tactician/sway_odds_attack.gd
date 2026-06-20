@@ -23,7 +23,7 @@ func calculate_multiplier():
     self.data.multiplier += snapped(bonus, 0.01)
     var curr_health: float = self.data.src.data.stats.health
     var max_health: float = self.data.src.data.stats.max_health
-    var new_health: float = curr_health + (curr_health * ((self.data.multiplier - 1) / 10))
+    var new_health: float = curr_health + (curr_health * (1 + (self.data.multiplier - 1) / 10))
     self.data.src.data.stats.health = clamp(new_health, 0, max_health)
 
 # initialize data before _ready

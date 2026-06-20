@@ -16,10 +16,7 @@ var grid_scale = Vector2i(36, 36)
 
 var terrain_iterations: int
 
-var soil_density_min = 0.22 # min increased to account for erosion
-var soil_density_max = 1.00
-var soil_variance = 0.55
-var soil_texture_factor = 0.33
+var soil_variance = 0.066
 
 
 # Terrain Helpers
@@ -29,64 +26,12 @@ func _handle_terrain(curr_terrain: Terrain):
 	# update world terrain to current terrain
 	self.world.data.terrain = curr_terrain
 
-
-# Terrain Simulation
-
-## calculates new soil values for the passed tile,  
-## factors in neighbor data from the passed tile map,
-## returns array of passed tile and its metrics
-func _calculate_soil(tile: Tile, terrain_map: Array) -> Array:
-	# define metrics
-	var n_avg_dist = 0
-	var n_textures = []
-	var n_avg_density = 0
-	var n_count = 0
-	var neighbors = self.Utils.get_neighbors(tile, terrain_map)
-	var s = tile.data.terrain.density
-	# get neighbor data
-	for n in neighbors:
-		# get distance to neighbor
-		var n_distance = n.data.terrain.density - s
-		# update metrics
-		n_avg_dist += n_distance
-		n_avg_density += n.data.terrain.density
-		n_count += 1
-		n_textures.append(n.data.terrain.texture)
-		
-	# calculate neighbor avg
-	n_avg_density /= n_count
-	n_avg_dist /= n_count
-	var avg_texture = self.Utils.common_string(n_textures)
-	
-	# lerp soil value towards total avg distance to each neighbor
-	var d_scalar = n_avg_dist
-	var t_scalar = tile.data.terrain[avg_texture] - s
-	
-	## apply d_scalar to soil density
-	## representing tendency towards neighboring soil densities
-	var new_s_neighbors = clamp(
-		lerp(
-			(s), (s + d_scalar), (1 - soil_variance)
-		), soil_density_min, soil_density_max
-	)
-	## apply t_scalar to soil density
-	## representing tendency towards soil texture classification
-	new_s_neighbors = clamp(
-		lerp(
-			(new_s_neighbors), (new_s_neighbors + t_scalar), soil_texture_factor * (1 - soil_variance)
-		), soil_density_min, soil_density_max
-	)
-	tile.data.terrain.density = new_s_neighbors
-		
-	# return the passed entity with updated soil value
-	return [tile, n_avg_density, n_avg_dist, avg_texture]
-
 ## normalizes soil values to soil_density_min, soil_density_max
 ## returns normalized terrain tile_map
 func _normalize_soil(
 	tile_map: Array,
-	sd_min: float = soil_density_min,
-	sd_max: float = soil_density_max
+	sd_min: float,
+	sd_max: float
 ) -> Array:
 	var min_s = INF
 	var max_s = - INF
@@ -113,6 +58,83 @@ func _normalize_soil(
 	avg = avg / count
 	return [tile_map, avg]
 
+## normalizes values in a 2d array to min_v, max_v and returns remapped array
+func normalize_values(arr: Array, min_v: Variant, max_v: Variant) -> Array:
+	var min_s = INF
+	var max_s = - INF
+	for x in range(arr.size()):
+		for y in range(arr[x].size()):
+			min_s = min(min_s, arr[x][y])
+			max_s = max(max_s, arr[x][y])
+	
+	var range_val = max_s - min_s
+	if range_val == 0: return arr
+	for x in range(arr.size()):
+		for y in range(arr[x].size()):
+			# remap soil densities
+			arr[x][y] = remap(
+				arr[x][y],
+				min_s, max_s,
+				min_v, max_v)
+	return arr
+
+## makes a 2d noise array given noise obj and dimensions
+## returns 2d array
+func _make_noise_array(noise: FastNoiseLite, dimensions: Vector2i) -> Array:
+	var noise_array = []
+	for x in range(dimensions.x):
+		noise_array.append([])
+		for y in range(dimensions.y):
+			noise_array[x].append(noise.get_noise_2d(x, y))
+	return noise_array
+
+
+# Terrain Simulation
+
+## calculates new soil values for the passed tile,  
+## factors in neighbor data from the passed tile map,
+## returns array of passed tile and its metrics
+func _calculate_soil(tile: Tile, terrain: Terrain) -> Array:
+	# define metrics
+	var n_avg_dist = 0
+	var n_textures = []
+	var n_avg_density = 0
+	var n_count = 0
+	var tile_map = terrain.data.tile_map
+	var neighbors = self.Utils.get_neighbors(tile, tile_map)
+	var s = tile.data.terrain.density
+	# get neighbor data
+	for n in neighbors:
+		# get distance to neighbor
+		var n_distance = n.data.terrain.density - s
+		# update metrics
+		n_avg_dist += n_distance
+		n_avg_density += n.data.terrain.density
+		n_count += 1
+		n_textures.append(n.data.terrain.texture)
+		
+	# calculate neighbor avg
+	n_avg_density /= n_count
+	n_avg_dist /= n_count
+	var avg_texture = self.Utils.common_string(n_textures)
+	
+	# lerp soil value towards total avg distance to each neighbor
+	var d_scalar = n_avg_dist
+	
+	## apply d_scalar to soil density
+	## representing tendency towards neighboring soil densities
+	var sd_min = terrain.data.biome.data.ranges.density[0]
+	var sd_max = terrain.data.biome.data.ranges.density[1]
+	var new_s_neighbors = clamp(
+		lerp(
+			(s), (s + d_scalar), (1 - (soil_variance * 15))
+		), sd_min, sd_max
+	)
+	tile.data.terrain.density = new_s_neighbors
+		
+	# return the passed entity with updated soil value
+	return [tile, n_avg_density, n_avg_dist, avg_texture]
+
 ## optimizes soil data in the world tile map,
 ## returns result flag
 func _optimize_soil(terrain: Terrain) -> Array:
@@ -126,7 +148,7 @@ func _optimize_soil(terrain: Terrain) -> Array:
 		for y in range(tile_map[x].size()):
 			# do something with soil value
 			var t = tile_map[x][y]
-			var new_t = _calculate_soil(t, tile_map)
+			var new_t = _calculate_soil(t, terrain)
 			# update tile_map
 			tile_map[x][y] = new_t[0]
 			avg_density += new_t[1]
@@ -136,7 +158,9 @@ func _optimize_soil(terrain: Terrain) -> Array:
 
 	# apply normalization to terrain soil density
 	# according to biome if one exists
-	var norm_soil = _normalize_soil(tile_map)
+	var sd_min = terrain.data.biome.data.ranges.density[0]
+	var sd_max = terrain.data.biome.data.ranges.density[1]
+	var norm_soil = _normalize_soil(tile_map, sd_min, sd_max)
 	tile_map = norm_soil[0]
 	avg_density = norm_soil[1]
 	
@@ -150,7 +174,7 @@ func _optimize_soil(terrain: Terrain) -> Array:
 	}
 
 	# define completion threshold
-	var threshold = soil_variance / 1.5
+	var threshold = soil_variance
 	var condition = (avg_dist_sq <= threshold)
 	
 	# determine if conditions met
@@ -210,44 +234,60 @@ func _optimize_terrain(terrain: Terrain) -> Terrain:
 
 ## accepts a terrain object and
 ## returns a terrain object with initialized soil values in tile_map
-func _init_soil(terrain: Terrain, biome: Biome = null) -> Terrain:
+func _init_soil(terrain: Terrain) -> Terrain:
+	# initialize new noise map for initial soil values
+	var noise: FastNoiseLite = FastNoiseLite.new()
+	noise.seed = randi()
+	noise.noise_type = FastNoiseLite.TYPE_SIMPLEX
+	noise.frequency = self.soil_variance
+	noise.fractal_type = FastNoiseLite.FRACTAL_FBM
+	noise.fractal_octaves = 3
+	var noise_map = _make_noise_array(noise, self.grid_dimensions)
+	noise_map = normalize_values(
+		noise_map,
+		terrain.data.biome.data.ranges.density[0],
+		terrain.data.biome.data.ranges.density[1])
+	
 	var tile_map = terrain.data.tile_map
+	var avg_density = 0.0
+	var avg_textures = []
+	var count = 0
 	for x in range(tile_map.size()):
 		for y in range(tile_map[x].size()):
 			var t = tile_map[x][y]
 			# initialize soil data
-			if biome == null:
-				var s_types = 3
-				var sand = randf_range(self.soil_density_min, self.soil_density_max)
-				var silt = randf_range(self.soil_density_min, self.soil_density_max)
-				var clay = randf_range(self.soil_density_min, self.soil_density_max)
-				var density = (sand + clay + silt)
-				t.data.terrain = {
-					"sand": sand / s_types,
-					"silt": silt / s_types,
-					"clay": clay / s_types,
-					"density": density / s_types
-				}
-				# get verbose soil texture
-				t.data.terrain.texture = self.Utils.get_soil_texture(t)
-			
-			# biome passed,
-			else:
-				# update tile data according to biome
-				var s_types = 3
-				var sand = randf_range(biome.data.ranges.density[0], biome.data.ranges.density[1])
-				var silt = randf_range(biome.data.ranges.density[0], biome.data.ranges.density[1])
-				var clay = randf_range(biome.data.ranges.density[0], biome.data.ranges.density[1])
-				var density = (sand + clay + silt)
-				t.data.terrain = {
-					"sand": sand / s_types,
-					"silt": silt / s_types,
-					"clay": clay / s_types,
-					"density": density / s_types
-				}
-				# get verbose soil texture
-				t.data.terrain.texture = self.Utils.get_soil_texture(t)
-			
+			# var s_types = 3
+			var biome = terrain.data.biome
+			var density = noise_map[x][y]
+			var sand = randf_range(biome.data.ranges.density[0], biome.data.ranges.density[1])
+			var silt = randf_range(biome.data.ranges.density[0], biome.data.ranges.density[1])
+			var clay = randf_range(biome.data.ranges.density[0], biome.data.ranges.density[1])
+			sand /= density
+			silt /= density
+			clay /= density
+			t.data.terrain = {
+				"sand": sand * density,
+				"silt": silt * density,
+				"clay": clay * density,
+				"density": density
+			}
+			# get verbose soil texture
+			t.data.terrain.texture = self.Utils.get_soil_texture(t)
+			# update metrics
+			avg_density += density
+			avg_textures.append(t.data.terrain.texture)
+			count += 1
+	
+	# update metrics
+	avg_density /= count
+	terrain.data.metrics.avg_density = snapped(avg_density, 0.001)
+	var avg_texture = self.Utils.common_string(avg_textures)
+	terrain.data.metrics.avg_texture = avg_texture
+
+	FileLogger.log_message(self,
+		"avg_density=" + str(snapped(avg_density, 0.001)) + ", " +
+		"avg_texture=" + avg_texture)
+
 	# update terrain
 	terrain.data.tile_map = tile_map
 	terrain.data.map_count += 1
@@ -380,19 +420,23 @@ func _ready() -> void:
 	# get utils
 	self.Utils = $"/root/Utils"
 
+	FileLogger.log_message(self, "::INITIALIZING::")
+
 	# DEV: get random biome
-	# var biomes = Biome.BiomeClass
-	# var r_biome = biomes.values().pick_random()
-	# var new_biome = biomes.get(r_biome)
+	var biomes = Biome.BiomeClass
+	var r_biome = biomes.values().pick_random()
+	var biome = Biome.new(r_biome)
 
 	# DEV: set biome manually
-	var biome_n = Biome.BiomeClass.DESERT
-	var biome = Biome.new(biome_n)
+	# var biome_n = Biome.BiomeClass.DESERT
+	# var biome = Biome.new(biome_n)
 
 	# initialize terrain entity
 	var new_terrain = _init_terrain(biome)
+	
+	# FIXME: reconsider terrain optimization with noise as source
 	# optimize terrain
-	new_terrain = _optimize_terrain(new_terrain)
+	# new_terrain = _optimize_terrain(new_terrain)
 
 	# initialize terrain weather controller
 	var new_weather_controller = _init_weather(new_terrain)
@@ -408,10 +452,13 @@ func _ready() -> void:
 
 	# update world terrain to new terrain
 	self.world.data.terrain = new_terrain
+
 	# add terrain to world tree
 	self.world.add_child(new_terrain)
 
+	FileLogger.log_message(self, "::INITIALIZED::")
 
+	
 # Terrain Processing
 
 ## generates new terrain object and saves to world.data.terrain
@@ -422,13 +469,13 @@ func _generate_terrain(curr_terrain: Terrain) -> void:
 	var new_terrain = curr_terrain
 
 	# reinitialize soil
-	new_terrain = _init_soil(new_terrain, curr_terrain.data.biome)
+	new_terrain = _init_soil(new_terrain)
 
-	# optimize terrain
-	new_terrain = _optimize_terrain(new_terrain)
+	# # optimize terrain
+	# new_terrain = _optimize_terrain(new_terrain)
 
-	# add callback to terrain for calling on data change
-	new_terrain.data.on_change = _handle_terrain.bind(new_terrain)
+	# # add callback to terrain for calling on data change
+	# new_terrain.data.on_change = _handle_terrain.bind(new_terrain)
 
 	# generate weather on terrain
 	self.weather_controller.terrain = new_terrain

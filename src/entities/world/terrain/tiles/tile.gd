@@ -90,6 +90,22 @@ func _update_label_text(tile_data: Dictionary):
 	]
 	for l in labels:
 		# update resource labels
+		if "terrain" in keys:
+			if l == self.label_density:
+				var new_text = ""
+				if tile_data.terrain.density:
+					new_text = str(snapped(tile_data.terrain.density, 0.01))
+				l.text = new_text
+				l.add_theme_color_override("font_color", Color(0, 0, 0, tile_data.terrain.density + 0.11))
+		
+		if "weather" in keys:
+			if l == self.label_erosion:
+				var new_text = ""
+				if tile_data.terrain.density:
+					new_text = str(snapped(tile_data.weather.erosion, 0.001))
+				l.text = new_text
+				l.add_theme_color_override("font_color", Color(0, 0, 0, tile_data.weather.erosion + 0.5))
+
 		if "resources" in keys:
 			if l == self.label_resources:
 				var new_text = ""

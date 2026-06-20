@@ -76,7 +76,7 @@ func _unhandled_input(event: InputEvent) -> void:
 func _ready() -> void:
 	# get FileLogger
 	self.FileLogger = $"/root/FileLogger"
-	FileLogger.log_message(self , "Time initialized.")
+	FileLogger.log_message(self, "::INITIALIZED::")
 
 
 # Time Processing
@@ -84,10 +84,9 @@ func _ready() -> void:
 ## checks whether time cycle conditions are currently valid
 func _check_cycle_conditions() -> bool:
 	var conditions = (
+		self.parent.player_controller &&
 		self.world &&
-		self.world.data.terrain &&
-		"weather" in self.world.data.terrain.data &&
-		"resources" in self.world.data.terrain.data
+		self.world.data.terrain
 	)
 	return true if conditions else false
 
@@ -111,7 +110,7 @@ func _process_cycle(delta: float):
 		self.cycling = true
 		_update_time_stats(self.cycles)
 		if self.FileLogger:
-			FileLogger.log_message(self , "Starting cycle " + str(self.cycles))
+			FileLogger.log_message(self, "::Starting cycle " + str(self.cycles) + "...")
 	else:
 		self.cycling = false
 
