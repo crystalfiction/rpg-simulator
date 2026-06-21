@@ -10,7 +10,7 @@ var init_data = {
 
 # initialize data before _ready
 func _init() -> void:
-    super ()
+    super()
     # init action type
     self.Type = self.ActionType.ATTACK
     # init attack type

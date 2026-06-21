@@ -38,7 +38,7 @@ var label_entry = {
 	"label": null,
 }
 
-var string_n := 12
+var string_n := 10
 
 
 func _get_substring(string: String, n: int) -> String:
@@ -149,7 +149,7 @@ func _make_data_label(
 
 	new_name_label.clip_text = true
 	new_name_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	new_name_label.custom_minimum_size = Vector2(160, 0)
+	new_name_label.custom_minimum_size = Vector2(140, 0)
 
 	var new_data_label = Label.new()
 	new_data_label.label_settings = self.stat_label_settings
@@ -186,7 +186,7 @@ func _make_data_labels(obj: Variant, container: String):
 		0: ["stats", "skills", "actions", "resources", "inventory"]
 	}
 	var enemy_filter = {
-		0: ["stats", "skills", "actions"]
+		0: ["stats"]
 	}
 	for k in obj.data:
 		if (
@@ -301,7 +301,7 @@ func _ready() -> void:
 	# define label settings
 	var new_stat_label_settings = LabelSettings.new()
 	new_stat_label_settings.font = preload("res://src/assets/JetBrainsMono-Medium.ttf")
-	new_stat_label_settings.font_size = 13
+	new_stat_label_settings.font_size = 12
 	self.stat_label_settings = new_stat_label_settings # define label settings
 
 	# init stat panels

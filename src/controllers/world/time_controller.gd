@@ -7,14 +7,20 @@ var enemy_controller: Controller
 var encounter_controller: Controller
 # components
 var frames: float = 0.0
-var time_scale: float = 60.0
+# cycles-per-second at 1x (realtime)
+# rates above 1 have headroom to fire more often, up to the per-frame cap (~60/sec).
+var time_scale: float = 10.0
+# frames accumulated per cycle; one cycle fires when this threshold is reached
+const CYCLE_INTERVAL: float = 1.0
+# speed multipliers: 0.5 == half speed, 1 == realtime, >1 == faster than realtime
 var frame_rates: Array = [
-	10,
-	5,
-	1
+	0.5,
+	1.0,
+	3.0, # dev speed
 ]
-# default to middle index if available
-var frame_rate: int = frame_rates[floor(frame_rates.size() / 2.0)] if frame_rates.size() > 2 else frame_rates[0]
+# index into frame_rates; default to realtime (1.0) if present, else the middle
+var frame_rate_index: int = frame_rates.find(1.0) if frame_rates.has(1.0) else int(floor(frame_rates.size() / 2.0))
+var frame_rate: float = frame_rates[frame_rate_index]
 
 var cycling: bool = false
 var cycles: int = 0
@@ -60,17 +66,15 @@ func _unhandled_input(event: InputEvent) -> void:
 
 	# shortcuts: =
 	if event.is_action_pressed("world_tick_inc"):
-		var current_speed = self.frame_rates.find(self.frame_rate)
-		var new_speed = clamp(current_speed + 1, 0, self.frame_rates.size() - 1)
-		self.frame_rate = self.frame_rates[new_speed]
-		print("World tick rate: " + str(self.frame_rate))
-	
+		self.frame_rate_index = clamp(self.frame_rate_index + 1, 0, self.frame_rates.size() - 1)
+		self.frame_rate = self.frame_rates[self.frame_rate_index]
+		print("World tick rate: " + str(self.frame_rate) + "x")
+
 	# shortcuts: -
 	if event.is_action_pressed("world_tick_dec"):
-		var current_speed = self.frame_rates.find(self.frame_rate)
-		var new_speed = clamp(current_speed - 1, 0, self.frame_rates.size() - 1)
-		self.frame_rate = self.frame_rates[new_speed]
-		print("World tick rate: " + str(self.frame_rate))
+		self.frame_rate_index = clamp(self.frame_rate_index - 1, 0, self.frame_rates.size() - 1)
+		self.frame_rate = self.frame_rates[self.frame_rate_index]
+		print("World tick rate: " + str(self.frame_rate) + "x")
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -98,14 +102,17 @@ func _process_cycle(delta: float):
 		self.cycling = false
 		return
 
-	# accumulate frames using delta to be framerate-independent
-	frames += delta * time_scale
+	# accumulate frames using delta, scaled by the speed multiplier so that
+	# higher frame_rate == faster than realtime and <1 == slower
+	frames += delta * time_scale * self.frame_rate
 
-	var interval = float(self.frame_rate)
 	# if we've reached or passed the interval, consume interval and advance cycle
-	if frames >= interval:
+	if frames >= CYCLE_INTERVAL:
 		# consume the interval (allow leftover for next interval)
-		frames -= interval
+		frames -= CYCLE_INTERVAL
+		# consumers step at most once per frame, so drop any surplus beyond a
+		# single interval to keep `frames` bounded when speed exceeds the cap
+		frames = min(frames, CYCLE_INTERVAL)
 		self.cycles += 1
 		self.cycling = true
 		_update_time_stats(self.cycles)

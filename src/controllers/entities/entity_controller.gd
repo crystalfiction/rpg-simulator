@@ -1,8 +1,7 @@
 class_name EntityController extends Controller
 
 # components
-var skill_chance: float = 0.25
-
+var last_cycle: int = 0
 
 func _calculate_skill(skill: Dictionary):
 	var step = 10
@@ -67,42 +66,58 @@ func _calculate_exp(e: Entity) -> Dictionary:
 ## returns updated stats dictionary
 func _calculate_attributes(e: Entity) -> Dictionary:
 	var stats = e.data.stats
+
+	# BASE STATS
 	if e is Player:
-		# BASE STATS
 		stats.stamina += 1
 		stats.strength += 1
 		stats.perception += 1
-
-		# stamina-based
+	elif e is Enemy:
+		var enemy_controller = e.data.controller
+		var enemy_scaling: float = enemy_controller.enemy_scaling
+		stats.stamina += snapped((stats.level ** enemy_scaling), 0.01)
+		stats.strength += snapped((stats.level ** enemy_scaling), 0.01)
+		stats.perception += snapped((stats.level ** enemy_scaling), 0.01)
+	
+	# scaling
+	# stamina
+	var stamina_multi = 10
+	var stamina_step = stats.stamina * stamina_multi
+	# strength
+	var strength_multi = 0.25
+	var strength_step = stats.strength * (1 + strength_multi)
+	# perception
+	var perception_multi = 0.001
+	var perception_step = stats.perception * perception_multi
+	
+	# player class bonuses
+	if e is Player:
+		# regen
 		var regen_step = clamp(stats.stamina * 0.0001, 0, 1)
 		stats.regen_rate += regen_step
-
-		# perception-based
-		# var crit_dodge_step = stats.perception * 0.0001
 		
 		# CLASS BONUSES
+		# recalculate attribute scaling according to player class
 		match e.Class:
 			Player.PlayerClass.WANDERER:
-				stats.stamina += 1
+				stamina_multi *= 1.5
+				stamina_step = stats.stamina * stamina_multi
 			Player.PlayerClass.BRUTE:
-				stats.strength += 1
+				strength_multi *= 1.5
+				strength_step = stats.strength * (1 + strength_multi)
 			Player.PlayerClass.TACTICIAN:
-				stats.perception += 1
+				perception_multi *= 1.5
+				perception_step = stats.perception * perception_multi
 
-	if e is Enemy:
-		# base stats
-		stats.stamina += stats.level
-		stats.strength += stats.level
-		stats.perception += stats.level
-
-	# stamina-based
-	stats.max_health = stats.base_health + (stats.stamina * 10)
+	# calculations
+	# stamina
+	stats.max_health = snapped(stats.base_health + stamina_step, 0.01)
 	stats.health = stats.max_health
-	# strength-based
-	stats.attack = stats.base_attack + (stats.strength * 1.5)
-	# agility-based
-	stats.crit_chance += (stats.perception * 0.0001)
-	stats.dodge_chance += (stats.perception * 0.0001)
+	# strength
+	stats.attack = snapped(stats.base_attack + strength_step, 0.01)
+	# perception
+	stats.crit_chance = snapped(stats.base_crit + perception_step, 0.01)
+	stats.dodge_chance = snapped(stats.base_dodge + perception_step, 0.01)
 	
 	# return stats
 	return stats
@@ -135,18 +150,22 @@ func evaluate_combat(attack: AttackAction):
 	if weapon_equipped:
 		equipped_weapon = attack.data.src.data.inventory.equipped.weapon
 		# calculate weapon damage
+		# weapon damage = the avg between weapon's dmg and 50% src's attack
 		var weapon_dmg = snapped(
-			equipped_weapon.data.stats.damage + (src_attack * 0.50) / 2,
+			(equipped_weapon.data.stats.damage + (src_attack * 0.50)) / 2,
 			0.01)
 		# if entity has skills,
 		if "skills" in attack.data.src.data:
 			# calculate skill damage bonus
 			var weapon_string = equipped_weapon.get_weapon_class_string()
 			var skill_level = attack.data.src.data.skills[weapon_string].level
-			var skill_bonus = snapped((skill_level) / ((weapon_dmg / 2) + 1), 0.01)
+			# skill damage = skill level divided by 50% weapon damage + 1
+			# ensures skill dmg never exceeds weapon dmg
+			# 0 dmg weapons (unarmed) receieve the full skill level bonus
+			var skill_dmg = snapped((skill_level) / ((weapon_dmg / 2) + 1), 0.01)
 			# update attack src weapon skill bonus data
-			attack.data.src.data.skills[weapon_string].bonus = skill_bonus + weapon_dmg
-			weapon_dmg += skill_bonus
+			attack.data.src.data.skills[weapon_string].bonus = skill_dmg + weapon_dmg
+			weapon_dmg += skill_dmg
 
 		# add weapon damage to attack damage
 		src_attack += weapon_dmg
@@ -215,9 +234,16 @@ func evaluate_combat(attack: AttackAction):
 	if result == "HITS" || result == "CRITS":
 		if attack.data.src is Player:
 			var p = attack.data.src
-			var avg_dealt: float = p.data.stats.avg_dealt
-			var new_avg: float = (avg_dealt + float(src_attack)) / 2
-			p.data.stats.avg_dealt = snapped(new_avg, 0.01)
+			p.data.stats.total_dmg = snapped(
+				p.data.stats.total_dmg + src_attack,
+				0.01)
+			var time_controller = p.data.controller.parent.time_controller
+			var cycles: float = time_controller.cycles
+			var seconds: float = floor(cycles / 10.0)
+			p.data.stats.dps = snapped(
+				p.data.stats.total_dmg / seconds,
+				0.01)
+			
 	# only hits
 	if result == "HITS":
 		if attack.data.src is Player:
@@ -243,28 +269,38 @@ func evaluate_combat(attack: AttackAction):
 	# dodge,
 	if result == "DODGES":
 		FileLogger.log_message(self,
-			attack.data.target.name + " " + result + " " + attack.data.src.name + "'s attack",
+			attack.data.target.name +
+			"[lv" + str(attack.data.target.data.stats.level) + "] " +
+			result + " " +
+			attack.data.src.name + "'s attack",
 		"COMBAT")
 	# miss, hit, crit
 	else:
 		# miss,
 		if result == "MISSES":
 			FileLogger.log_message(self,
-				attack.data.src.name + " " + result + " " + attack.data.target.name,
+				attack.data.src.name +
+				"[lv" + str(attack.data.src.data.stats.level) + "] " +
+				result + " " +
+				attack.data.target.name,
 			"COMBAT")
 		# hit, crit
 		else:
 			FileLogger.log_message(self,
-				attack.data.src.name + " " + result + " " + attack.data.target.name + " for " +
-				str(src_attack) + " with " + str(attack.get_attack_type_string()) + " attack" +
+				attack.data.src.name +
+				"[lv" + str(attack.data.src.data.stats.level) + "] " +
+				result + " " +
+				attack.data.target.name + " for " +
+				str(src_attack) + " with " +
+				str(attack.get_attack_type_string()) + " attack" +
 				(" using " + equipped_weapon.get_weapon_class_string() if weapon_equipped else ""),
 			"COMBAT")
 	
 	# process weapon skill
 	if "skills" in attack.data.src.data && (
-		result == "HITS" || result == "CRITS"):
-		if r <= self.skill_chance:
-			_progress_skill(attack.data.src, equipped_weapon.get_weapon_class_string())
+		result == "HITS" || result == "CRITS"
+	):
+		_progress_skill(attack.data.src, equipped_weapon.get_weapon_class_string())
 
 	# flag action complete
 	attack.data.done = true

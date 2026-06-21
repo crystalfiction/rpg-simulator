@@ -4,7 +4,7 @@ extends EntityController
 var inventory_manager_script = preload("res://src/controllers/entities/player/inventory_manager.gd")
 
 # components
-var enemy_scaling: float = 1
+var enemy_scaling: float = 1.20
 var enemies: Array = []
 
 # Enemy Initialization

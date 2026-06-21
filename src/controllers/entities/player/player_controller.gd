@@ -5,6 +5,7 @@ var inventory_manager_script = preload("res://src/controllers/entities/player/in
 
 # components
 var player: Player
+var init_class: Player.PlayerClass = Player.PlayerClass.BASE
 
 var exp_step: int = 1
 var exp_rate: int
@@ -192,16 +193,19 @@ func _init_player_entity():
 	new_player.data.controller = self
 	
 	# class
-	var p_class = Player.PlayerClass.BRUTE
+	var p_class = self.init_class
 	new_player.Class = p_class
 	new_player.data.class = new_player.Class
 	new_player.data.class_v = new_player.get_player_class_string()
-	# spin up class script to get init class stats and abilities
+	# spin up base class script to get base class data
+	var base_class_obj: Resource = new_player_script.PlayerClasses[0].new()
+	new_player.data.stats = base_class_obj.stats
+	# spin up class script to get class data
 	var class_obj: Resource = new_player_script.PlayerClasses[p_class].new()
-	new_player.data.stats = class_obj.stats
+	new_player.data.stats.merge(class_obj.stats)
 	var abilities: Array = new_player.data.actions.abilities
 	for a in class_obj.class_abilities:
-		abilities.push_front(a)
+		abilities.push_back(a)
 	new_player.data.actions.abilities = abilities
 
 	# stats
@@ -216,9 +220,6 @@ func _init_player_entity():
 	new_player.data.inventory.manager = new_inventory_manager
 
 	# weapon
-	# var n_weapons = Weapon.WeaponClass.size() - 1 # account for unarmed
-	# var i = randi_range(0, n_weapons)
-	# var new_weapon = Weapon.WeaponClasses[i].new()
 	var new_weapon = UnarmedWeapon.new()
 	new_player.data.inventory.equipped.weapon = new_weapon
 	_progress_skill(new_player, new_weapon.get_weapon_class_string())
@@ -245,7 +246,7 @@ func _ready() -> void:
 	# initialize the player entity as scene
 	_init_player_entity()
 	
-	FileLogger.log_message(self, "Player initialized.")
+	FileLogger.log_message(self, "::INITIALIZED::")
 
 
 # Player Processing
@@ -254,11 +255,11 @@ func _ready() -> void:
 func _check_player(p: Player):
 	# if player health is 0 or below and last_stand remaining,
 	if p.data.stats.health <= 0:
-		if not p.data.actions.last_stand:
+		if p.data.actions.last_stand:
 			if p.data.resources.food > 0:
 				p.data.resources.food = 0
 				p.data.stats.health = p.data.stats.max_health
-				p.data.actions.last_stand = true
+				p.data.actions.last_stand = false
 				FileLogger.log_message(self, self.player.name +
 					" is taking a last stand!")
 			
@@ -266,6 +267,7 @@ func _check_player(p: Player):
 			else:
 				# if player isn't already queued for deletion,
 				if !p.is_queued_for_deletion():
+					p.data.actions.metrics["highest_map"] = self.world.data.terrain.data.map_count
 					FileLogger.log_message(self,
 						str(self.player.data),
 						"INFO",
@@ -275,10 +277,11 @@ func _check_player(p: Player):
 					# queue for deletion
 					p.queue_free()
 
-		# no last stand remaining, player is dead
+		# no last stand remaining, 
 		else:
 			# if player isn't already queued for deletion,
 			if !p.is_queued_for_deletion():
+				p.data.actions.metrics["highest_map"] = self.world.data.terrain.data.map_count
 				FileLogger.log_message(self,
 					str(self.player.data),
 					"INFO",

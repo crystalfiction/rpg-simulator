@@ -136,27 +136,24 @@ func _ready() -> void:
 
 ## accepts current world entity,
 ## validates world data and returns result flag
-func _process_cycle(current_world: Sprite2D):
+func _process_cycle(curr_world: Sprite2D):
 	# if time_controller is cycling (game is active),
 	if self.time_controller:
 		if self.time_controller.cycling:
 			# if world is valid,
-			if is_instance_valid(current_world):
+			if is_instance_valid(curr_world):
 				## process world state conditions
 				# if player_controller exists, but player is invalid
 				if player_controller && !self.world.data.player:
-					# reload game if only Map 1,
-					if current_world.data.terrain.data.map_count == 1:
-						FileLogger.log_message(self,
-							"Player died on Map 1, reloading world..."
-						)
-						get_tree().reload_current_scene()
-					else:
-						# otherwise end game
-						FileLogger.log_message(self,
-							"Player died on Map " + str(current_world.data.terrain.data.map_count)
-						)
-						get_tree().quit()
+					if curr_world.data.terrain.data.map_count == 1:
+						curr_world.get_tree().reload_current_scene()
+						return
+						
+					# end game
+					FileLogger.log_message(self,
+						"Player died on Map " + str(curr_world.data.terrain.data.map_count)
+					)
+					get_tree().quit()
 
 			# if world invalid,
 			else:

@@ -39,7 +39,7 @@ var player_data: Dictionary = {
 			# "CRITS": 0,
 			# "DODGES": 0,
 		},
-		"last_stand": false,
+		"last_stand": true,
 	},
 	"skills": {},
 	"resources": {
@@ -80,5 +80,4 @@ func init_scene() -> Sprite2D:
 ## initializes the entity data
 func _init() -> void:
 	self.Type = EntityType.PLAYER
-
 	self.data = _traverse_data(self.data, self.player_data)

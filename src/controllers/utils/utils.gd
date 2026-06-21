@@ -64,7 +64,9 @@ func grid_to_world(grid_idx: Vector2i, grid_scale: Vector2i) -> Vector2i:
 
 ## converts world position to grid position and returns as Vector2i
 func world_to_grid(world_pos: Vector2i, grid_scale: Vector2i) -> Vector2i:
-	return floor(world_pos / grid_scale)
+	var world_pos_v = world_pos as Vector2
+	var grid_scale_v = grid_scale as Vector2
+	return (world_pos_v.floor() / grid_scale_v.floor()) as Vector2i
 
 ## gets the most prominent soil texture in a tile's given soil data
 ## according to total average soil density
