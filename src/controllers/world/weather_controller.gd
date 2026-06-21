@@ -216,9 +216,11 @@ func init_controller() -> void:
 		for y in range(len(tile_map[x])):
 			var t = tile_map[x][y]
 			# initialize weather data
-			var rand_r = randf_range(biome.data.ranges.drainage[0], biome.data.ranges.drainage[1])
-			# drainage = random number r scaled by the distance of r to soil density
-			var drainage = rand_r * (1 + (t.data.terrain.density - rand_r))
+			var drainage = clamp(
+				(1 - t.data.terrain.density),
+				biome.data.ranges.drainage[0],
+				biome.data.ranges.drainage[1]
+			)
 			var water = 0.0
 			var erosion = 0.0
 			if "water" in t.data.weather:
