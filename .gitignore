@@ -4,8 +4,8 @@
 
 **/*.tmp
 
-**/world_log.txt
+world_log.txt
+game_log.txt
 
 # Python
 .venv/
-game_log.txt
