@@ -428,7 +428,7 @@ func _ready() -> void:
 	var biome = Biome.new(r_biome)
 
 	# DEV: set biome manually
-	# var biome_n = Biome.BiomeClass.DESERT
+	# var biome_n = Biome.BiomeClass.FOREST
 	# var biome = Biome.new(biome_n)
 
 	# initialize terrain entity
@@ -473,9 +473,6 @@ func _generate_terrain(curr_terrain: Terrain) -> void:
 
 	# # optimize terrain
 	# new_terrain = _optimize_terrain(new_terrain)
-
-	# # add callback to terrain for calling on data change
-	# new_terrain.data.on_change = _handle_terrain.bind(new_terrain)
 
 	# generate weather on terrain
 	self.weather_controller.terrain = new_terrain

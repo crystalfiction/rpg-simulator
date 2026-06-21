@@ -41,7 +41,7 @@ func _calculate_biome_data() -> Dictionary:
 	match self.Class:
 		BiomeClass.DESERT:
 			density = [0.00, 0.88]
-			rainfall = [0.22, 0.44]
+			rainfall = [0.33, 0.66]
 			drainage = [0.44, 1.00]
 		BiomeClass.GRASSLAND:
 			density = [0.22, 0.88]

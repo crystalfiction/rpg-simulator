@@ -8,7 +8,7 @@ var resource_iterations: int
 var resources_optimized = null
 var resource_count = 0
 
-var food_factor = 0.33 # chance to generate food on a given tile
+var food_factor = 0.22 # chance to generate food on a given tile
 
 
 # Resource Generation
@@ -23,9 +23,8 @@ func _evaluate_resources(tile: Tile) -> Tile:
 		var rand_f = randf_range(0, 1)
 		if k == "food":
 			var food_conditions = true if (
-				(tile.data.terrain.density >= 0.44 && tile.data.terrain.density <= 0.66)
-				&& (tile.data.weather.rainfall >= 0.22 && tile.data.weather.rainfall <= 1)
-				&& (tile.data.weather.drainage >= 0.33 && tile.data.weather.drainage <= 0.88)
+				(tile.data.terrain.density >= 0.33 && tile.data.terrain.density <= 0.66) &&
+				(tile.data.weather.water >= 0.11 && tile.data.weather.water <= 1.00)
 				&& (rand_f <= food_factor)
 			) else false
 			if food_conditions:

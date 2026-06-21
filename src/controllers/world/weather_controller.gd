@@ -15,7 +15,7 @@ var rainfall_max = 1.00
 var drainage_min = 0.00
 var drainage_max = 1.00
 
-var erosion_factor = 0.006
+var erosion_factor = 0.005
 
 var weather_metrics: Dictionary
 
@@ -217,7 +217,8 @@ func init_controller() -> void:
 			var t = tile_map[x][y]
 			# initialize weather data
 			var rand_r = randf_range(biome.data.ranges.drainage[0], biome.data.ranges.drainage[1])
-			var drainage = rand_r
+			# drainage = random number r scaled by the distance of r to soil density
+			var drainage = rand_r * (1 + (t.data.terrain.density - rand_r))
 			var water = 0.0
 			var erosion = 0.0
 			if "water" in t.data.weather:
