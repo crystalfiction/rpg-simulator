@@ -47,9 +47,7 @@ Create a procedurally generated RPG simulation that embraces chaos and instabili
         - [ ] only one stance can be active at a time, but players can switch stance when a new party member is acquired
   - [ ] _skill system_: players accumulate skill points for specific skills by doing specific actions
     - [x] weapon skills accumulated in combat while using a particular weapon type
-    - [ ] stat skills accumulated in combat i.e. defense on damage taken, resilience on crit taken, etc.
-      - _the idea is that cumulative stats like this provide some level of randomness in how the world simulates._
-      - _each run provides a slightly different set of thresholds that met and these thresholds must be used efficiently in order to progress_
+      - _the idea is that cumulative stats like this can form the character in some way according to each individual seed._
   - [x] _inventory system_: players can manage their own inventory items
     - [x] equipping and unequipping equippable items
     - [x] deleting items
