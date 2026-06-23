@@ -34,6 +34,11 @@ func get_biome_class_string() -> String:
 	var key = BiomeClass.find_key(curr_biome)
 	return key
 
+static func get_random_biome() -> BiomeClass:
+	var biomes = Biome.BiomeClass
+	var r_biome = biomes.values().pick_random()
+	return r_biome
+
 func _calculate_biome_data() -> Dictionary:
 	var density = [0.00, 0.00]
 	var rainfall = [0.00, 0.00]

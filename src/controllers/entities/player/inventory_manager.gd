@@ -12,7 +12,6 @@ func _init(new_entity: Entity) -> void:
 
 ## adds an item to the inventory backpack
 func add_item(item: Item) -> bool:
-	# TODO: connect this to inventory backpack when added
 	if item == null:
 		return false
 	items.append(item)
@@ -53,10 +52,33 @@ func equip_item(item: Equipment) -> bool:
 			# determine armor slot
 			if item is Armor:
 				match item.Slot:
+					Armor.ArmorSlot.HEAD:
+						if entity.data.inventory.equipped.head != null:
+							unequip_item_from_slot("head")
+						entity.data.inventory.equipped.head = item
+						# add value to armor stat
+						entity.data.stats.armor += item.data.stats.armor
+						return true
 					Armor.ArmorSlot.CHEST:
 						if entity.data.inventory.equipped.chest != null:
 							unequip_item_from_slot("chest")
 						entity.data.inventory.equipped.chest = item
+						# add value to armor stat
+						entity.data.stats.armor += item.data.stats.armor
+						return true
+					Armor.ArmorSlot.LEGS:
+						if entity.data.inventory.equipped.legs != null:
+							unequip_item_from_slot("legs")
+						entity.data.inventory.equipped.legs = item
+						# add value to armor stat
+						entity.data.stats.armor += item.data.stats.armor
+						return true
+					Armor.ArmorSlot.FEET:
+						if entity.data.inventory.equipped.feet != null:
+							unequip_item_from_slot("feet")
+						entity.data.inventory.equipped.feet = item
+						# add value to armor stat
+						entity.data.stats.armor += item.data.stats.armor
 						return true
 			return false
 	

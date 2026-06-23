@@ -394,6 +394,7 @@ func _init_weather(terrain: Terrain) -> Controller:
 func _init_terrain(biome: Biome = null) -> Terrain:
 	# create new Terrain obj
 	var new_terrain = Terrain.new()
+	new_terrain.name = "Terrain"
 	if not biome == null:
 		new_terrain.data.biome = biome
 
@@ -423,9 +424,7 @@ func _ready() -> void:
 	FileLogger.log_message(self, "::INITIALIZING::")
 
 	# DEV: get random biome
-	var biomes = Biome.BiomeClass
-	var r_biome = biomes.values().pick_random()
-	var biome = Biome.new(r_biome)
+	var biome = Biome.new(Biome.get_random_biome())
 
 	# DEV: set biome manually
 	# var biome_n = Biome.BiomeClass.FOREST
@@ -464,7 +463,8 @@ func _ready() -> void:
 ## generates new terrain object and saves to world.data.terrain
 ## called when player has completed all conditions on a map
 func _generate_terrain(curr_terrain: Terrain) -> void:
-	# TODO: add a way to reset terrain data without breaking dependencies
+	# FIXME: this is a lazy way to avoid making a functional UI
+	# and updating invalid references
 	# reuse existing Terrain obj
 	var new_terrain = curr_terrain
 
@@ -487,7 +487,6 @@ func _generate_terrain(curr_terrain: Terrain) -> void:
 	# log update
 	FileLogger.log_message(self, "Map " + str(new_terrain.data.map_count) + " generated.")
 	
-
 	# update world terrain to new terrain
 	self.world.data.terrain = new_terrain
 

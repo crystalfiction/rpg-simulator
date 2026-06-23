@@ -10,5 +10,5 @@ var chest_armor_data = {
 ## initializes the entity data
 func _init() -> void:
 	self.Slot = ArmorSlot.CHEST
-	super ()
+	super()
 	_traverse_data(self.data, self.chest_armor_data)

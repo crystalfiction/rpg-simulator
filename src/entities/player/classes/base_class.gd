@@ -1,4 +1,5 @@
 class_name BaseClass extends Resource
+## Used purely for class testing / balancing
 
 # components
 var stats = {

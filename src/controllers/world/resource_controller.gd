@@ -8,7 +8,7 @@ var resource_iterations: int
 var resources_optimized = null
 var resource_count = 0
 
-var food_factor = 0.22 # chance to generate food on a given tile
+var food_factor = 0.15 # chance to generate food on a given tile
 
 
 # Resource Generation

@@ -54,10 +54,10 @@ var player_data: Dictionary = {
 		"manager": null,
 		"equipped": {
 			"weapon": null,
-			# "head": null,
-			# "chest": null,
-			# "legs": null,
-			# "feet": null
+			"head": null,
+			"chest": null,
+			"legs": null,
+			"feet": null
 		},
 	}
 }

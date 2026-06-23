@@ -134,7 +134,29 @@ func _process_rewards(encounter: Dictionary):
 	FileLogger.log_message(self,
 		str(self.exp_step + enemy_exp) + " exp rewarded."
 	)
-	
+
+	# check for item rewards
+	var r = randf()
+	var n = 1.0
+	if r <= n:
+		# pick random, unfilled equipment slot
+		var weapon_equipped = self.player.data.inventory.manager.get_equipped("weapon")
+		if not weapon_equipped:
+			var weapon_c = Weapon.WeaponClass.values().pick_random()
+			var new_weapon = Weapon.WeaponClasses[weapon_c].new()
+			self.player.data.inventory.manager.equip_item(new_weapon)
+		else:
+			# check armor slots
+			var armor_slots: Dictionary = Armor.ArmorSlot
+			for a in armor_slots:
+				var enid = Armor.ArmorSlot.get(a)
+				var key: String = a.to_lower()
+				var equipped = self.player.data.inventory.manager.get_equipped(key)
+				if not equipped:
+					var new_armor = Armor.armor_slots[enid].new()
+					self.player.data.inventory.manager.equip_item(new_armor)
+
+
 	# check if level_up
 	var level_up = false
 	if self.player.data.stats.exp >= self.exp_cap:
@@ -199,10 +221,21 @@ func _init_player_entity():
 	new_player.data.class_v = new_player.get_player_class_string()
 	# spin up base class script to get base class data
 	var base_class_obj: Resource = new_player_script.PlayerClasses[0].new()
+	# set data structure
 	new_player.data.stats = base_class_obj.stats
+	# TODO: get user-defined attribute spread
+	# for now, manually set spread
+	var attributes: Array = ["stamina", "strength", "perception"]
+	var attr_spread: Array = [1, 1, 1]
+	var i: int = 0
+	for a in attributes:
+		var n = attr_spread[i]
+		new_player.data.stats[a] += n
+		i += 1
+
 	# spin up class script to get class data
 	var class_obj: Resource = new_player_script.PlayerClasses[p_class].new()
-	new_player.data.stats.merge(class_obj.stats)
+	# class abilities
 	var abilities: Array = new_player.data.actions.abilities
 	for a in class_obj.class_abilities:
 		abilities.push_back(a)

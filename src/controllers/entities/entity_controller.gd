@@ -54,10 +54,8 @@ func _calculate_exp(e: Entity) -> Dictionary:
 	
 	# if enemy,
 	if e is Enemy:
-		var enemy_controller = self.world.data.controller.enemy_controller
-		var map_level = self.world.data.terrain.data.map_count
-		var enemy_scaling = enemy_controller.enemy_scaling
-		stats.level = floori(map_level * enemy_scaling)
+		var map_count = self.world.data.terrain.data.map_count
+		stats.level = map_count
 
 	# return stats dict
 	return stats
@@ -73,11 +71,9 @@ func _calculate_attributes(e: Entity) -> Dictionary:
 		stats.strength += 1
 		stats.perception += 1
 	elif e is Enemy:
-		var enemy_controller = e.data.controller
-		var enemy_scaling: float = enemy_controller.enemy_scaling
-		stats.stamina += snapped((stats.level ** enemy_scaling), 0.01)
-		stats.strength += snapped((stats.level ** enemy_scaling), 0.01)
-		stats.perception += snapped((stats.level ** enemy_scaling), 0.01)
+		stats.stamina += stats.level
+		stats.strength += stats.level
+		stats.perception += stats.level
 	
 	# scaling
 	# stamina

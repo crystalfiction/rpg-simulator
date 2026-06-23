@@ -233,14 +233,15 @@ func _make_data_labels(obj: Variant, container: String):
 				if obj == time_controller:
 					_make_data_label(obj, k, container)
 
-func _check_obj_labels(obj: Variant, curr_labels: Array):
+func _check_obj_labels(obj: Variant, curr_labels: Array) -> Array:
 	if is_instance_valid(obj):
 		if !obj.is_queued_for_deletion():
 			var found = curr_labels.filter(func(l): return l.obj == obj)
 			if found.size() == 0:
-				return false
+				return [false, ]
 			else:
-				return found
+				return [true, found]
+	return [false, ]
 
 ## removes lingering name labels in stats container
 func _remove_lingerers(container: String):
@@ -258,7 +259,7 @@ func _init_enemy_stats(curr_labels: Array):
 			# make stats
 			## TODO: make this dynamic for arrays
 			var found = _check_obj_labels(enemies[0], curr_labels)
-			if !found:
+			if !found[0]:
 				_make_data_labels(enemies[0], "enemy_stats")
 				self.enemy_panel.folded = false
 		else:
@@ -301,7 +302,7 @@ func _ready() -> void:
 	# define label settings
 	var new_stat_label_settings = LabelSettings.new()
 	new_stat_label_settings.font = preload("res://src/assets/JetBrainsMono-Medium.ttf")
-	new_stat_label_settings.font_size = 12
+	new_stat_label_settings.font_size = 11
 	self.stat_label_settings = new_stat_label_settings # define label settings
 
 	# init stat panels

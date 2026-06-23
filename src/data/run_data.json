@@ -1,0 +1,480 @@
+{
+  "2026-06-21 21:10:59": [
+    {
+      "uid": 0,
+      "controller": "PlayerController:<Node#316065989624>",
+      "world": "World:<Sprite2D#49962550732>",
+      "grid_idx": [
+        4,
+        16
+      ],
+      "class": 0,
+      "class_v": "BASE",
+      "stats": {
+        "level": 11,
+        "exp": 988,
+        "exp_cap": 1210,
+        "exp_step": 10,
+        "health": -1.21,
+        "max_health": 220.0,
+        "base_health": 100,
+        "regen_rate": 0.2077,
+        "attack": 20.0,
+        "base_attack": 5,
+        "dps": 105.61,
+        "total_dmg": 55446.39,
+        "largest_hit": 54.64,
+        "largest_taken": 32.45,
+        "hit_chance": 0.66,
+        "crit_bonus": 1.5,
+        "crit_chance": 0.12,
+        "base_crit": 0.11,
+        "dodge_chance": 0.06,
+        "base_dodge": 0.05,
+        "armor": 0,
+        "armor_reduc": 0.0,
+        "stamina": 12,
+        "strength": 12,
+        "perception": 12
+      },
+      "actions": {
+        "controller": "ActionController:<Node#316183430143>",
+        "action": null,
+        "last_action": "BasicAttack",
+        "abilities": [
+          "(res://src/controllers/entities/actions/attacks/heavy_attack.gd):<GDScript#-9223371994274200056>"
+        ],
+        "metrics": {
+          "HITS": 2621,
+          "MISSES": 1671,
+          "CRITS": 296,
+          "DODGES": 273,
+          "highest_map": 9
+        },
+        "last_stand": false
+      },
+      "skills": {
+        "UNARMED": {
+          "level": 40,
+          "exp": 15450,
+          "step": 10,
+          "cap": 16000,
+          "bonus": 16.43
+        }
+      },
+      "resources": {
+        "food": 0.0,
+        "total": 651
+      },
+      "encounters": {
+        "active": true,
+        "done": 329
+      },
+      "inventory": {
+        "manager": "<RefCounted#-9223371720654568448>",
+        "equipped": {
+          "weapon": "<Node2D#316216984577>"
+        }
+      }
+    }
+  ],
+  "2026-06-21 21:19:02": [
+    {
+      "uid": 0,
+      "controller": "PlayerController:<Node#316065989624>",
+      "world": "World:<Sprite2D#49962550732>",
+      "grid_idx": [
+        17,
+        5
+      ],
+      "class": 0,
+      "class_v": "BASE",
+      "stats": {
+        "level": 11,
+        "exp": 1136,
+        "exp_cap": 1210,
+        "exp_step": 10,
+        "health": -10.33,
+        "max_health": 220.0,
+        "base_health": 100,
+        "regen_rate": 0.2077,
+        "attack": 20.0,
+        "base_attack": 5,
+        "dps": 103.59,
+        "total_dmg": 56456.78,
+        "largest_hit": 54.64,
+        "largest_taken": 36.51,
+        "hit_chance": 0.66,
+        "crit_bonus": 1.5,
+        "crit_chance": 0.12,
+        "base_crit": 0.11,
+        "dodge_chance": 0.06,
+        "base_dodge": 0.05,
+        "armor": 0,
+        "armor_reduc": 0.0,
+        "stamina": 12,
+        "strength": 12,
+        "perception": 12
+      },
+      "actions": {
+        "controller": "ActionController:<Node#316183430143>",
+        "action": null,
+        "last_action": "HeavyAttack",
+        "abilities": [
+          "(res://src/controllers/entities/actions/attacks/heavy_attack.gd):<GDScript#-9223371994274200056>"
+        ],
+        "metrics": {
+          "HITS": 2675,
+          "CRITS": 256,
+          "MISSES": 1730,
+          "DODGES": 263,
+          "highest_map": 11
+        },
+        "last_stand": false
+      },
+      "skills": {
+        "UNARMED": {
+          "level": 40,
+          "exp": 15720,
+          "step": 10,
+          "cap": 16000,
+          "bonus": 16.43
+        }
+      },
+      "resources": {
+        "food": 18.87,
+        "total": 700
+      },
+      "encounters": {
+        "active": true,
+        "done": 316
+      },
+      "inventory": {
+        "manager": "<RefCounted#-9223371720654568448>",
+        "equipped": {
+          "weapon": "<Node2D#316216984577>"
+        }
+      }
+    }
+  ],
+  "2026-06-21 21:27:06": [
+    {
+      "uid": 0,
+      "controller": "PlayerController:<Node#316065989624>",
+      "world": "World:<Sprite2D#49962550732>",
+      "grid_idx": [
+        18,
+        5
+      ],
+      "class": 1,
+      "class_v": "WANDERER",
+      "stats": {
+        "level": 14,
+        "exp": 1438,
+        "exp_cap": 1960,
+        "exp_step": 10,
+        "health": -9.33,
+        "max_health": 325.0,
+        "base_health": 100,
+        "regen_rate": 0.2119,
+        "attack": 23.75,
+        "base_attack": 5,
+        "dps": 126.56,
+        "total_dmg": 110104.86,
+        "largest_hit": 63.42,
+        "largest_taken": 45.68,
+        "hit_chance": 0.66,
+        "crit_bonus": 1.5,
+        "crit_chance": 0.13,
+        "base_crit": 0.11,
+        "dodge_chance": 0.07,
+        "base_dodge": 0.05,
+        "armor": 0,
+        "armor_reduc": 0.0,
+        "stamina": 15,
+        "strength": 15,
+        "perception": 15
+      },
+      "actions": {
+        "controller": "ActionController:<Node#316183430143>",
+        "action": null,
+        "last_action": "PersistAttack",
+        "abilities": [
+          "(res://src/controllers/entities/actions/attacks/heavy_attack.gd):<GDScript#-9223371994274200056>",
+          "(res://src/controllers/entities/actions/attacks/wanderer/persist_attack.gd):<GDScript#-9223371994005764598>"
+        ],
+        "metrics": {
+          "HITS": 4188,
+          "CRITS": 479,
+          "MISSES": 2777,
+          "DODGES": 487,
+          "highest_map": 15
+        },
+        "last_stand": false
+      },
+      "skills": {
+        "UNARMED": {
+          "level": 50,
+          "exp": 24690,
+          "step": 10,
+          "cap": 25000,
+          "bonus": 18.53
+        }
+      },
+      "resources": {
+        "food": 0.0,
+        "total": 1161
+      },
+      "encounters": {
+        "active": true,
+        "done": 555
+      },
+      "inventory": {
+        "manager": "<RefCounted#-9223371720654568448>",
+        "equipped": {
+          "weapon": "<Node2D#316216984577>"
+        }
+      }
+    }
+  ],
+  "2026-06-21 21:42:02": [
+    {
+      "uid": 0,
+      "controller": "PlayerController:<Node#316065989624>",
+      "world": "World:<Sprite2D#49962550732>",
+      "grid_idx": [
+        28,
+        6
+      ],
+      "class": 2,
+      "class_v": "BRUTE",
+      "stats": {
+        "level": 11,
+        "exp": 38,
+        "exp_cap": 1210,
+        "exp_step": 10,
+        "health": -1.9,
+        "max_health": 220.0,
+        "base_health": 100,
+        "regen_rate": 0.2077,
+        "attack": 21.5,
+        "base_attack": 5,
+        "dps": 106.55,
+        "total_dmg": 44858.62,
+        "largest_hit": 54.56,
+        "largest_taken": 31.95,
+        "hit_chance": 0.66,
+        "crit_bonus": 1.5,
+        "crit_chance": 0.12,
+        "base_crit": 0.11,
+        "dodge_chance": 0.06,
+        "base_dodge": 0.05,
+        "armor": 0,
+        "armor_reduc": 0.0,
+        "stamina": 12,
+        "strength": 12,
+        "perception": 12
+      },
+      "actions": {
+        "controller": "ActionController:<Node#316183430143>",
+        "action": null,
+        "last_action": "BasicAttack",
+        "abilities": [
+          "(res://src/controllers/entities/actions/attacks/heavy_attack.gd):<GDScript#-9223371994274200056>",
+          "(res://src/controllers/entities/actions/attacks/brute/frenzy_attack.gd):<GDScript#-9223371993603111412>"
+        ],
+        "metrics": {
+          "HITS": 2005,
+          "MISSES": 1223,
+          "CRITS": 201,
+          "DODGES": 204,
+          "highest_map": 9
+        },
+        "last_stand": false
+      },
+      "skills": {
+        "UNARMED": {
+          "level": 35,
+          "exp": 11910,
+          "step": 10,
+          "cap": 12250,
+          "bonus": 14.87
+        }
+      },
+      "resources": {
+        "food": 0.0,
+        "total": 545
+      },
+      "encounters": {
+        "active": true,
+        "done": 269
+      },
+      "inventory": {
+        "manager": "<RefCounted#-9223371720654568448>",
+        "equipped": {
+          "weapon": "<Node2D#316216984577>"
+        }
+      }
+    }
+  ],
+  "2026-06-21 21:48:15": [
+    {
+      "uid": 0,
+      "controller": "PlayerController:<Node#316065989624>",
+      "world": "World:<Sprite2D#49962550732>",
+      "grid_idx": [
+        16,
+        11
+      ],
+      "class": 3,
+      "class_v": "TACTICIAN",
+      "stats": {
+        "level": 13,
+        "exp": 893,
+        "exp_cap": 1690,
+        "exp_step": 10,
+        "health": -9.88,
+        "max_health": 240.0,
+        "base_health": 100,
+        "regen_rate": 0.2104,
+        "attack": 22.5,
+        "base_attack": 5,
+        "dps": 164.73,
+        "total_dmg": 112509.62,
+        "largest_hit": 99.83,
+        "largest_taken": 38.79,
+        "hit_chance": 0.66,
+        "crit_bonus": 1.5,
+        "crit_chance": 0.13,
+        "base_crit": 0.11,
+        "dodge_chance": 0.07,
+        "base_dodge": 0.05,
+        "armor": 0,
+        "armor_reduc": 0.0,
+        "stamina": 14,
+        "strength": 14,
+        "perception": 14
+      },
+      "actions": {
+        "controller": "ActionController:<Node#316183430143>",
+        "action": null,
+        "last_action": "HeavyAttack",
+        "abilities": [
+          "(res://src/controllers/entities/actions/attacks/heavy_attack.gd):<GDScript#-9223371994274200056>",
+          "(res://src/controllers/entities/actions/attacks/tactician/sway_odds_attack.gd):<GDScript#-9223371993334675955>"
+        ],
+        "metrics": {
+          "HITS": 3305,
+          "MISSES": 2093,
+          "DODGES": 340,
+          "CRITS": 343,
+          "highest_map": 12
+        },
+        "last_stand": false
+      },
+      "skills": {
+        "UNARMED": {
+          "level": 45,
+          "exp": 20210,
+          "step": 10,
+          "cap": 20250,
+          "bonus": 17.43
+        }
+      },
+      "resources": {
+        "food": 0.0,
+        "total": 916
+      },
+      "encounters": {
+        "active": true,
+        "done": 465
+      },
+      "inventory": {
+        "manager": "<RefCounted#-9223371720654568448>",
+        "equipped": {
+          "weapon": "<Node2D#316216984577>"
+        }
+      }
+    }
+  ],
+  "2026-06-21 21:57:42": [
+    {
+      "uid": 0,
+      "controller": "PlayerController:<Node#316065989624>",
+      "world": "World:<Sprite2D#49962550732>",
+      "grid_idx": [
+        22,
+        0
+      ],
+      "class": 2,
+      "class_v": "BRUTE",
+      "stats": {
+        "level": 14,
+        "exp": 1488,
+        "exp_cap": 1960,
+        "exp_step": 10,
+        "health": -15.81,
+        "max_health": 250.0,
+        "base_health": 100,
+        "regen_rate": 0.2119,
+        "attack": 25.63,
+        "base_attack": 5,
+        "dps": 132.57,
+        "total_dmg": 110696.81,
+        "largest_hit": 65.89,
+        "largest_taken": 45.68,
+        "hit_chance": 0.66,
+        "crit_bonus": 1.5,
+        "crit_chance": 0.13,
+        "base_crit": 0.11,
+        "dodge_chance": 0.07,
+        "base_dodge": 0.05,
+        "armor": 0,
+        "armor_reduc": 0.0,
+        "stamina": 15,
+        "strength": 15,
+        "perception": 15
+      },
+      "actions": {
+        "controller": "ActionController:<Node#316183430143>",
+        "action": null,
+        "last_action": "BasicAttack",
+        "abilities": [
+          "(res://src/controllers/entities/actions/attacks/heavy_attack.gd):<GDScript#-9223371994274200056>",
+          "(res://src/controllers/entities/actions/attacks/brute/frenzy_attack.gd):<GDScript#-9223371993603111412>"
+        ],
+        "metrics": {
+          "HITS": 3983,
+          "MISSES": 2424,
+          "DODGES": 421,
+          "CRITS": 424,
+          "highest_map": 15
+        },
+        "last_stand": false
+      },
+      "skills": {
+        "UNARMED": {
+          "level": 50,
+          "exp": 24050,
+          "step": 10,
+          "cap": 25000,
+          "bonus": 18.3
+        }
+      },
+      "resources": {
+        "food": 0.0,
+        "total": 1143
+      },
+      "encounters": {
+        "active": true,
+        "done": 556
+      },
+      "inventory": {
+        "manager": "<RefCounted#-9223371720654568448>",
+        "equipped": {
+          "weapon": "<Node2D#316216984577>"
+        }
+      }
+    }
+  ]
+}

@@ -16,10 +16,10 @@ const CYCLE_INTERVAL: float = 1.0
 var frame_rates: Array = [
 	0.5,
 	1.0,
-	3.0, # dev speed
+	5.0, # dev speed
 ]
 # index into frame_rates; default to realtime (1.0) if present, else the middle
-var frame_rate_index: int = frame_rates.find(1.0) if frame_rates.has(1.0) else int(floor(frame_rates.size() / 2.0))
+var frame_rate_index: int = frame_rates.find(5.0) if frame_rates.has(5.0) else int(floor(frame_rates.size() / 2.0))
 var frame_rate: float = frame_rates[frame_rate_index]
 
 var cycling: bool = false
