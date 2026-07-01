@@ -83,9 +83,6 @@ func _init_terrain_controller() -> Controller:
 func _init_world_scene() -> Sprite2D:
 	var new_world: Sprite2D = World.new().init_scene()
 	new_world.name = "World"
-	var screen_size = get_tree().root.size
-	new_world.texture.width = screen_size.x
-	new_world.texture.height = screen_size.y
 	add_child(new_world)
 	return new_world
 

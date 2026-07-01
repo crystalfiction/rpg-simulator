@@ -51,7 +51,7 @@ func _update_labels(curr_labels: Array):
 	var player_controller = self.world.data.controller.player_controller
 	var enemy_controller = self.world.data.controller.enemy_controller
 
-	# check for invalid labels
+	# check for labels with invalid objects
 	var invalid_entries = curr_labels.filter(func(l): return !is_instance_valid(l.obj))
 	for i in range(invalid_entries.size()):
 		# queue the label for deletion
@@ -97,19 +97,33 @@ func _update_labels(curr_labels: Array):
 				n_keys += keys.size()
 				if n_keys == 2:
 					if l.obj.data[keys[0]][keys[1]] is Action:
-						data_string = _get_substring(str(l.obj.data[keys[0]][keys[1]].get_script().get_global_name()), self.string_n)
+						data_string = _get_substring(
+							str(l.obj.data[keys[0]][keys[1]].get_script().get_global_name()),
+							self.string_n)
 					else:
-						data_string = _get_substring(str(l.obj.data[keys[0]][keys[1]]), self.string_n)
+						data_string = _get_substring(
+							str(l.obj.data[keys[0]][keys[1]]),
+							self.string_n)
 					l.label.text = data_string
 				elif n_keys == 3:
 					if l.obj.data[keys[0]][keys[1]][keys[2]] is Weapon:
 						var weapon_class = l.obj.data[keys[0]][keys[1]][keys[2]].get_weapon_class_string()
-						data_string = _get_substring(str(weapon_class), self.string_n)
+						data_string = _get_substring(
+							str(weapon_class),
+							self.string_n)
+					elif l.obj.data[keys[0]][keys[1]][keys[2]] is Armor:
+						data_string = _get_substring(
+							str(l.obj.data[keys[0]][keys[1]][keys[2]].get_script().get_global_name()),
+							self.string_n)
 					else:
-						data_string = _get_substring(str(l.obj.data[keys[0]][keys[1]][keys[2]]), self.string_n)
+						data_string = _get_substring(
+							str(l.obj.data[keys[0]][keys[1]][keys[2]]),
+							self.string_n)
 					l.label.text = data_string
 			else:
-				data_string = _get_substring(str(l.obj.data[l.key]), self.string_n)
+				data_string = _get_substring(
+					str(l.obj.data[l.key]),
+					self.string_n)
 				l.label.text = data_string
 	
 	# update labels
@@ -251,7 +265,7 @@ func _remove_lingerers(container: String):
 			if !l.is_queued_for_deletion():
 				l.queue_free()
 
-func _init_enemy_stats(curr_labels: Array):
+func _handle_enemy_stats(curr_labels: Array):
 	var enemy_controller = self.world.data.controller.enemy_controller
 	if enemy_controller:
 		var enemies: Array = enemy_controller.enemies
@@ -268,28 +282,43 @@ func _init_enemy_stats(curr_labels: Array):
 			# hide
 			self.enemy_panel.folded = true
 
-func _init_player_stats():
+func _handle_player_stats(curr_labels: Array):
 	var player_controller = self.world.data.controller.player_controller
 	if player_controller:
 		var p = player_controller.player
-		_make_data_labels(p, "player_stats")
+		if is_instance_valid(p):
+			var found = _check_obj_labels(p, curr_labels).front()
+			if !found:
+				_make_data_labels(p, "player_stats")
+		else:
+			_remove_lingerers("player_stats")
 	else:
 		# no player controller, hide player panel
 		self.player_panel.folded = true
 
-func _init_world_stats():
+func _handle_world_stats(curr_labels: Array):
 	# make world labels
 	var w = self.world
-	_make_data_labels(w, "world_stats")
+	var is_world = _check_obj_labels(w, curr_labels).front()
+	if !is_world:
+		_make_data_labels(w, "world_stats")
+	
 	# terrain data
 	var terrain = self.world.data.terrain
-	_make_data_labels(terrain, "world_stats")
+	var is_terrain = _check_obj_labels(terrain, curr_labels).front()
+	if !is_terrain:
+		_make_data_labels(terrain, "world_stats")
+	
 	# biome data
 	var biome = self.world.data.terrain.data.biome
-	_make_data_labels(biome, "world_stats")
+	var is_biome = _check_obj_labels(biome, curr_labels).front()
+	if !is_biome:
+		_make_data_labels(biome, "world_stats")
+	
 	# time data
 	var t = self.world.data.controller.time_controller
-	if t:
+	var is_time = _check_obj_labels(t, curr_labels).front()
+	if !is_time:
 		_make_data_labels(t, "world_stats")
 
 # Called when the node enters the scene tree for the first time.
@@ -305,11 +334,9 @@ func _ready() -> void:
 	new_stat_label_settings.font_size = 11
 	self.stat_label_settings = new_stat_label_settings # define label settings
 
-	# init stat panels
-	_init_player_stats()
-	_init_world_stats()
-
 # Called every frame. '_delta' is the elapsed time since the previous frame.
 func _process(_delta: float) -> void:
-	_init_enemy_stats(self.labels)
+	_handle_world_stats(self.labels)
+	_handle_player_stats(self.labels)
+	_handle_enemy_stats(self.labels)
 	_update_labels(self.labels)

@@ -19,6 +19,7 @@ var armor_data = {
     "slot": Slot,
 }
 
+
 ## initializes the entity data
 func _init() -> void:
 	self.EquipType = EquipmentType.ARMOR

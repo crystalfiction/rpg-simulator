@@ -11,8 +11,8 @@ var resource_controller: Controller
 var encounter_controller: Controller
 
 # components
-var grid_dimensions: Vector2i
-var grid_scale = Vector2i(36, 36)
+var grid_dimensions: Vector2i = Vector2i(35, 20)
+var grid_scale: Vector2i = Vector2i(36, 36)
 
 var terrain_iterations: int
 
@@ -337,15 +337,7 @@ func _init_grid_tiles(terrain: Terrain) -> Array:
 
 ## initializes the world grid and returns a nested array of 
 ## screen positions organized by grid steps, grid scale
-func _init_grid(scale: Vector2i) -> Array:
-	# get screen dimensions
-	var screen_size = get_tree().root.get_viewport().size
-	# Calculate how many tiles fit on the screen
-	var cols = floor(screen_size.x / scale.x)
-	var rows = floor(screen_size.y / scale.y)
-	var scaled_dimensions = Vector2i(cols, rows)
-	self.grid_dimensions = scaled_dimensions
-	
+func _init_grid() -> Array:
 	# create new grid
 	var new_grid = []
 	for x in range(self.grid_dimensions.x):
@@ -353,7 +345,6 @@ func _init_grid(scale: Vector2i) -> Array:
 		for y in range(self.grid_dimensions.y):
 			# append grid coordinates to current row, col
 			new_grid[x].append(Vector2i(x, y))
-	
 	return new_grid
 
 ## initializes the encounters system controller script as object,
@@ -399,7 +390,7 @@ func _init_terrain(biome: Biome = null) -> Terrain:
 		new_terrain.data.biome = biome
 
 	# initialize world grid
-	var new_grid = _init_grid(self.grid_scale)
+	var new_grid = _init_grid()
 	new_terrain.data.grid = new_grid
 	
 	# initialize world tiles

@@ -3,7 +3,7 @@ class_name LegArmor extends Armor
 # components
 var leg_armor_data = {
     "stats": {
-        "armor": 20
+        "armor": 10
     }
 }
 

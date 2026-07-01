@@ -3,7 +3,7 @@ class_name FeetArmor extends Armor
 # components
 var feet_armor_data = {
     "stats": {
-        "armor": 10
+        "armor": 5
     }
 }
 

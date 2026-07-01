@@ -14,5 +14,5 @@ var equipment_data = {
 ## initializes the entity data
 func _init() -> void:
 	self.Use = ItemUse.EQUIP
-	super ()
+	super()
 	_traverse_data(self.data, self.equipment_data)

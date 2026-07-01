@@ -3,7 +3,7 @@ class_name HeadArmor extends Armor
 # components
 var head_armor_data = {
     "stats": {
-        "armor": 10
+        "armor": 5
     }
 }
 

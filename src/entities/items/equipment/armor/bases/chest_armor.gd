@@ -3,7 +3,7 @@ class_name ChestArmor extends Armor
 # components
 var chest_armor_data = {
     "stats": {
-        "armor": 20
+        "armor": 10
     }
 }
 
