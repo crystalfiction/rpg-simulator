@@ -31,39 +31,42 @@ The Tactician is a siezer of opportunities. What they lack in brawn they more th
 
 ### MVP
 
-#### Goals
-
 Create a procedurally generated RPG simulation that embraces chaos and instability, balanced by user input and natural in-game forces
 
 - [ ] _player systems_
-  - [ ] _class system_: allow player to choose a player class that forms a unique, distinct way of interacting with the world
-    - [ ] _ability system_: players/enemies utilize an ability-based combat system
+  - [x] _class system_: allow player to choose a player class that forms a unique, distinct way of interacting with the world
+    - [x] _ability system_: players/enemies utilize an ability-based combat system
       - [x] neutral abilities: BasicAttack, HeavyAttack
       - [x] class-specific
       - [x] abilities incur a cycle-based cooldown and are used in order of priority within the player's abilities table
-    - [ ] _subclass system_: once a particular stance threshold is reached, player can choose to specialize in an associated subclass
-      - [ ] _stance system_: each base class has 3 "stances" that can be cycled through, allowing experience to be accumulated for that particular stance
-        - [ ] stances represent strategy/role types: defensive, offensive, utility
-        - [ ] only one stance can be active at a time, but players can switch stance when a new party member is acquired
-  - [ ] _skill system_: players accumulate skill points for specific skills by doing specific actions
+  - [x] _skill system_: players accumulate skill points for specific skills by doing specific actions
     - [x] weapon skills accumulated in combat while using a particular weapon type
       - _the idea is that cumulative stats like this can form the character in some way according to each individual seed._
   - [x] _inventory system_: players can manage their own inventory items
     - [x] equipping and unequipping equippable items
     - [x] deleting items
     - [x] reordering items
-  - [ ] _item system_: players have a chance to randomly find items including weapons, armor
+  - [x] _item system_: players have a chance to randomly find items including weapons, armor
     - [x] _weapons_: any class can equip any type of weapon; the only determinant is weapon skills
     - [x] _armor_: any class can equip any armor type, but each armor type has benefits and drawbacks, relying mainly on armor skill of that particular type
-    - [ ] all items are generated randomly, according to a pool of base-types and stat modifiers
   - [ ] _party system_: player has a random chance to encounter neutral entities, within particular progress thresholds, that can be adopted into the player's party
     - [ ] progress thresholds are determined by player : enemy stat ratios
       - thresholds act primarily as a way to smooth out world randomness by giving agency to the player at specific progress levels
     - [ ] neutral entities are a type of player starting with a randomized class
     - [ ] player can choose to adopt this player into their party or pass
-- [ ] _environmental system_: create a dynamic environment with terrain, weather, and organic life simulation that directly impacts the player's world interaction somehow
+- [x] _enemy system_: player encounters enemies across the world when attempting to interact with resources
+- [x] _environmental system_: create a dynamic environment with terrain, weather, and organic life simulation that directly impacts the player's world interaction somehow
+  - [x] simulates a basic world environment using procedurally generated terrain samples
+    - [x] player resources are generated according to tile conditions related to terrain
+
+### Further
+
+- [ ] _subclass system_: once a particular stance threshold is reached, player can choose to specialize in an associated subclass
+  - [ ] _stance system_: each base class has 3 "stances" that can be cycled through, allowing experience to be accumulated for that particular stance
+    - [ ] stances represent strategy/role types: defensive, offensive, utility
+    - [ ] only one stance can be active at a time, but players can switch stance when a new party member is acquired
+- [ ] _environment simulation_
   - [ ] implement organic matter to terrain with basic life simulation
-  - [x] finish implementing basic erosion
 
 #### Reference
 
