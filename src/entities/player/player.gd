@@ -19,7 +19,7 @@ var PlayerClasses = {
 }
 
 var player_data: Dictionary = {
-	"world": "",
+	"world": null,
 	"grid_idx": Vector2i(0, 0),
 	"class": null,
 	"class_v": "",
@@ -29,7 +29,7 @@ var player_data: Dictionary = {
 	"actions": {
 		"controller": null,
 		"action": null,
-		"last_action": "",
+		"last_action": null,
 		"abilities": [
 			HeavyAttack,
 		],
@@ -38,8 +38,9 @@ var player_data: Dictionary = {
 			# "MISSES": 0,
 			# "CRITS": 0,
 			# "DODGES": 0,
+			# "highest_map: 0,
 		},
-		"last_stand": true,
+		"last_stand": true, # whether or not last stand is available
 	},
 	"skills": {},
 	"resources": {
@@ -51,7 +52,7 @@ var player_data: Dictionary = {
 		"done": 0
 	},
 	"inventory": {
-		"manager": null,
+		"controller": null,
 		"equipped": {
 			"weapon": null,
 			"head": null,

@@ -3,7 +3,7 @@ class_name Enemy extends Entity
 # components
 var init_enemy: Resource = preload("res://src/entities/enemies/enemy.tscn")
 var init_data: Dictionary = {
-	"world": "",
+	"world": null,
 	"grid_idx": Vector2i(0, 0),
 	"stats": {
 		"level": 0,
@@ -25,7 +25,7 @@ var init_data: Dictionary = {
 	},
 	"skills": {},
 	"actions": {
-		"controller": "",
+		"controller": null,
 		"action": null,
 		"last_action": null,
 	},
@@ -33,7 +33,7 @@ var init_data: Dictionary = {
 		"active": false,
 	},
 	"inventory": {
-		"manager": null,
+		"controller": null,
 		"equipped": {
 			"weapon": null,
 			"head": null,

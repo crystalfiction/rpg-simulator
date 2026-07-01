@@ -1,19 +1,15 @@
 extends EntityController
 
-# scripts
-var inventory_manager_script = preload("res://src/controllers/entities/player/inventory_manager.gd")
-
 # components
 var player: Player
 var init_class: Player.PlayerClass = Player.PlayerClass.BASE
 
-var exp_step: int = 1
+var exp_step: int = 10
 var exp_rate: int
 var exp_cap: int
 
 
 # Player Action Helpers
-
 ## finds the nearest resource tile to player and returns it
 func find_nearest_resource(p: Player, w: World) -> Tile:
 	# get all resource tiles
@@ -140,21 +136,21 @@ func _process_rewards(encounter: Dictionary):
 	var n = 1.0
 	if r <= n:
 		# pick random, unfilled equipment slot
-		var weapon_equipped = self.player.data.inventory.manager.get_equipped("weapon")
+		var weapon_equipped = self.player.data.inventory.controller.get_equipped("weapon")
 		if not weapon_equipped:
 			var weapon_c = Weapon.WeaponClass.values().pick_random()
 			var new_weapon = Weapon.WeaponClasses[weapon_c].new()
-			self.player.data.inventory.manager.equip_item(new_weapon)
+			self.player.data.inventory.controller.equip_item(new_weapon)
 		else:
 			# check armor slots
 			var armor_slots: Dictionary = Armor.ArmorSlot
 			for a in armor_slots:
 				var enid = Armor.ArmorSlot.get(a)
 				var key: String = a.to_lower()
-				var equipped = self.player.data.inventory.manager.get_equipped(key)
+				var equipped = self.player.data.inventory.controller.get_equipped(key)
 				if not equipped:
 					var new_armor = Armor.armor_slots[enid].new()
-					self.player.data.inventory.manager.equip_item(new_armor)
+					self.player.data.inventory.controller.equip_item(new_armor)
 
 
 	# check if level_up
@@ -249,8 +245,8 @@ func _init_player_entity():
 	new_player.data.actions.controller = _init_action_controller(new_player)
 
 	# inventory
-	var new_inventory_manager = inventory_manager_script.new(new_player)
-	new_player.data.inventory.manager = new_inventory_manager
+	var new_inventory_controller = InventoryController.new(new_player)
+	new_player.data.inventory.controller = new_inventory_controller
 
 	# weapon
 	var new_weapon = UnarmedWeapon.new()

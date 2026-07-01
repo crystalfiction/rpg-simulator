@@ -1,8 +1,5 @@
 extends EntityController
 
-# scripts
-var inventory_manager_script = preload("res://src/controllers/entities/player/inventory_manager.gd")
-
 # components
 var enemies: Array = []
 
@@ -47,8 +44,8 @@ func _init_enemy_entity():
 	# actions
 	new_enemy.data.actions.controller = _init_action_controller(new_enemy)
 	# inventory
-	var new_inventory_manager = inventory_manager_script.new(new_enemy)
-	new_enemy.data.inventory.manager = new_inventory_manager
+	var new_inventory_controller = InventoryController.new(new_enemy)
+	new_enemy.data.inventory.controller = new_inventory_controller
 
 	add_child(new_enemy)
 	

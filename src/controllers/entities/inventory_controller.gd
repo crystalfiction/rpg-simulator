@@ -1,4 +1,4 @@
-class_name InventoryManager extends RefCounted
+class_name InventoryController extends Controller
 
 # refs
 var entity: Entity
@@ -44,7 +44,7 @@ func equip_item(item: Equipment) -> bool:
 		Equipment.EquipmentType.WEAPON:
 			# unequip existing weapon first
 			if entity.data.inventory.equipped.weapon != null:
-				unequip_item(Equipment.EquipmentType.WEAPON)
+				unequip_item(Equipment.EquipmentType.WEAPON, "weapon")
 			entity.data.inventory.equipped.weapon = item
 			return true
 		
@@ -88,7 +88,7 @@ func equip_item(item: Equipment) -> bool:
 ## unequips equipment from a slot by equipment type
 func unequip_item(
 	equip_type: Equipment.EquipmentType,
-	slot_name: Armor.ArmorSlot
+	slot_name: String
 ) -> Equipment:
 	match equip_type:
 		Equipment.EquipmentType.WEAPON:
@@ -97,19 +97,19 @@ func unequip_item(
 			return unequipped
 		Equipment.EquipmentType.ARMOR:
 			match slot_name:
-				Armor.ArmorSlot.HEAD:
+				"head":
 					var unequipped = entity.data.inventory.equipped.head
 					entity.data.inventory.equipped.head = null
 					return unequipped
-				Armor.ArmorSlot.CHEST:
+				"chest":
 					var unequipped = entity.data.inventory.equipped.chest
 					entity.data.inventory.equipped.chest = null
 					return unequipped
-				Armor.ArmorSlot.LEGS:
+				"legs":
 					var unequipped = entity.data.inventory.equipped.legs
 					entity.data.inventory.equipped.legs = null
 					return unequipped
-				Armor.ArmorSlot.FEET:
+				"feet":
 					var unequipped = entity.data.inventory.equipped.feet
 					entity.data.inventory.equipped.feet = null
 					return unequipped
