@@ -141,7 +141,7 @@ func _process_cycle(curr_world: Sprite2D):
 			if is_instance_valid(curr_world):
 				## process world state conditions
 				# if player_controller exists, but player is invalid
-				if player_controller && !self.world.data.player:
+				if player_controller && !self.world.data.party.lead:
 					if curr_world.data.terrain.data.map_count == 1:
 						curr_world.get_tree().reload_current_scene()
 						return

@@ -38,7 +38,7 @@ var label_entry = {
 	"label": null,
 }
 
-var string_n := 10
+var string_n := 12
 
 
 func _get_substring(string: String, n: int) -> String:
@@ -63,7 +63,8 @@ func _update_labels(curr_labels: Array):
 
 	# player progress bars updated directly
 	if player_controller:
-		var p = self.world.data.controller.player_controller.player
+		# FIXME: make this account for other party members
+		var p = self.world.data.party.lead
 		if is_instance_valid(p):
 			# update class title
 			self.player_class.text = p.get_player_class_string()
@@ -285,7 +286,8 @@ func _handle_enemy_stats(curr_labels: Array):
 func _handle_player_stats(curr_labels: Array):
 	var player_controller = self.world.data.controller.player_controller
 	if player_controller:
-		var p = player_controller.player
+		# FIXME: make this consider other party members
+		var p = self.world.data.party.lead
 		if is_instance_valid(p):
 			var found = _check_obj_labels(p, curr_labels).front()
 			if !found:

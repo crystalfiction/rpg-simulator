@@ -1,8 +1,12 @@
 extends EntityController
 
+# scripts
+var party_controller_script = preload("res://src/controllers/entities/player/party_controller.gd")
+
 # components
-var player: Player
 var init_class: Player.PlayerClass = Player.PlayerClass.BASE
+
+var party_controller: Controller
 
 var exp_step: int = 10
 var exp_rate: int
@@ -52,6 +56,7 @@ func interact_with_tile(p: Player, current_tile: Tile):
 	else:
 		self.world.data.terrain.data.resources.count -= 1
 
+
 ## moves the passed player to the passed tile and updates player grid_idx
 func move_to_tile(p: Player, t: Tile):
 	# move player to tile
@@ -65,6 +70,7 @@ func move_to_tile(p: Player, t: Tile):
 	p.data.grid_idx = self.Utils.world_to_grid(
 		p.global_position, grid_scale
 	)
+
 
 ## moves the passed player one tile towards the passed tile,
 ## or to the passed tile if only one tile distance
@@ -101,9 +107,9 @@ func check_resource_surplus(p: Player):
 	):
 		if p.data.resources.food > 0:
 			# if regen times is more than surplus allows,
-			if n_regen > player.data.resources.food:
+			if n_regen > p.data.resources.food:
 				# get the difference
-				var difference: float = snapped(player.data.resources.food - float(n_regen), 0.01)
+				var difference: float = snapped(p.data.resources.food - float(n_regen), 0.01)
 				n_regen += difference
 			# apply regen times to amount
 			regen_amt *= n_regen
@@ -121,11 +127,12 @@ func check_resource_surplus(p: Player):
 		
 
 ## process stat rewards considering the cycle's encounter
-func _process_rewards(encounter: Dictionary):
+func _process_rewards(p: Player, encounter: Dictionary):
 	# reward player exp
 	var map_count = self.world.data.terrain.data.map_count
 	var enemy_exp = encounter.n_enemies * map_count
-	self.player.data.stats.exp += self.exp_step + enemy_exp
+	
+	p.data.stats.exp += self.exp_step + enemy_exp
 
 	FileLogger.log_message(self,
 		str(self.exp_step + enemy_exp) + " exp rewarded."
@@ -133,39 +140,47 @@ func _process_rewards(encounter: Dictionary):
 
 	# check for item rewards
 	var r = randf()
-	var n = 1.0
+	var n = 0.05
 	if r <= n:
 		# pick random, unfilled equipment slot
-		var weapon_equipped = self.player.data.inventory.controller.get_equipped("weapon")
+		var weapon_equipped = p.data.inventory.controller.get_equipped("weapon")
 		if not weapon_equipped:
 			var weapon_c = Weapon.WeaponClass.values().pick_random()
 			var new_weapon = Weapon.WeaponClasses[weapon_c].new()
-			self.player.data.inventory.controller.equip_item(new_weapon)
+			p.data.inventory.controller.equip_item(new_weapon)
 		else:
 			# check armor slots
 			var armor_slots: Dictionary = Armor.ArmorSlot
-			for a in armor_slots:
-				var enid = Armor.ArmorSlot.get(a)
-				var key: String = a.to_lower()
-				var equipped = self.player.data.inventory.controller.get_equipped(key)
-				if not equipped:
-					var new_armor = Armor.armor_slots[enid].new()
-					self.player.data.inventory.controller.equip_item(new_armor)
+			var r_slot = armor_slots.keys().pick_random()
+			var enid = Armor.ArmorSlot.get(r_slot)
+			var key: String = r_slot.to_lower()
+			var equipped = p.data.inventory.controller.get_equipped(key)
+			# loop until null slot,
+			while equipped != null:
+				r_slot = armor_slots.keys().pick_random()
+				enid = Armor.ArmorSlot.get(r_slot)
+				key = r_slot.to_lower()
+				equipped = p.data.inventory.controller.get_equipped(key)
+
+			# once null slot found,
+			if not equipped:
+				var new_armor = Armor.armor_slots[enid].new()
+				p.data.inventory.controller.equip_item(new_armor)
 
 
 	# check if level_up
 	var level_up = false
-	if self.player.data.stats.exp >= self.exp_cap:
+	if p.data.stats.exp >= self.exp_cap:
 		# calculate player stats
-		self.player.data.stats = _calculate_stats(self.player)
+		p.data.stats = _calculate_stats(p)
 		level_up = true
 	
 		# update exp_cap reference
-		self.player.data.stats.exp_cap = self.exp_cap
+		p.data.stats.exp_cap = self.exp_cap
 		
 		var msg = (
-			"src_lvl: " + str(self.player.data.stats.level) + " | " +
-			"src_exp: " + str(self.player.data.stats.exp) + " | " +
+			"src_lvl: " + str(p.data.stats.level) + " | " +
+			"src_exp: " + str(p.data.stats.exp) + " | " +
 			"exp_rate: " + str(self.exp_step) + " | " +
 			"exp_cap: " + str(self.exp_cap)
 		)
@@ -174,16 +189,16 @@ func _process_rewards(encounter: Dictionary):
 	# log if level up
 	if level_up:
 		# reset player health to max if level up
-		self.player.data.stats.health = self.player.data.stats.max_health
-		FileLogger.log_message(self, self.player.name + " is now level " + str(self.player.data.stats.level))
+		p.data.stats.health = p.data.stats.max_health
+		FileLogger.log_message(self, p.name + " is now level " + str(p.data.stats.level))
 	
 	# if no level up,
 	else:
 		# # check if last stand used
-		# if self.player.data.actions.last_stand == true:
-		# 	self.player.data.actions.last_stand = false
+		# if p.data.actions.last_stand == true:
+		# 	p.data.actions.last_stand = false
 		# check surplus
-		check_resource_surplus(self.player)
+		check_resource_surplus(p)
 
 	
 # Player Initialization
@@ -199,13 +214,23 @@ func _init_action_controller(p: Player) -> ActionController:
 	new_action_controller.FileLogger = self.FileLogger
 	return new_action_controller
 
+
+## initializes the party system controller
+func _init_party_controller() -> Controller:
+	var new_party_controller = party_controller_script.new()
+	new_party_controller.world = self.world
+	new_party_controller.parent = self
+	self.party_controller = new_party_controller
+	return new_party_controller
+
+
 ## initializes a new player entity
 func _init_player_entity():
 	# create new player scene of class
 	var new_player_script = Player.new()
 	var new_player = new_player_script.init_scene()
 	
-	# metadata
+	# meta
 	new_player.data.uid = self.world.data.controller.uid_ref
 	new_player.data.world = self.world
 	new_player.data.controller = self
@@ -258,11 +283,12 @@ func _init_player_entity():
 	self.world.data.controller.uid_ref += 1
 	
 	# update player entity reference
-	self.player = new_player
-	self.world.data.player = self.player
+	self.party_controller.add_party_member(new_player)
+	self.party_controller.update_party_lead(new_player)
 	
 	# add player to tree
 	self.add_child(new_player)
+
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -272,6 +298,8 @@ func _ready() -> void:
 	self.Utils = $"/root/Utils"
 
 	# TODO: account for multiple players
+	_init_party_controller()
+
 	# initialize the player entity as scene
 	_init_player_entity()
 	
@@ -289,7 +317,7 @@ func _check_player(p: Player):
 				p.data.resources.food = 0
 				p.data.stats.health = p.data.stats.max_health
 				p.data.actions.last_stand = false
-				FileLogger.log_message(self, self.player.name +
+				FileLogger.log_message(self, p.name +
 					" is taking a last stand!")
 			
 			# no food for last stand, player is dead
@@ -298,7 +326,7 @@ func _check_player(p: Player):
 				if !p.is_queued_for_deletion():
 					p.data.actions.metrics["highest_map"] = self.world.data.terrain.data.map_count
 					FileLogger.log_message(self,
-						str(self.player.data),
+						str(p.data),
 						"INFO",
 						FileLogger.Outputs.find_key(
 							FileLogger.Outputs.GAME_LOG_PATH))
@@ -312,13 +340,14 @@ func _check_player(p: Player):
 			if !p.is_queued_for_deletion():
 				p.data.actions.metrics["highest_map"] = self.world.data.terrain.data.map_count
 				FileLogger.log_message(self,
-					str(self.player.data),
+					str(p.data),
 					"INFO",
 					FileLogger.Outputs.find_key(
 						FileLogger.Outputs.GAME_LOG_PATH))
 
 				# queue for deletion
 				p.queue_free()
+
 
 # checks if an active encounter is complete and rewards player if so
 func check_encounter(p: Player) -> bool:
@@ -330,7 +359,7 @@ func check_encounter(p: Player) -> bool:
 	if !encounter_controller.encountering:
 		# get player rewards with active encounter
 		var current_encounter = encounter_controller.encounter
-		_process_rewards(current_encounter)
+		_process_rewards(p, current_encounter)
 		# move active encounter to done and set active null
 		p.data.encounters.done += 1
 		p.data.encounters.active = false
@@ -338,6 +367,7 @@ func check_encounter(p: Player) -> bool:
 	
 	# return result flag
 	return result
+
 
 ## determines and processes player logic for a time cycle
 func _process_cycle(p: Player):
@@ -359,8 +389,9 @@ func _process_cycle(p: Player):
 			if not p.is_queued_for_deletion():
 				p.data.actions.controller.get_action()
 
+
 func _process(_delta: float) -> void:
 	# if player is valid,
-	if is_instance_valid(self.player):
+	if is_instance_valid(self.world.data.party.lead):
 		# process player cycle
-		_process_cycle(self.player)
+		_process_cycle(self.world.data.party.lead)
