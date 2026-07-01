@@ -86,18 +86,33 @@ func equip_item(item: Equipment) -> bool:
 
 
 ## unequips equipment from a slot by equipment type
-func unequip_item(equip_type: Equipment.EquipmentType) -> Equipment:
+func unequip_item(
+	equip_type: Equipment.EquipmentType,
+	slot_name: Armor.ArmorSlot
+) -> Equipment:
 	match equip_type:
 		Equipment.EquipmentType.WEAPON:
 			var unequipped = entity.data.inventory.equipped.weapon
 			entity.data.inventory.equipped.weapon = null
 			return unequipped
 		Equipment.EquipmentType.ARMOR:
-			# default to chest if no specific slot provided
-			var unequipped = entity.data.inventory.equipped.chest
-			entity.data.inventory.equipped.chest = null
-			return unequipped
-	
+			match slot_name:
+				Armor.ArmorSlot.HEAD:
+					var unequipped = entity.data.inventory.equipped.head
+					entity.data.inventory.equipped.head = null
+					return unequipped
+				Armor.ArmorSlot.CHEST:
+					var unequipped = entity.data.inventory.equipped.chest
+					entity.data.inventory.equipped.chest = null
+					return unequipped
+				Armor.ArmorSlot.LEGS:
+					var unequipped = entity.data.inventory.equipped.legs
+					entity.data.inventory.equipped.legs = null
+					return unequipped
+				Armor.ArmorSlot.FEET:
+					var unequipped = entity.data.inventory.equipped.feet
+					entity.data.inventory.equipped.feet = null
+					return unequipped
 	return null
 
 
