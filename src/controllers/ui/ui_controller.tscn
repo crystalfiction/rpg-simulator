@@ -1,243 +1,82 @@
 [gd_scene format=3 uid="uid://cmr8a4iqcvrgb"]
 
 [ext_resource type="Script" uid="uid://ce6ie113viqdg" path="res://src/controllers/ui/ui_controller.gd" id="1_2yfeh"]
-[ext_resource type="FontFile" uid="uid://dvjb12pu7hof1" path="res://src/assets/JetBrainsMono-Medium.ttf" id="2_1mjrn"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1mjrn"]
-bg_color = Color(0.3882353, 0.5294118, 0.16862746, 1)
-
-[sub_resource type="ButtonGroup" id="ButtonGroup_1mjrn"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fsh7l"]
-bg_color = Color(0.3882353, 0.5294118, 0.16862746, 1)
-
-[node name="UiController" type="Control" unique_id=694900400 node_paths=PackedStringArray("world_panel", "world_stats", "party_inventory", "player_panel", "player_class", "player_stats", "player_health_bar", "player_exp_bar", "enemy_panel", "enemy_stats", "enemy_health_bar")]
+[node name="UiController" type="Control" unique_id=694900400 node_paths=PackedStringArray("world_stats", "party_stats", "enemy_stats")]
 top_level = true
 layout_mode = 3
+anchors_preset = 11
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -288.0
+grow_horizontal = 0
+grow_vertical = 2
+script = ExtResource("1_2yfeh")
+world_stats = NodePath("PanelContainer/MarginContainer/VBoxContainer/TabContainer/World/WorldStats")
+party_stats = NodePath("PanelContainer/MarginContainer/VBoxContainer/TabContainer/Party/PartyStats")
+enemy_stats = NodePath("PanelContainer/MarginContainer/VBoxContainer/TabContainer/Enemy/EnemyStats")
+
+[node name="PanelContainer" type="PanelContainer" parent="." unique_id=459534008]
+layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_2yfeh")
-world_panel = NodePath("MarginContainer/WorldPanel")
-world_stats = NodePath("MarginContainer/WorldPanel/MarginContainer/VBoxContainer/WorldContainer/WorldStats")
-party_inventory = NodePath("BoxContainer/Main/BoxContainer/PlayerPanel/MarginContainer/VBoxContainer/PartyContainer/PartyInventory")
-player_panel = NodePath("BoxContainer/Main/BoxContainer/PlayerPanel")
-player_class = NodePath("BoxContainer/Main/BoxContainer/PlayerPanel/MarginContainer/VBoxContainer/PartyContainer/PlayerContainer/PlayerClass")
-player_stats = NodePath("BoxContainer/Main/BoxContainer/PlayerPanel/MarginContainer/VBoxContainer/PartyContainer/PlayerContainer/PlayerStats")
-player_health_bar = NodePath("BoxContainer/Main/BoxContainer/PlayerPanel/MarginContainer/VBoxContainer/PartyContainer/PlayerContainer/Vitals/Health")
-player_exp_bar = NodePath("BoxContainer/Main/BoxContainer/PlayerPanel/MarginContainer/VBoxContainer/PartyContainer/PlayerContainer/Vitals/Exp")
-enemy_panel = NodePath("BoxContainer/EnemyContainer/EnemyPanel")
-enemy_stats = NodePath("BoxContainer/EnemyContainer/EnemyPanel/MarginContainer/VBoxContainer/EnemyContainer/EnemyStats")
-enemy_health_bar = NodePath("BoxContainer/EnemyContainer/EnemyPanel/MarginContainer/VBoxContainer/EnemyContainer/Vitals/Health")
 
-[node name="MarginContainer" type="MarginContainer" parent="." unique_id=888413199]
-layout_mode = 1
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -32.0
-offset_top = -32.0
-grow_horizontal = 0
-grow_vertical = 0
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer" unique_id=1759692390]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer" unique_id=2020825404]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="TabContainer" type="TabContainer" parent="PanelContainer/MarginContainer/VBoxContainer" unique_id=1628161260]
+layout_mode = 2
+current_tab = 0
+
+[node name="World" type="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer" unique_id=1136931055]
+layout_mode = 2
 theme_override_constants/margin_left = 4
 theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 4
 theme_override_constants/margin_bottom = 4
+metadata/_tab_index = 0
 
-[node name="WorldPanel" type="FoldableContainer" parent="MarginContainer" unique_id=1772690337]
-layout_mode = 2
-size_flags_vertical = 0
-theme_override_fonts/font = ExtResource("2_1mjrn")
-
-[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/WorldPanel" unique_id=1451901922]
-layout_mode = 2
-
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/WorldPanel/MarginContainer" unique_id=1067996328]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="WorldContainer" type="VBoxContainer" parent="MarginContainer/WorldPanel/MarginContainer/VBoxContainer" unique_id=907586852]
-layout_mode = 2
-theme_override_constants/separation = 1
-
-[node name="Label" type="Label" parent="MarginContainer/WorldPanel/MarginContainer/VBoxContainer/WorldContainer" unique_id=2043932261]
-layout_mode = 2
-theme_override_fonts/font = ExtResource("2_1mjrn")
-theme_override_font_sizes/font_size = 18
-text = "World"
-
-[node name="HSeparator" type="HSeparator" parent="MarginContainer/WorldPanel/MarginContainer/VBoxContainer/WorldContainer" unique_id=2054964226]
-clip_contents = true
-layout_mode = 2
-
-[node name="WorldStats" type="GridContainer" parent="MarginContainer/WorldPanel/MarginContainer/VBoxContainer/WorldContainer" unique_id=2146590863]
+[node name="WorldStats" type="GridContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/World" unique_id=1827575150]
 layout_mode = 2
 theme_override_constants/v_separation = -2
 columns = 2
 
-[node name="BoxContainer" type="BoxContainer" parent="." unique_id=1464763295]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
-theme_override_constants/separation = 0
-
-[node name="Main" type="MarginContainer" parent="BoxContainer" unique_id=1397540001]
+[node name="Party" type="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer" unique_id=167004360]
+visible = false
 layout_mode = 2
 theme_override_constants/margin_left = 4
 theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 4
 theme_override_constants/margin_bottom = 4
+metadata/_tab_index = 1
 
-[node name="BoxContainer" type="BoxContainer" parent="BoxContainer/Main" unique_id=1992779978]
-layout_mode = 2
-vertical = true
-
-[node name="PlayerPanel" type="FoldableContainer" parent="BoxContainer/Main/BoxContainer" unique_id=2091273920]
-layout_mode = 2
-size_flags_vertical = 0
-theme_override_fonts/font = ExtResource("2_1mjrn")
-
-[node name="MarginContainer" type="MarginContainer" parent="BoxContainer/Main/BoxContainer/PlayerPanel" unique_id=1830623962]
-layout_mode = 2
-
-[node name="VBoxContainer" type="VBoxContainer" parent="BoxContainer/Main/BoxContainer/PlayerPanel/MarginContainer" unique_id=2009706202]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="PartyContainer" type="VBoxContainer" parent="BoxContainer/Main/BoxContainer/PlayerPanel/MarginContainer/VBoxContainer" unique_id=293350668]
-layout_mode = 2
-
-[node name="PlayerContainer" type="VBoxContainer" parent="BoxContainer/Main/BoxContainer/PlayerPanel/MarginContainer/VBoxContainer/PartyContainer" unique_id=1850851588]
-layout_mode = 2
-theme_override_constants/separation = 1
-
-[node name="Label" type="Label" parent="BoxContainer/Main/BoxContainer/PlayerPanel/MarginContainer/VBoxContainer/PartyContainer/PlayerContainer" unique_id=1513690529]
-layout_mode = 2
-theme_override_fonts/font = ExtResource("2_1mjrn")
-theme_override_font_sizes/font_size = 16
-text = "Player"
-
-[node name="PlayerClass" type="Label" parent="BoxContainer/Main/BoxContainer/PlayerPanel/MarginContainer/VBoxContainer/PartyContainer/PlayerContainer" unique_id=157588049]
-layout_mode = 2
-theme_override_fonts/font = ExtResource("2_1mjrn")
-theme_override_font_sizes/font_size = 12
-text = "Class"
-
-[node name="HSeparator" type="HSeparator" parent="BoxContainer/Main/BoxContainer/PlayerPanel/MarginContainer/VBoxContainer/PartyContainer/PlayerContainer" unique_id=1548506717]
-clip_contents = true
-layout_mode = 2
-
-[node name="Vitals" type="VBoxContainer" parent="BoxContainer/Main/BoxContainer/PlayerPanel/MarginContainer/VBoxContainer/PartyContainer/PlayerContainer" unique_id=203879371]
-layout_mode = 2
-theme_override_constants/separation = 1
-
-[node name="Health" type="ProgressBar" parent="BoxContainer/Main/BoxContainer/PlayerPanel/MarginContainer/VBoxContainer/PartyContainer/PlayerContainer/Vitals" unique_id=1053375286]
-custom_minimum_size = Vector2(0, 8)
-layout_mode = 2
-theme_override_styles/fill = SubResource("StyleBoxFlat_1mjrn")
-show_percentage = false
-
-[node name="Exp" type="ProgressBar" parent="BoxContainer/Main/BoxContainer/PlayerPanel/MarginContainer/VBoxContainer/PartyContainer/PlayerContainer/Vitals" unique_id=1925969346]
-custom_minimum_size = Vector2(0, 4)
-layout_mode = 2
-show_percentage = false
-
-[node name="PlayerStats" type="GridContainer" parent="BoxContainer/Main/BoxContainer/PlayerPanel/MarginContainer/VBoxContainer/PartyContainer/PlayerContainer" unique_id=307626570]
+[node name="PartyStats" type="GridContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/Party" unique_id=156362244]
 layout_mode = 2
 theme_override_constants/v_separation = -2
 columns = 2
 
-[node name="PlayerAbilities" type="GridContainer" parent="BoxContainer/Main/BoxContainer/PlayerPanel/MarginContainer/VBoxContainer/PartyContainer/PlayerContainer" unique_id=215374304]
-layout_mode = 2
-
-[node name="PartyInventory" type="GridContainer" parent="BoxContainer/Main/BoxContainer/PlayerPanel/MarginContainer/VBoxContainer/PartyContainer" unique_id=1894468770]
-layout_mode = 2
-
-[node name="StancesPanel" type="FoldableContainer" parent="BoxContainer/Main/BoxContainer" unique_id=2113978293]
+[node name="Enemy" type="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer" unique_id=2032826631]
 visible = false
 layout_mode = 2
-
-[node name="BoxContainer" type="BoxContainer" parent="BoxContainer/Main/BoxContainer/StancesPanel" unique_id=94141563]
-layout_mode = 2
-
-[node name="Button" type="Button" parent="BoxContainer/Main/BoxContainer/StancesPanel/BoxContainer" unique_id=1768853630]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_fonts/font = ExtResource("2_1mjrn")
-theme_override_font_sizes/font_size = 14
-toggle_mode = true
-button_group = SubResource("ButtonGroup_1mjrn")
-text = "Atk"
-
-[node name="Button2" type="Button" parent="BoxContainer/Main/BoxContainer/StancesPanel/BoxContainer" unique_id=172400102]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_fonts/font = ExtResource("2_1mjrn")
-theme_override_font_sizes/font_size = 14
-toggle_mode = true
-button_group = SubResource("ButtonGroup_1mjrn")
-text = "Bal"
-
-[node name="Button3" type="Button" parent="BoxContainer/Main/BoxContainer/StancesPanel/BoxContainer" unique_id=1814159771]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_fonts/font = ExtResource("2_1mjrn")
-theme_override_font_sizes/font_size = 14
-toggle_mode = true
-button_group = SubResource("ButtonGroup_1mjrn")
-text = "Def"
-
-[node name="EnemyContainer" type="MarginContainer" parent="BoxContainer" unique_id=2141182674]
-layout_mode = 2
-size_flags_vertical = 0
 theme_override_constants/margin_left = 4
 theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 4
 theme_override_constants/margin_bottom = 4
+metadata/_tab_index = 2
 
-[node name="EnemyPanel" type="FoldableContainer" parent="BoxContainer/EnemyContainer" unique_id=2010273539]
-layout_mode = 2
-size_flags_horizontal = 8
-size_flags_vertical = 0
-theme_override_fonts/font = ExtResource("2_1mjrn")
-folded = true
-
-[node name="MarginContainer" type="MarginContainer" parent="BoxContainer/EnemyContainer/EnemyPanel" unique_id=394116400]
-visible = false
-layout_mode = 2
-
-[node name="VBoxContainer" type="VBoxContainer" parent="BoxContainer/EnemyContainer/EnemyPanel/MarginContainer" unique_id=1250108174]
-layout_mode = 2
-
-[node name="EnemyContainer" type="VBoxContainer" parent="BoxContainer/EnemyContainer/EnemyPanel/MarginContainer/VBoxContainer" unique_id=32444330]
-layout_mode = 2
-theme_override_constants/separation = 1
-
-[node name="Label" type="Label" parent="BoxContainer/EnemyContainer/EnemyPanel/MarginContainer/VBoxContainer/EnemyContainer" unique_id=1900654540]
-layout_mode = 2
-theme_override_fonts/font = ExtResource("2_1mjrn")
-theme_override_font_sizes/font_size = 18
-text = "Enemy"
-
-[node name="HSeparator" type="HSeparator" parent="BoxContainer/EnemyContainer/EnemyPanel/MarginContainer/VBoxContainer/EnemyContainer" unique_id=1730886686]
-clip_contents = true
-layout_mode = 2
-
-[node name="Vitals" type="VBoxContainer" parent="BoxContainer/EnemyContainer/EnemyPanel/MarginContainer/VBoxContainer/EnemyContainer" unique_id=1812623585]
-layout_mode = 2
-theme_override_constants/separation = 0
-
-[node name="Health" type="ProgressBar" parent="BoxContainer/EnemyContainer/EnemyPanel/MarginContainer/VBoxContainer/EnemyContainer/Vitals" unique_id=2008061236]
-custom_minimum_size = Vector2(0, 8)
-layout_mode = 2
-theme_override_styles/fill = SubResource("StyleBoxFlat_fsh7l")
-show_percentage = false
-
-[node name="EnemyStats" type="GridContainer" parent="BoxContainer/EnemyContainer/EnemyPanel/MarginContainer/VBoxContainer/EnemyContainer" unique_id=1745527692]
+[node name="EnemyStats" type="GridContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/Enemy" unique_id=91714677]
 layout_mode = 2
 theme_override_constants/v_separation = -2
 columns = 2

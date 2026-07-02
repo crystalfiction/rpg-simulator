@@ -25,8 +25,8 @@ Utils="*uid://ddj182f22o77i"
 
 [display]
 
-window/size/viewport_width=1260
-window/size/viewport_height=720
+window/size/viewport_width=1440
+window/size/viewport_height=800
 window/size/resizable=false
 
 [editor_plugins]

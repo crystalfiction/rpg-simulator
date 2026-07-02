@@ -4,7 +4,6 @@ class_name World extends Entity
 var init_world: Resource = preload("res://src/entities/world/world.tscn")
 var init_data: Dictionary = {
 	"terrain": {},
-	"player": null,
 	"party": {},
 }
 

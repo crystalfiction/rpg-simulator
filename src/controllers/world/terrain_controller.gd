@@ -11,8 +11,8 @@ var resource_controller: Controller
 var encounter_controller: Controller
 
 # components
-var grid_dimensions: Vector2i = Vector2i(35, 20)
-var grid_scale: Vector2i = Vector2i(36, 36)
+var grid_dimensions: Vector2i = Vector2i(36, 25)
+var grid_scale: Vector2i = Vector2i(32, 32)
 
 var terrain_iterations: int
 

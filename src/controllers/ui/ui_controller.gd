@@ -1,41 +1,22 @@
 extends Control
 
-# references
+# refs
 var world: Sprite2D
 var Utils: Node
 var FileLogger: Node
 
 # components
-var stat_label_settings: LabelSettings
-var log_label_settings: LabelSettings
-
-@export var world_panel: FoldableContainer
 @export var world_stats: GridContainer
-
-@export var party_inventory: GridContainer
-
-@export var player_panel: FoldableContainer
-@export var player_class: Label
-@export var player_stats: GridContainer
-@export var player_health_bar: ProgressBar
-@export var player_exp_bar: ProgressBar
-
-@export var enemy_panel: FoldableContainer
+@export var party_stats: GridContainer
 @export var enemy_stats: GridContainer
-@export var enemy_health_bar: ProgressBar
 
-
-var stat_containers = [
-	world_stats,
-	player_stats,
-	enemy_stats
-]
-
+var label_settings: LabelSettings
 var labels = []
 var label_entry = {
-	"obj": null,
-	"key": "",
-	"label": null,
+	"obj": null, # source object
+	"key": "", # data key
+	"name": null, # name label
+	"data": null, # data label
 }
 
 var string_n := 12
@@ -46,207 +27,26 @@ func _get_substring(string: String, n: int) -> String:
 	substring = string if string.length() <= string_n else string.substr(0, n) + "..."
 	return substring
 
-func _update_labels(curr_labels: Array):
-	# check for controller existence
-	var player_controller = self.world.data.controller.player_controller
-	var enemy_controller = self.world.data.controller.enemy_controller
 
-	# check for labels with invalid objects
-	var invalid_entries = curr_labels.filter(func(l): return !is_instance_valid(l.obj))
-	for i in range(invalid_entries.size()):
-		# queue the label for deletion
-		if is_instance_valid(invalid_entries[i].label):
-			if !invalid_entries[i].label.is_queued_for_deletion():
-				invalid_entries[i].label.queue_free()
-		# remove the entry from current labels
-		curr_labels.erase(invalid_entries[i])
+## removes labels and label entries with invalid objects
+func _remove_invalids(curr_labels: Array):
+	# remove labels if player invalid
+	var invalids = curr_labels.filter(
+		func(l): return not is_instance_valid(l.obj)
+	)
+	if not invalids.is_empty():
+		for i in invalids:
+			# remove name label
+			if is_instance_valid(invalids[i].name):
+				if not invalids[i].name.is_queued_for_deletion():
+					invalids[i].name.queue_free()
+			# remove data label
+			if is_instance_valid(invalids[i].data):
+				if not invalids[i].data.is_queued_for_deletion():
+					invalids[i].data.queue_free()
+			# remove label entry ref
+			invalids[i].erase()
 
-	# player progress bars updated directly
-	if player_controller:
-		# FIXME: make this account for other party members
-		var p = self.world.data.party.lead
-		if is_instance_valid(p):
-			# update class title
-			self.player_class.text = p.get_player_class_string()
-			# update progress bars
-			self.player_health_bar.value = p.data.stats.health
-			self.player_health_bar.max_value = p.data.stats.max_health
-			self.player_exp_bar.value = p.data.stats.exp
-			self.player_exp_bar.max_value = p.data.stats.exp_cap
-				
-	## TODO: make this account for multiple enemies
-	if enemy_controller:
-		var enemies = self.world.data.controller.enemy_controller.enemies
-		if !enemies.is_empty():
-			var e = enemies[0]
-			if is_instance_valid(e):
-				# update progress bars
-				self.enemy_health_bar.value = e.data.stats.health
-				self.enemy_health_bar.max_value = e.data.stats.max_health
-				self.enemy_health_bar.show()
-		else:
-			self.enemy_health_bar.hide()
-	
-	# traverse labels
-	for l in curr_labels:
-		# if object is valid and not queued for deletion,
-		if is_instance_valid(l.obj) && !l.obj.is_queued_for_deletion():
-			var keys = l.key.split(".", false)
-			var n_keys = 0
-			var data_string = ""
-			if keys.size() > 1:
-				n_keys += keys.size()
-				if n_keys == 2:
-					if l.obj.data[keys[0]][keys[1]] is Action:
-						data_string = _get_substring(
-							str(l.obj.data[keys[0]][keys[1]].get_script().get_global_name()),
-							self.string_n)
-					else:
-						data_string = _get_substring(
-							str(l.obj.data[keys[0]][keys[1]]),
-							self.string_n)
-					l.label.text = data_string
-				elif n_keys == 3:
-					if l.obj.data[keys[0]][keys[1]][keys[2]] is Weapon:
-						var weapon_class = l.obj.data[keys[0]][keys[1]][keys[2]].get_weapon_class_string()
-						data_string = _get_substring(
-							str(weapon_class),
-							self.string_n)
-					elif l.obj.data[keys[0]][keys[1]][keys[2]] is Armor:
-						data_string = _get_substring(
-							str(l.obj.data[keys[0]][keys[1]][keys[2]].get_script().get_global_name()),
-							self.string_n)
-					else:
-						data_string = _get_substring(
-							str(l.obj.data[keys[0]][keys[1]][keys[2]]),
-							self.string_n)
-					l.label.text = data_string
-			else:
-				data_string = _get_substring(
-					str(l.obj.data[l.key]),
-					self.string_n)
-				l.label.text = data_string
-	
-	# update labels
-	self.labels = curr_labels
-
-## returns stringified obj data given the passed obj and entry key string
-func _parse_label_entry(obj: Variant, entry_key: String) -> String:
-	# check if nested key
-	var keys = entry_key.split(".", false)
-	var n_keys = 0
-	if keys.size() > 0:
-		n_keys += keys.size()
-	
-	var data_string = ""
-	if n_keys == 2:
-		data_string = str(obj.data[keys[0]][keys[1]])
-	elif n_keys == 3:
-		data_string = str(obj.data[keys[0]][keys[1]][keys[2]])
-	else:
-		data_string = str(obj.data[entry_key])
-	return data_string
-
-func _make_data_label(
-	obj: Variant, key: String, container: String, entry_key: String = key,
-):
-	var new_name_label = Label.new()
-	new_name_label.label_settings = self.stat_label_settings
-	new_name_label.name = key
-	if obj is Controller:
-		var time_controller = self.world.data.controller.time_controller
-		if obj == time_controller:
-			new_name_label.text = "time." + entry_key
-	elif obj is Biome:
-		new_name_label.text = "biome." + entry_key
-	else:
-		new_name_label.text = entry_key
-
-	new_name_label.clip_text = true
-	new_name_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	new_name_label.custom_minimum_size = Vector2(140, 0)
-
-	var new_data_label = Label.new()
-	new_data_label.label_settings = self.stat_label_settings
-	new_data_label.name = key + "_data"
-	var data_string = null
-	data_string = _parse_label_entry(obj, entry_key)
-	
-	new_data_label.text = data_string
-	
-	self[container].add_child(new_name_label)
-	self[container].add_child(new_data_label)
-
-	var new_label_entry = label_entry.duplicate()
-	new_label_entry.obj = obj
-	new_label_entry.key = entry_key
-	new_label_entry.label = new_data_label
-
-	self.labels.append(new_label_entry)
-
-## traverses passed object data up to 3 layers deep using recursion,
-## adds them to the passed stat_container,
-## and processes ui controller label entries for updating labels
-func _make_data_labels(obj: Variant, container: String):
-	var world_filter = {
-		0: ["uid"]
-	}
-	var terrain_filter = {
-		0: ["map_count", "map_complete", "metrics", "weather", "resources"],
-	}
-	var biome_filter = {
-		0: ["class_v", "ranges"]
-	}
-	var player_filter = {
-		0: ["stats", "skills", "actions", "resources", "inventory"]
-	}
-	var enemy_filter = {
-		0: ["stats"]
-	}
-	for k in obj.data:
-		if (
-			obj is World && k in world_filter[0] ||
-			obj is Terrain && k in terrain_filter[0] ||
-			obj is Biome && k in biome_filter[0] ||
-			obj is Player && k in player_filter[0] ||
-			obj is Enemy && k in enemy_filter[0]
-		):
-			# if dictionary entry, traverse to the 3rd degree
-			## TODO: make this recursive
-			if obj.data[k] is Dictionary:
-				for k_n in obj.data[k]:
-					if (
-						obj is Player ||
-						obj is Enemy ||
-						obj is Terrain ||
-						obj is Biome
-					):
-						if obj.data[k][k_n] is Dictionary:
-							for k_n_n in obj.data[k][k_n]:
-								if (
-									obj is Player ||
-									obj is Enemy ||
-									obj is Terrain ||
-									obj is Biome
-								):
-									# if not dictionary entry,
-									var entry_key = ".".join([k, k_n, k_n_n])
-									_make_data_label(obj, k_n_n, container, entry_key)
-						# if not dictionary entry,	
-						else:
-							var entry_key = ".".join([k, k_n])
-							_make_data_label(obj, k_n, container, entry_key)
-			# if not dictionary entry,
-			else:
-				_make_data_label(obj, k, container)
-		
-		# if not Entity,
-		# check controllers
-		else:
-			if obj is Controller:
-				var time_controller = self.world.data.controller.time_controller
-				if obj == time_controller:
-					_make_data_label(obj, k, container)
 
 func _check_obj_labels(obj: Variant, curr_labels: Array) -> Array:
 	if is_instance_valid(obj):
@@ -258,72 +58,133 @@ func _check_obj_labels(obj: Variant, curr_labels: Array) -> Array:
 				return [true, found]
 	return [false, ]
 
-## removes lingering name labels in stats container
-func _remove_lingerers(container: String):
-	var lingering = self[container].get_children()
-	for l in lingering:
-		if is_instance_valid(l):
-			if !l.is_queued_for_deletion():
-				l.queue_free()
 
-func _handle_enemy_stats(curr_labels: Array):
-	var enemy_controller = self.world.data.controller.enemy_controller
-	if enemy_controller:
-		var enemies: Array = enemy_controller.enemies
-		if !enemies.is_empty():
-			# make stats
-			## TODO: make this dynamic for arrays
-			var found = _check_obj_labels(enemies[0], curr_labels)
-			if !found[0]:
-				_make_data_labels(enemies[0], "enemy_stats")
-				self.enemy_panel.folded = false
+## recursively traverses obj data dictionaries and creates labels
+## for non-dictionary data types
+func traverse_data(
+	obj: Variant,
+	key: String,
+	data: Dictionary,
+	container: String,
+	curr_labels: Array
+):
+	for k in data:
+		var entry = data[k]
+		var key_fmt = key + "." + k
+		if entry is Dictionary:
+			traverse_data(obj, key_fmt, entry, container, curr_labels)
 		else:
-			# if enemies array empty, delete lingering name labels
-			_remove_lingerers("enemy_stats")
-			# hide
-			self.enemy_panel.folded = true
+			_make_stat_label(obj, key_fmt, entry, container, curr_labels)
 
-func _handle_player_stats(curr_labels: Array):
-	var player_controller = self.world.data.controller.player_controller
-	if player_controller:
-		# FIXME: make this consider other party members
-		var p = self.world.data.party.lead
-		if is_instance_valid(p):
-			var found = _check_obj_labels(p, curr_labels).front()
-			if !found:
-				_make_data_labels(p, "player_stats")
-		else:
-			_remove_lingerers("player_stats")
-	else:
-		# no player controller, hide player panel
-		self.player_panel.folded = true
 
-func _handle_world_stats(curr_labels: Array):
-	# make world labels
-	var w = self.world
-	var is_world = _check_obj_labels(w, curr_labels).front()
-	if !is_world:
-		_make_data_labels(w, "world_stats")
+## makes name and data ui labels for data entry 
+## and adds ref to labels array
+func _make_stat_label(
+	obj: Variant,
+	key: String,
+	data: Variant,
+	container: String,
+	curr_labels: Array
+):
+	# name label
+	var new_name_label = Label.new()
+	new_name_label.label_settings = self.label_settings
+	if obj is Terrain:
+		key = "terrain." + key
+	elif obj is Biome:
+		key = "biome." + key
+	new_name_label.name = key
+	new_name_label.text = key
+	# force width clipping
+	new_name_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	new_name_label.custom_minimum_size.x = 128
 	
-	# terrain data
-	var terrain = self.world.data.terrain
-	var is_terrain = _check_obj_labels(terrain, curr_labels).front()
-	if !is_terrain:
-		_make_data_labels(terrain, "world_stats")
-	
-	# biome data
-	var biome = self.world.data.terrain.data.biome
-	var is_biome = _check_obj_labels(biome, curr_labels).front()
-	if !is_biome:
-		_make_data_labels(biome, "world_stats")
-	
-	# time data
-	var t = self.world.data.controller.time_controller
-	var is_time = _check_obj_labels(t, curr_labels).front()
-	if !is_time:
-		_make_data_labels(t, "world_stats")
+	# data label
+	var new_data_label = Label.new()
+	new_data_label.label_settings = self.label_settings
+	new_data_label.name = key + "_data"
+	# stringify data
+	new_data_label.text = str(data)
+	# force width clipping
+	new_data_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	new_data_label.custom_minimum_size.x = 128
 
-# Called when the node enters the scene tree for the first time.
+	# label entry ref
+	var new_label_entry = self.label_entry.duplicate()
+	new_label_entry.obj = obj
+	new_label_entry.key = key
+	new_label_entry.name = new_name_label
+	new_label_entry.data = new_data_label
+
+	self[container].add_child(new_name_label)
+	self[container].add_child(new_data_label)
+
+	curr_labels.append(new_label_entry)
+
+
+func _make_stat_labels(obj: Variant, container: String, curr_labels: Array):
+	var player_filters = [
+		"stats",
+		"resources",
+		"inventory",
+	]
+	
+	var data = obj.data
+	for k in data:
+		if (
+			obj is World ||
+			obj is Terrain ||
+			obj is Biome ||
+			(obj is Player && k in player_filters)
+		):
+			var entry = data[k]
+			# if entry is a dictionary,
+			if entry is Dictionary:
+				# traverse dictionary entry recursively
+				traverse_data(obj, k, entry, container, curr_labels)
+			
+			# not dictionary,
+			else:
+				# make label for entry
+				_make_stat_label(obj, k, entry, container, curr_labels)
+
+
+func _handle_world_stats(curr_world: Sprite2D, curr_labels: Array):
+	if is_instance_valid(curr_world):
+		if not curr_world.is_queued_for_deletion():
+			# world
+			var world_labels = _check_obj_labels(curr_world, curr_labels).front()
+			if not world_labels:
+				_make_stat_labels(curr_world, "world_stats", curr_labels)
+
+			# terrain
+			if "terrain" in curr_world.data:
+				# check for existing labels
+				var terrain_labels = _check_obj_labels(curr_world.data.terrain, curr_labels).front()
+				if not terrain_labels:
+					# make labels if none
+					_make_stat_labels(curr_world.data.terrain, "world_stats", curr_labels)
+				
+				# biome
+				if "biome" in curr_world.data.terrain.data:
+					var biome_labels = _check_obj_labels(
+						curr_world.data.terrain.data.biome, curr_labels).front()
+					if not biome_labels:
+						_make_stat_labels(curr_world.data.terrain.data.biome, "world_stats", curr_labels)
+
+
+func _handle_party_stats(curr_party: Dictionary, curr_labels: Array):
+	var members = curr_party.members
+	if not members.is_empty():
+		for p in members:
+			# player is valid,
+			if is_instance_valid(p):
+				if not p.is_queued_for_deletion():
+					var player_labels = _check_obj_labels(p, curr_labels).front()
+					if not player_labels:
+						_make_stat_labels(p, "party_stats", curr_labels)
+
+
 func _ready() -> void:
 	# get file logger
 	self.FileLogger = $"/root/FileLogger"
@@ -334,11 +195,12 @@ func _ready() -> void:
 	var new_stat_label_settings = LabelSettings.new()
 	new_stat_label_settings.font = preload("res://src/assets/JetBrainsMono-Medium.ttf")
 	new_stat_label_settings.font_size = 11
-	self.stat_label_settings = new_stat_label_settings # define label settings
+	self.label_settings = new_stat_label_settings # define label settings
 
-# Called every frame. '_delta' is the elapsed time since the previous frame.
+
 func _process(_delta: float) -> void:
-	_handle_world_stats(self.labels)
-	_handle_player_stats(self.labels)
-	_handle_enemy_stats(self.labels)
-	_update_labels(self.labels)
+	if not self.labels.is_empty():
+		_remove_invalids(self.labels)
+
+	_handle_world_stats(self.world, self.labels)
+	_handle_party_stats(self.world.data.party, self.labels)

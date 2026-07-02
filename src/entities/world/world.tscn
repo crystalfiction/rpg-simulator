@@ -8,6 +8,8 @@ colors = PackedColorArray(0, 0, 0, 1)
 
 [sub_resource type="GradientTexture2D" id="GradientTexture2D_p35q0"]
 gradient = SubResource("Gradient_iletc")
+width = 1152
+height = 800
 fill_from = Vector2(1, 0)
 
 [node name="World" type="Sprite2D" unique_id=1124284112]

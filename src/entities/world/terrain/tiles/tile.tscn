@@ -6,6 +6,8 @@
 
 [sub_resource type="GradientTexture2D" id="GradientTexture2D_mk1qm"]
 gradient = ExtResource("1_f75nv")
+width = 32
+height = 32
 
 [node name="Tile" type="Sprite2D" unique_id=1023157020 node_paths=PackedStringArray("label_density", "label_erosion", "label_resources", "label_grid_x", "label_grid_y", "tile_terrain") groups=["tiles"]]
 texture = SubResource("GradientTexture2D_mk1qm")
@@ -30,13 +32,16 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = -0.5
+offset_top = -11.0
+offset_right = 0.5
+offset_bottom = 11.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = -3
 alignment = 1
 
 [node name="GridLabels" type="HBoxContainer" parent="Terrain/Labels" unique_id=1984204596]
-visible = false
 layout_mode = 2
 theme_override_constants/separation = 0
 
