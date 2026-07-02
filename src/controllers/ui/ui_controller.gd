@@ -124,6 +124,7 @@ func _make_stat_label(
 
 func _make_stat_labels(obj: Variant, container: String, curr_labels: Array):
 	var player_filters = [
+		"uid",
 		"stats",
 		"resources",
 		"inventory",
