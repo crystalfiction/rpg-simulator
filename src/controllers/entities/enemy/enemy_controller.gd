@@ -39,6 +39,7 @@ func _init_enemy_entity():
 	var new_enemy = Enemy.new().init_scene()
 	# metadata
 	new_enemy.data.uid = world_controller.uid_ref
+	new_enemy.name = "enemy_" + str(new_enemy.data.uid)
 	new_enemy.data.world = self.world
 	new_enemy.data.controller = self
 	# actions

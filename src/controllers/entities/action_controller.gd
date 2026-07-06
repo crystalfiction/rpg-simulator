@@ -5,8 +5,6 @@ var entity: Entity
 var on_cooldown: Array = []
 
 
-# Cooldowns
-
 ## gets the next available attack in entity abilities queue
 func _cooldown_summary() -> String:
 	var entries: Array = []
@@ -19,6 +17,7 @@ func _cooldown_summary() -> String:
 		if i < entries.size() - 1:
 			summary += ", "
 	return summary
+
 
 func _get_attack() -> AttackAction:
 	var new_action = null
@@ -57,6 +56,7 @@ func _check_cooldowns(action: AttackAction, cooldowns: Array) -> bool:
 			return true
 	return false
 
+
 ## puts an action on cooldown by adding to on_cooldown array
 func _add_cooldown(action: AttackAction, cooldowns: Array):
 	# Basic attacks should never be put on cooldown
@@ -69,6 +69,7 @@ func _add_cooldown(action: AttackAction, cooldowns: Array):
 			# cooldown should block the next N cycles after this action completes
 			action.data.cooldown_remaining = int(action.data.cooldown) + 1
 			cooldowns.append(action)
+
 
 ## handles on_cooldown array
 func _handle_cooldowns(cooldowns: Array) -> Array:
@@ -88,13 +89,13 @@ func _handle_cooldowns(cooldowns: Array) -> Array:
 					cooldowns.remove_at(i)
 	return cooldowns
 
+
 func get_action():
 	# action is null if world complete
 	if self.world.data.terrain.data.map_complete:
 		self.entity.data.actions.action = null
 		return
 
-	# debug: trace action cycle entry
 	# handle action cooldowns every cycle
 	self.on_cooldown = _handle_cooldowns(self.on_cooldown)
 
@@ -108,7 +109,10 @@ func get_action():
 		# if resources exist and player not in encounter,
 		if "count" in self.world.data.terrain.data.resources:
 			var resources_exist = self.world.data.terrain.data.resources.count > 0
-			if resources_exist && ! self.entity.data.encounters.active:
+			if (
+				resources_exist &&
+				not self.entity.data.encounters.active
+			):
 				# get current tile
 				var current_tile = self.Utils.get_object_by_grid(
 					self.entity.data.grid_idx, self.world.data.terrain.data.tile_map)
@@ -224,7 +228,7 @@ func _evaluate_action():
 				# log update
 				var action_v = current_action.get_action_string()
 				var objective_v = current_action.get_objective_string()
-				FileLogger.log_message(self , (
+				FileLogger.log_message(self, (
 					self.entity.name + ": " + action_v + " " + objective_v
 				), )
 

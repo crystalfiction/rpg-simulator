@@ -198,7 +198,16 @@ func _handle_party_stats(curr_party: Dictionary, curr_labels: Array):
 					var is_player_labels = player_labels.front()
 					# if no labels,
 					if not is_player_labels:
-						# make them
+						# make player name label
+						var new_name_label = Label.new()
+						new_name_label.add_theme_font_override(
+							"font", preload("res://src/assets/JetBrainsMono-Medium.ttf"))
+						new_name_label.text = p.name
+						# make empty label since 2 grid cols
+						var new_empty_label = Label.new()
+						self.party_stats.add_child(new_name_label)
+						self.party_stats.add_child(new_empty_label)
+						# make stat labels
 						_make_stat_labels(p, "party_stats", curr_labels)
 
 
@@ -216,13 +225,26 @@ func _handle_enemy_stats(curr_enemies: Array, curr_labels: Array):
 					var is_enemy_labels = enemy_labels.front()
 					# if no labels,
 					if not is_enemy_labels:
-						# make them
+						# make enemy name label
+						var new_name_label = Label.new()
+						new_name_label.add_theme_font_override(
+							"font", preload("res://src/assets/JetBrainsMono-Medium.ttf"))
+						new_name_label.text = e.name
+						# make empty label since 2 grid cols
+						var new_empty_label = Label.new()
+						self.enemy_stats.add_child(new_name_label)
+						self.enemy_stats.add_child(new_empty_label)
+						# make stat labels
 						_make_stat_labels(e, "enemy_stats", curr_labels)
 	
 	# enemies array empty,
 	else:
-		# delete all enemy labels
-		pass
+		# delete lingering name labels
+		var children = self.enemy_stats.get_children()
+		for label in children:
+			if is_instance_valid(label):
+				if not label.is_queued_for_deletion():
+					label.queue_free()
 
 
 func _ready() -> void:

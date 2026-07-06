@@ -42,6 +42,7 @@ theme_override_constants/separation = -3
 alignment = 1
 
 [node name="GridLabels" type="HBoxContainer" parent="Terrain/Labels" unique_id=1984204596]
+visible = false
 layout_mode = 2
 theme_override_constants/separation = 0
 
@@ -75,6 +76,7 @@ theme_override_constants/separation = -3
 alignment = 1
 
 [node name="Density" type="Label" parent="Terrain/Labels/TerrainData" unique_id=1748745256]
+visible = false
 layout_mode = 2
 theme_override_fonts/font = ExtResource("3_mk1qm")
 theme_override_font_sizes/font_size = 9

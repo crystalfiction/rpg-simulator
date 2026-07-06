@@ -204,9 +204,6 @@ func _process_rewards(p: Player, encounter: Dictionary):
 	
 	# if no level up,
 	else:
-		# # check if last stand used
-		# if p.data.actions.last_stand == true:
-		# 	p.data.actions.last_stand = false
 		# check surplus
 		check_resource_surplus(p)
 
@@ -235,13 +232,15 @@ func _init_party_controller() -> Controller:
 
 
 ## initializes a new player entity
-func _init_player_entity():
+func _init_player_entity(is_initial: bool = true):
 	# create new player scene of class
 	var new_player_script = Player.new()
 	var new_player = new_player_script.init_scene()
 	
 	# meta
 	new_player.data.uid = self.world.data.controller.uid_ref
+	self.world.data.controller.uid_ref += 1
+	new_player.name = "player_" + str(new_player.data.uid)
 	new_player.data.world = self.world
 	new_player.data.controller = self
 	
@@ -263,10 +262,8 @@ func _init_player_entity():
 		var n = attr_spread[i]
 		new_player.data.stats[a] += n
 		i += 1
-
-	# spin up class script to get class data
+	# spin up class script to get class data/abilities
 	var class_obj: Resource = new_player_script.PlayerClasses[p_class].new()
-	# class abilities
 	var abilities: Array = new_player.data.actions.abilities
 	for a in class_obj.class_abilities:
 		abilities.push_back(a)
@@ -288,14 +285,16 @@ func _init_player_entity():
 	new_player.data.inventory.equipped.weapon = new_weapon
 	_progress_skill(new_player, new_weapon.get_weapon_class_string())
 	new_player.data.inventory.equipped.weapon = new_weapon
+	
+	# if initial player,
+	if is_initial:
+		# set as lead and add to party
+		self.party_controller.update_party_lead(new_player)
+	# if not initial player,
+	else:
+		# add to party
+		self.party_controller.add_party_member(new_player)
 
-	# update uid ref
-	self.world.data.controller.uid_ref += 1
-	
-	# update player entity reference
-	self.party_controller.add_party_member(new_player)
-	self.party_controller.update_party_lead(new_player)
-	
 	# add player to tree
 	self.add_child(new_player)
 
@@ -381,8 +380,8 @@ func check_encounter(p: Player) -> bool:
 
 ## determines and processes player logic for a time cycle
 func _process_cycle(p: Player):
-	var time_controller = world.data.controller.time_controller
 	# if time cycling,
+	var time_controller = world.data.controller.time_controller
 	if time_controller:
 		if time_controller.cycling:
 			# if terrain map complete,
@@ -396,12 +395,13 @@ func _process_cycle(p: Player):
 			_check_player(p)
 			
 			# get player action for cycle
-			if not p.is_queued_for_deletion():
-				p.data.actions.controller.get_action()
+			if is_instance_valid(p):
+				if not p.is_queued_for_deletion():
+					p.data.actions.controller.get_action()
 
 
 func _process(_delta: float) -> void:
-	# if player is valid,
+	# if party lead is valid,
 	if is_instance_valid(self.world.data.party.lead):
-		# process player cycle
+		# process player cycles
 		_process_cycle(self.world.data.party.lead)

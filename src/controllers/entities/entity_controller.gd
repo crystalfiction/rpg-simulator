@@ -5,7 +5,7 @@ var last_cycle: int = 0
 
 func _calculate_skill(skill: Dictionary):
 	var step = 10
-	var cap = floor((step) * (skill.level ** 2))
+	var cap = floor((step) * (skill.lvl ** 2))
 	skill.step = step
 	skill.cap = cap
 	return skill
@@ -13,7 +13,7 @@ func _calculate_skill(skill: Dictionary):
 func _progress_skill(entity: Entity, skill: String):
 	if skill not in entity.data.skills:
 		var new_skill = {
-			"level": 1,
+			"lvl": 1,
 			"exp": 0,
 			"step": 0,
 			"cap": 0,
@@ -30,7 +30,7 @@ func _progress_skill(entity: Entity, skill: String):
 
 func _check_skill(skill: Dictionary):
 	if skill.exp >= skill.cap:
-		skill.level += 1
+		skill.lvl += 1
 		skill = _calculate_skill(skill)
 	return skill
 
@@ -154,7 +154,7 @@ func evaluate_combat(attack: AttackAction):
 		if "skills" in attack.data.src.data:
 			# calculate skill damage bonus
 			var weapon_string = equipped_weapon.get_weapon_class_string()
-			var skill_level = attack.data.src.data.skills[weapon_string].level
+			var skill_level = attack.data.src.data.skills[weapon_string].lvl
 			# skill damage = skill level divided by 50% weapon damage + 1
 			# ensures skill dmg never exceeds weapon dmg
 			# 0 dmg weapons (unarmed) receieve the full skill level bonus
