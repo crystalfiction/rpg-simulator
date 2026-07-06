@@ -18,6 +18,15 @@ var data: Dictionary = {
 }
 
 
+func get_entity_type() -> EntityType:
+	return self.Type
+
+
+func get_entity_type_string() -> String:
+	var type_s = self.EntityType.find_key(self.Type)
+	return type_s
+
+
 ## traverse data dictionary recursively
 func _traverse_data(base: Dictionary, layer: Dictionary) -> Dictionary:
 	for k in layer:

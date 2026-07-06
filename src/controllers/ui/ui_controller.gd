@@ -18,6 +18,17 @@ var label_entry = {
 	"name": null, # name label
 	"data": null, # data label
 }
+var label_filters = {
+	"world": [],
+	"player": [
+		"class_V",
+		"stats",
+		"skills",
+		"resources",
+		"inventory"
+	],
+	"enemy": []
+}
 
 var string_n := 12
 
@@ -35,19 +46,21 @@ func _remove_invalids(curr_labels: Array):
 		func(l): return not is_instance_valid(l.obj)
 	)
 	if not invalids.is_empty():
-		for i in invalids:
+		for invalid in invalids:
 			# remove name label
-			if is_instance_valid(invalids[i].name):
-				if not invalids[i].name.is_queued_for_deletion():
-					invalids[i].name.queue_free()
+			if is_instance_valid(invalid.name):
+				if not invalid.name.is_queued_for_deletion():
+					invalid.name.queue_free()
 			# remove data label
-			if is_instance_valid(invalids[i].data):
-				if not invalids[i].data.is_queued_for_deletion():
-					invalids[i].data.queue_free()
+			if is_instance_valid(invalid.data):
+				if not invalid.data.is_queued_for_deletion():
+					invalid.data.queue_free()
 			# remove label entry ref
-			invalids[i].erase()
+			curr_labels.erase(invalid)
 
 
+## checks for existing labels given the passed obj,
+## and returns [bool, [labels]] depending on existence
 func _check_obj_labels(obj: Variant, curr_labels: Array) -> Array:
 	if is_instance_valid(obj):
 		if !obj.is_queued_for_deletion():
@@ -69,9 +82,7 @@ func _traverse_make(
 	path: String = ""
 ):
 	for key in data:
-		# note current entry value
 		var curr_entry = data[key]
-		# update entry data path
 		var curr_path = path + str(key)
 		if curr_entry is Dictionary:
 			# append path before traversing deeper
@@ -126,12 +137,23 @@ func _make_stat_label(
 ## makes stat labels in the given stat container for the passed object
 ## and adds label entries to labels reference array
 func _make_stat_labels(obj: Variant, container: String, curr_labels: Array):
-	# get obj data dict
-	var data = obj.data
+	# filter object data
+	var data_filtered = obj.data.duplicate()
+	if obj is Player:
+		var player_filters = [
+			"controller",
+			"world",
+			"actions",
+			"encounters"
+		]
+		for key in player_filters:
+			data_filtered.erase(key)
+
 	# traverse data dict and make labels
-	_traverse_make(obj, data, container, curr_labels)
+	_traverse_make(obj, data_filtered, container, curr_labels)
 
 
+## handles the creation of world data labels
 func _handle_world_stats(curr_world: Sprite2D, curr_labels: Array):
 	if is_instance_valid(curr_world):
 		if not curr_world.is_queued_for_deletion():
@@ -161,6 +183,7 @@ func _handle_world_stats(curr_world: Sprite2D, curr_labels: Array):
 						_make_stat_labels(curr_world.data.terrain.data.biome, "world_stats", curr_labels)
 
 
+## handles the creation of party data labels
 func _handle_party_stats(curr_party: Dictionary, curr_labels: Array):
 	var members = curr_party.members
 	# if party members exist,
@@ -179,6 +202,28 @@ func _handle_party_stats(curr_party: Dictionary, curr_labels: Array):
 						_make_stat_labels(p, "party_stats", curr_labels)
 
 
+func _handle_enemy_stats(curr_enemies: Array, curr_labels: Array):
+	# if enemies exist,
+	if not curr_enemies.is_empty():
+		# for each enemy,
+		for e in curr_enemies:
+			# if enemy is valid,
+			if is_instance_valid(e):
+				# and if not queued for deletion,
+				if not e.is_queued_for_deletion():
+					var enemy_labels = _check_obj_labels(e, curr_labels)
+					var is_enemy_labels = enemy_labels.front()
+					# if no labels,
+					if not is_enemy_labels:
+						# make them
+						_make_stat_labels(e, "enemy_stats", curr_labels)
+	
+	# enemies array empty,
+	else:
+		# delete all enemy labels
+		pass
+
+
 func _ready() -> void:
 	# get file logger
 	self.FileLogger = $"/root/FileLogger"
@@ -192,6 +237,8 @@ func _ready() -> void:
 	self.label_settings = new_stat_label_settings # define label settings
 
 
+## traverses label object data recursively until label entry key found, 
+## and updates data label text with result
 func _traverse_update(entry: Dictionary, data: Variant):
 	if data is Dictionary:
 		for key in data:
@@ -205,6 +252,7 @@ func _traverse_update(entry: Dictionary, data: Variant):
 			_traverse_update(entry, data[key])
 
 
+## updates all labels existing in the passed labels array
 func _update_label_entries(curr_labels: Array):
 	# for each label entry,
 	for l in curr_labels:
@@ -219,6 +267,9 @@ func _process(_delta: float) -> void:
 	# handle object label creation
 	_handle_world_stats(self.world, self.labels)
 	_handle_party_stats(self.world.data.party, self.labels)
+	var enemy_controller = self.world.data.controller.enemy_controller
+	var enemies = enemy_controller.enemies
+	_handle_enemy_stats(enemies, self.labels)
 
 	# update label data
 	_update_label_entries(self.labels)

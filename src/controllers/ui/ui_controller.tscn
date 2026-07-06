@@ -13,9 +13,9 @@ offset_left = -288.0
 grow_horizontal = 0
 grow_vertical = 2
 script = ExtResource("1_2yfeh")
-world_stats = NodePath("PanelContainer/MarginContainer/VBoxContainer/TabContainer/World/ScrollContainer/WorldStats")
-party_stats = NodePath("PanelContainer/MarginContainer/VBoxContainer/TabContainer/Party/ScrollContainer/PartyStats")
-enemy_stats = NodePath("PanelContainer/MarginContainer/VBoxContainer/TabContainer/Enemy/ScrollContainer/EnemyStats")
+world_stats = NodePath("PanelContainer/MarginContainer/VBoxContainer/TabContainer/World/WorldStats")
+party_stats = NodePath("PanelContainer/MarginContainer/VBoxContainer/TabContainer/Party/PartyStats")
+enemy_stats = NodePath("PanelContainer/MarginContainer/VBoxContainer/TabContainer/Enemies/EnemyStats")
 
 [node name="PanelContainer" type="PanelContainer" parent="." unique_id=459534008]
 layout_mode = 1
@@ -48,11 +48,21 @@ theme_override_constants/margin_right = 4
 theme_override_constants/margin_bottom = 4
 metadata/_tab_index = 0
 
-[node name="ScrollContainer" type="ScrollContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/Party" unique_id=523874283]
-custom_minimum_size = Vector2(0, 750)
+[node name="PartyStats" type="GridContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/Party" unique_id=156362244]
 layout_mode = 2
+theme_override_constants/v_separation = -2
+columns = 2
 
-[node name="PartyStats" type="GridContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/Party/ScrollContainer" unique_id=156362244]
+[node name="Enemies" type="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer" unique_id=2032826631]
+visible = false
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+metadata/_tab_index = 1
+
+[node name="EnemyStats" type="GridContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/Enemies" unique_id=91714677]
 layout_mode = 2
 theme_override_constants/v_separation = -2
 columns = 2
@@ -64,31 +74,9 @@ theme_override_constants/margin_left = 4
 theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 4
 theme_override_constants/margin_bottom = 4
-metadata/_tab_index = 1
-
-[node name="ScrollContainer" type="ScrollContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/World" unique_id=1856838223]
-custom_minimum_size = Vector2(0, 750)
-layout_mode = 2
-
-[node name="WorldStats" type="GridContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/World/ScrollContainer" unique_id=1827575150]
-layout_mode = 2
-theme_override_constants/v_separation = -2
-columns = 2
-
-[node name="Enemy" type="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer" unique_id=2032826631]
-visible = false
-layout_mode = 2
-theme_override_constants/margin_left = 4
-theme_override_constants/margin_top = 4
-theme_override_constants/margin_right = 4
-theme_override_constants/margin_bottom = 4
 metadata/_tab_index = 2
 
-[node name="ScrollContainer" type="ScrollContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/Enemy" unique_id=1275643789]
-custom_minimum_size = Vector2(0, 750)
-layout_mode = 2
-
-[node name="EnemyStats" type="GridContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/Enemy/ScrollContainer" unique_id=91714677]
+[node name="WorldStats" type="GridContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/World" unique_id=1827575150]
 layout_mode = 2
 theme_override_constants/v_separation = -2
 columns = 2
