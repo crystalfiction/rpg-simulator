@@ -202,6 +202,7 @@ func _handle_party_stats(curr_party: Dictionary, curr_labels: Array):
 						_make_stat_labels(p, "party_stats", curr_labels)
 
 
+## handles the creation of enemy data labels
 func _handle_enemy_stats(curr_enemies: Array, curr_labels: Array):
 	# if enemies exist,
 	if not curr_enemies.is_empty():

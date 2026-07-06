@@ -11,6 +11,16 @@ var equipment_data = {
 	"equip_type": EquipType
 }
 
+
+func get_equipment_type() -> EquipmentType:
+	return self.EquipType
+
+
+func get_equipment_type_string() -> String:
+	var type = self.EquipType
+	return self.EquipmentType.find_key(type)
+
+
 ## initializes the entity data
 func _init() -> void:
 	self.Use = ItemUse.EQUIP

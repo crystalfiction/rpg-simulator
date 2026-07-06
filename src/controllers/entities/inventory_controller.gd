@@ -15,6 +15,7 @@ func add_item(item: Item) -> bool:
 	if item == null:
 		return false
 	items.append(item)
+	self.entity.data.inventory.bag = self.items
 	return true
 
 

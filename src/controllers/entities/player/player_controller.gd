@@ -142,31 +142,41 @@ func _process_rewards(p: Player, encounter: Dictionary):
 	var r = randf()
 	var n = 0.05
 	if r <= n:
-		# pick random, unfilled equipment slot
-		var weapon_equipped = p.data.inventory.controller.get_equipped("weapon")
-		if not weapon_equipped:
-			var weapon_c = Weapon.WeaponClass.values().pick_random()
-			var new_weapon = Weapon.WeaponClasses[weapon_c].new()
-			p.data.inventory.controller.equip_item(new_weapon)
+		var r_slots = ["weapon", "head", "chest", "legs", "feet"]
+		var r_item = r_slots.pick_random()
+		var new_item = null
+		match r_item:
+			"weapon":
+				var weapon_c = Weapon.WeaponClass.values().pick_random()
+				var new_weapon = Weapon.WeaponClasses[weapon_c].new()
+				new_item = new_weapon
+			"head":
+				var new_armor = Armor.armor_slots[0].new()
+				new_item = new_armor
+			"chest":
+				var new_armor = Armor.armor_slots[1].new()
+				new_item = new_armor
+			"legs":
+				var new_armor = Armor.armor_slots[2].new()
+				new_item = new_armor
+			"feet":
+				var new_armor = Armor.armor_slots[3].new()
+				new_item = new_armor
+		
+		# check if player has item already equipped
+		var equipped = p.data.inventory.controller.get_equipped(r_item)
+		# if not,
+		if not equipped:
+			# equip it
+			p.data.inventory.controller.equip_item(new_item)
+		# if so,
 		else:
-			# check armor slots
-			var armor_slots: Dictionary = Armor.ArmorSlot
-			var r_slot = armor_slots.keys().pick_random()
-			var enid = Armor.ArmorSlot.get(r_slot)
-			var key: String = r_slot.to_lower()
-			var equipped = p.data.inventory.controller.get_equipped(key)
-			# loop until null slot,
-			while equipped != null:
-				r_slot = armor_slots.keys().pick_random()
-				enid = Armor.ArmorSlot.get(r_slot)
-				key = r_slot.to_lower()
-				equipped = p.data.inventory.controller.get_equipped(key)
-
-			# once null slot found,
-			if not equipped:
-				var new_armor = Armor.armor_slots[enid].new()
-				p.data.inventory.controller.equip_item(new_armor)
-
+			# add to bag
+			p.data.inventory.controller.add_item(new_item)
+		
+		FileLogger.log_message(self,
+			p.name + "has acquired a new " +
+			new_item.get_equipment_type_string())
 
 	# check if level_up
 	var level_up = false
