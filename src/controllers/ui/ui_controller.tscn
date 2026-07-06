@@ -40,7 +40,7 @@ theme_override_constants/separation = 0
 layout_mode = 2
 current_tab = 0
 
-[node name="World" type="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer" unique_id=1136931055]
+[node name="Party" type="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer" unique_id=167004360]
 layout_mode = 2
 theme_override_constants/margin_left = 4
 theme_override_constants/margin_top = 4
@@ -48,16 +48,16 @@ theme_override_constants/margin_right = 4
 theme_override_constants/margin_bottom = 4
 metadata/_tab_index = 0
 
-[node name="ScrollContainer" type="ScrollContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/World" unique_id=1856838223]
+[node name="ScrollContainer" type="ScrollContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/Party" unique_id=523874283]
 custom_minimum_size = Vector2(0, 750)
 layout_mode = 2
 
-[node name="WorldStats" type="GridContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/World/ScrollContainer" unique_id=1827575150]
+[node name="PartyStats" type="GridContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/Party/ScrollContainer" unique_id=156362244]
 layout_mode = 2
 theme_override_constants/v_separation = -2
 columns = 2
 
-[node name="Party" type="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer" unique_id=167004360]
+[node name="World" type="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer" unique_id=1136931055]
 visible = false
 layout_mode = 2
 theme_override_constants/margin_left = 4
@@ -66,11 +66,11 @@ theme_override_constants/margin_right = 4
 theme_override_constants/margin_bottom = 4
 metadata/_tab_index = 1
 
-[node name="ScrollContainer" type="ScrollContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/Party" unique_id=523874283]
+[node name="ScrollContainer" type="ScrollContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/World" unique_id=1856838223]
 custom_minimum_size = Vector2(0, 750)
 layout_mode = 2
 
-[node name="PartyStats" type="GridContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/Party/ScrollContainer" unique_id=156362244]
+[node name="WorldStats" type="GridContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/World/ScrollContainer" unique_id=1827575150]
 layout_mode = 2
 theme_override_constants/v_separation = -2
 columns = 2

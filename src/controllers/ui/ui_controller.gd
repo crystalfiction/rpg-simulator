@@ -61,20 +61,24 @@ func _check_obj_labels(obj: Variant, curr_labels: Array) -> Array:
 
 ## recursively traverses obj data dictionaries and creates labels
 ## for non-dictionary data types
-func traverse_data(
+func _traverse_make(
 	obj: Variant,
-	key: String,
 	data: Dictionary,
 	container: String,
-	curr_labels: Array
+	curr_labels: Array,
+	path: String = ""
 ):
-	for k in data:
-		var entry = data[k]
-		var key_fmt = key + "." + k
-		if entry is Dictionary:
-			traverse_data(obj, key_fmt, entry, container, curr_labels)
+	for key in data:
+		# note current entry value
+		var curr_entry = data[key]
+		# update entry data path
+		var curr_path = path + str(key)
+		if curr_entry is Dictionary:
+			# append path before traversing deeper
+			curr_path += "."
+			_traverse_make(obj, curr_entry, container, curr_labels, curr_path)
 		else:
-			_make_stat_label(obj, key_fmt, entry, container, curr_labels)
+			_make_stat_label(obj, key, curr_path, curr_entry, container, curr_labels)
 
 
 ## makes name and data ui labels for data entry 
@@ -82,6 +86,7 @@ func traverse_data(
 func _make_stat_label(
 	obj: Variant,
 	key: String,
+	path: String,
 	data: Variant,
 	container: String,
 	curr_labels: Array
@@ -89,12 +94,8 @@ func _make_stat_label(
 	# name label
 	var new_name_label = Label.new()
 	new_name_label.label_settings = self.label_settings
-	if obj is Terrain:
-		key = "terrain." + key
-	elif obj is Biome:
-		key = "biome." + key
 	new_name_label.name = key
-	new_name_label.text = key
+	new_name_label.text = path
 	# force width clipping
 	new_name_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	new_name_label.custom_minimum_size.x = 128
@@ -122,32 +123,13 @@ func _make_stat_label(
 	curr_labels.append(new_label_entry)
 
 
+## makes stat labels in the given stat container for the passed object
+## and adds label entries to labels reference array
 func _make_stat_labels(obj: Variant, container: String, curr_labels: Array):
-	var player_filters = [
-		"uid",
-		"stats",
-		"resources",
-		"inventory",
-	]
-	
+	# get obj data dict
 	var data = obj.data
-	for k in data:
-		if (
-			obj is World ||
-			obj is Terrain ||
-			obj is Biome ||
-			(obj is Player && k in player_filters)
-		):
-			var entry = data[k]
-			# if entry is a dictionary,
-			if entry is Dictionary:
-				# traverse dictionary entry recursively
-				traverse_data(obj, k, entry, container, curr_labels)
-			
-			# not dictionary,
-			else:
-				# make label for entry
-				_make_stat_label(obj, k, entry, container, curr_labels)
+	# traverse data dict and make labels
+	_traverse_make(obj, data, container, curr_labels)
 
 
 func _handle_world_stats(curr_world: Sprite2D, curr_labels: Array):
@@ -155,34 +137,45 @@ func _handle_world_stats(curr_world: Sprite2D, curr_labels: Array):
 		if not curr_world.is_queued_for_deletion():
 			# world
 			var world_labels = _check_obj_labels(curr_world, curr_labels).front()
+			# if no labels,
 			if not world_labels:
+				# make them
 				_make_stat_labels(curr_world, "world_stats", curr_labels)
 
 			# terrain
 			if "terrain" in curr_world.data:
 				# check for existing labels
 				var terrain_labels = _check_obj_labels(curr_world.data.terrain, curr_labels).front()
+				# if no labels,
 				if not terrain_labels:
-					# make labels if none
+					# make them
 					_make_stat_labels(curr_world.data.terrain, "world_stats", curr_labels)
 				
 				# biome
 				if "biome" in curr_world.data.terrain.data:
 					var biome_labels = _check_obj_labels(
 						curr_world.data.terrain.data.biome, curr_labels).front()
+					# if no labels,
 					if not biome_labels:
+						# make them
 						_make_stat_labels(curr_world.data.terrain.data.biome, "world_stats", curr_labels)
 
 
 func _handle_party_stats(curr_party: Dictionary, curr_labels: Array):
 	var members = curr_party.members
+	# if party members exist,
 	if not members.is_empty():
+		# for each party member,
 		for p in members:
-			# player is valid,
+			# if player is valid,
 			if is_instance_valid(p):
+				# and if not queued for deletion,
 				if not p.is_queued_for_deletion():
-					var player_labels = _check_obj_labels(p, curr_labels).front()
-					if not player_labels:
+					var player_labels = _check_obj_labels(p, curr_labels)
+					var is_player_labels = player_labels.front()
+					# if no labels,
+					if not is_player_labels:
+						# make them
 						_make_stat_labels(p, "party_stats", curr_labels)
 
 
@@ -199,9 +192,33 @@ func _ready() -> void:
 	self.label_settings = new_stat_label_settings # define label settings
 
 
+func _traverse_update(entry: Dictionary, data: Variant):
+	if data is Dictionary:
+		for key in data:
+			# if entry key found,
+			if key == entry.key:
+				# update data label text and return
+				entry.data.text = str(data[key])
+				return
+			
+			# continue traversing data until found
+			_traverse_update(entry, data[key])
+
+
+func _update_label_entries(curr_labels: Array):
+	# for each label entry,
+	for l in curr_labels:
+		_traverse_update(l, l.obj.data)
+
+
 func _process(_delta: float) -> void:
+	# check for invalid labels
 	if not self.labels.is_empty():
 		_remove_invalids(self.labels)
 
+	# handle object label creation
 	_handle_world_stats(self.world, self.labels)
 	_handle_party_stats(self.world.data.party, self.labels)
+
+	# update label data
+	_update_label_entries(self.labels)

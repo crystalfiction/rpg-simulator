@@ -12,10 +12,6 @@ enum BiomeClass {
 var data = {
 	"class": self.Class,
 	"class_v": "",
-	"avg_texture": "",
-	"avg_density": 0.0,
-	"avg_rainfall": 0.0,
-	"avg_drainage": 0.0,
 	"ranges": {
 		"rainfall_chance": 0.00,
 		"density": [0.00, 0.00],
