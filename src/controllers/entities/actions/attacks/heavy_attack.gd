@@ -2,8 +2,8 @@ class_name HeavyAttack extends AttackAction
 
 # components
 var init_data = {
-    "multiplier": 1.5,
-    "cooldown": 2,
+    "multiplier": 1.25,
+    "cooldown": 1,
     "duration": 0,
 }
 

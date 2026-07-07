@@ -5,7 +5,7 @@ var last_cycle: int = 0
 
 func _calculate_skill(skill: Dictionary):
 	var step = 10
-	var cap = floor((step) * (skill.lvl ** 2))
+	var cap = floor((step) * (skill.level ** 2))
 	skill.step = step
 	skill.cap = cap
 	return skill
@@ -13,7 +13,7 @@ func _calculate_skill(skill: Dictionary):
 func _progress_skill(entity: Entity, skill: String):
 	if skill not in entity.data.skills:
 		var new_skill = {
-			"lvl": 1,
+			"level": 0,
 			"exp": 0,
 			"step": 0,
 			"cap": 0,
@@ -30,7 +30,7 @@ func _progress_skill(entity: Entity, skill: String):
 
 func _check_skill(skill: Dictionary):
 	if skill.exp >= skill.cap:
-		skill.lvl += 1
+		skill.level += 1
 		skill = _calculate_skill(skill)
 	return skill
 
@@ -154,7 +154,7 @@ func evaluate_combat(attack: AttackAction):
 		if "skills" in attack.data.src.data:
 			# calculate skill damage bonus
 			var weapon_string = equipped_weapon.get_weapon_class_string()
-			var skill_level = attack.data.src.data.skills[weapon_string].lvl
+			var skill_level = attack.data.src.data.skills[weapon_string].level
 			# skill damage = skill level divided by 50% weapon damage + 1
 			# ensures skill dmg never exceeds weapon dmg
 			# 0 dmg weapons (unarmed) receieve the full skill level bonus
@@ -165,7 +165,27 @@ func evaluate_combat(attack: AttackAction):
 
 		# add weapon damage to attack damage
 		src_attack += weapon_dmg
-	
+
+	# ARMOR
+	# account for armor skill if applicable,
+	var armor_skill = 0
+	if "skills" in attack.data.target.data:
+		if "ARMOR" in attack.data.target.data.skills:
+			armor_skill = attack.data.target.data.skills.ARMOR.level
+			target_armor += armor_skill / 10
+	# calculate armor factor
+	var base_health = attack.data.target.data.stats.base_health
+	var armor_factor = target_armor + (base_health * 10) + src_level
+	# calculate armor reduction
+	var armor_reduc = snapped(
+		(float(target_armor) / float(armor_factor)),
+		0.001
+	)
+	attack.data.target.data.stats.armor_factor = armor_factor
+	attack.data.target.data.stats.armor_reduc = armor_reduc
+	# reduce attack by target armor reduction
+	src_attack -= (src_attack * armor_reduc)
+
 	# ABILITIES
 	# factor in ability damage multiplier
 	if attack.has_method("calculate_multiplier"):
@@ -177,17 +197,6 @@ func evaluate_combat(attack: AttackAction):
 		"multiplier=" + str(ability_multi),
 		"COMBAT")
 	src_attack = src_attack * ability_multi
-
-	# ARMOR
-	# reduce attack by target armor reduction
-	var base_health = attack.data.target.data.stats.base_health
-	var armor_factor = target_armor + (base_health * 10) + src_level
-	var armor_reduc = snapped(
-		(float(target_armor) / float(armor_factor)),
-		0.01
-	)
-	attack.data.target.data.stats.armor_reduc = armor_reduc
-	src_attack -= (src_attack * armor_reduc)
 
 	# EVALUATE
 	# evaluate result
@@ -215,15 +224,13 @@ func evaluate_combat(attack: AttackAction):
 		src_attack = 0
 
 	# apply attack
+	src_attack = snapped(src_attack, 0.01)
 	target_health -= src_attack
 	attack.data.target.data.stats.health = snapped(target_health, 0.01)
 
 	# check for ability effects
 	if result == "HITS" or result == "CRITS":
-		if attack.get_attack_type() == AttackAction.AttackType.SWAYODDS:
-			# apply 'extra' attack
-			src_attack *= 2
-			target_health -= src_attack
+		pass
 
 	# update player damage done/taken metrics
 	# both hits and crits
@@ -292,11 +299,15 @@ func evaluate_combat(attack: AttackAction):
 				(" using " + equipped_weapon.get_weapon_class_string() if weapon_equipped else ""),
 			"COMBAT")
 	
-	# process weapon skill
-	if "skills" in attack.data.src.data && (
-		result == "HITS" || result == "CRITS"
-	):
-		_progress_skill(attack.data.src, equipped_weapon.get_weapon_class_string())
+	# progress armor skill
+	if "skills" in attack.data.target.data:
+		if (result == "HITS" || result == "CRITS"):
+			_progress_skill(attack.data.target, "ARMOR")
+
+	# progress weapon skill
+	if "skills" in attack.data.src.data:
+		if (result == "HITS" || result == "CRITS"):
+			_progress_skill(attack.data.src, equipped_weapon.get_weapon_class_string())
 
 	# flag action complete
 	attack.data.done = true

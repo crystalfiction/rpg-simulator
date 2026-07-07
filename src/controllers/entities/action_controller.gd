@@ -197,6 +197,10 @@ func get_action():
 			# make it active
 			self.entity.data.encounters.active = true
 	
+	# store readable action value for debugging
+	if self.entity.data.actions.action != null:
+		self.entity.data.actions.action_v = self.entity.data.actions.action.get_action_string()
+
 	# try to evaluate the current action
 	_evaluate_action()
 
@@ -268,6 +272,7 @@ func _evaluate_action():
 		if "last_action" in self.entity.data.actions:
 			# store readable script name
 			self.entity.data.actions.last_action = current_action.get_script().get_global_name()
+		# account for cooldown if AttackAction
 		if current_action is AttackAction:
 			_add_cooldown(current_action, self.on_cooldown)
 

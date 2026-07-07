@@ -2,8 +2,8 @@ class_name FrenzyAttack extends AttackAction
 
 # components
 var init_data = {
-    "multiplier": 1.25,
-    "cooldown": 1,
+    "multiplier": 1.5,
+    "cooldown": 2,
     "duration": 0,
 }
 

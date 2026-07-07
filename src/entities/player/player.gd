@@ -29,10 +29,9 @@ var player_data: Dictionary = {
 	"actions": {
 		"controller": null,
 		"action": null,
+		"action_v": null,
 		"last_action": null,
-		"abilities": [
-			HeavyAttack,
-		],
+		"abilities": [],
 		"metrics": {
 			# "HITS": 0,
 			# "MISSES": 0,
@@ -66,18 +65,19 @@ var player_data: Dictionary = {
 
 
 func get_player_class() -> PlayerClass:
-	var curr_class = self.Class
-	return curr_class
+	return self.Class
+
 
 func get_player_class_string() -> String:
-	var curr_class = self.Class
-	var key = PlayerClass.find_key(curr_class)
+	var key = PlayerClass.find_key(self.Class)
 	return key
+
 
 ## initializes the entity as scene
 func init_scene() -> Sprite2D:
 	var new_scene: Sprite2D = self.init_player.instantiate()
 	return new_scene
+
 
 ## initializes the entity data
 func _init() -> void:

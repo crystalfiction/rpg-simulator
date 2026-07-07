@@ -17,16 +17,20 @@ var stats = {
 	"total_dmg": 0.0,
 	"largest_hit": 0.0,
 	"largest_taken": 0.0,
+	"armor": 0,
+	"armor_factor": 0,
+	"armor_reduc": 0.0,
 	"hit_chance": 0.66,
 	"crit_bonus": 1.50,
 	"crit_chance": 0.0,
 	"base_crit": 0.11,
 	"dodge_chance": 0.0,
 	"base_dodge": 0.05,
-	"armor": 0,
-	"armor_reduc": 0.0,
 	"stamina": 0,
 	"strength": 0,
 	"perception": 0,
 }
-var class_abilities = []
+var class_abilities = [
+	HeavyAttack,
+	BasicAttack
+]

@@ -7,27 +7,18 @@ var FileLogger: Node
 
 # components
 @export var world_stats: GridContainer
-@export var party_stats: GridContainer
+@export var player_stats: GridContainer
+@export var player_abilities: GridContainer
+@export var player_developments: GridContainer
 @export var enemy_stats: GridContainer
 
 var label_settings: LabelSettings
 var labels = []
 var label_entry = {
 	"obj": null, # source object
-	"key": "", # data key
+	"path": "", # data path
 	"name": null, # name label
 	"data": null, # data label
-}
-var label_filters = {
-	"world": [],
-	"player": [
-		"class_V",
-		"stats",
-		"skills",
-		"resources",
-		"inventory"
-	],
-	"enemy": []
 }
 
 var string_n := 12
@@ -43,7 +34,10 @@ func _get_substring(string: String, n: int) -> String:
 func _remove_invalids(curr_labels: Array):
 	# remove labels if player invalid
 	var invalids = curr_labels.filter(
-		func(l): return not is_instance_valid(l.obj)
+		func(l): return (
+			not is_instance_valid(l.obj) or
+			not is_instance_valid(l.name) or
+			not is_instance_valid(l.data))
 	)
 	if not invalids.is_empty():
 		for invalid in invalids:
@@ -70,6 +64,58 @@ func _check_obj_labels(obj: Variant, curr_labels: Array) -> Array:
 			else:
 				return [true, found]
 	return [false, ]
+
+
+## creates player abilities panel given the passed player and container,
+## then adds to labels array for data updating
+func _make_abilities_labels(p: Player, container: String, curr_labels: Array):
+	var abilities = p.data.actions.abilities
+	for atk in abilities:
+		# make new attack name label
+		var attack_name = atk.get_global_name()
+		var new_title_label = Label.new()
+		new_title_label.name = attack_name
+		new_title_label.text = attack_name
+		new_title_label.add_theme_font_override(
+			"font", preload("res://src/assets/JetBrainsMono-Medium.ttf"))
+		new_title_label.add_theme_font_size_override("font_size", 14)
+		# make empty label to pass 2nd grid col
+		var empty_label = Label.new()
+		empty_label.name = "Pass"
+		empty_label.label_settings = self.label_settings
+
+		self[container].add_child(new_title_label)
+		self[container].add_child(empty_label)
+		
+		var data_filters = [
+			"multiplier",
+			"cooldown",
+			"duration"
+		]
+		var attack_data = atk.new().data
+		for key in attack_data:
+			if key in data_filters:
+				var new_name_label = Label.new()
+				new_name_label.name = key
+				new_name_label.text = key
+				new_name_label.label_settings = self.label_settings
+
+				var new_data_label = Label.new()
+				new_data_label.name = key + "_data"
+				new_data_label.text = str(attack_data[key])
+				new_data_label.label_settings = self.label_settings
+
+				self[container].add_child(new_name_label)
+				self[container].add_child(new_data_label)
+
+				var new_label_entry = self.label_entry.duplicate()
+				new_label_entry.obj = p
+				var path = "actions.abilities." + str(p.data.actions.abilities.find(atk)) + ".data." + key
+				new_label_entry.path = path
+				new_label_entry.name = new_name_label
+				new_label_entry.data = new_data_label
+
+				curr_labels.append(new_label_entry)
 
 
 ## recursively traverses obj data dictionaries and creates labels
@@ -124,7 +170,7 @@ func _make_stat_label(
 	# label entry ref
 	var new_label_entry = self.label_entry.duplicate()
 	new_label_entry.obj = obj
-	new_label_entry.key = key
+	new_label_entry.path = path
 	new_label_entry.name = new_name_label
 	new_label_entry.data = new_data_label
 
@@ -141,10 +187,10 @@ func _make_stat_labels(obj: Variant, container: String, curr_labels: Array):
 	var data_filtered = obj.data.duplicate()
 	if obj is Player:
 		var player_filters = [
+			"uid",
 			"controller",
 			"world",
-			"actions",
-			"encounters"
+			"inventory"
 		]
 		for key in player_filters:
 			data_filtered.erase(key)
@@ -154,7 +200,7 @@ func _make_stat_labels(obj: Variant, container: String, curr_labels: Array):
 
 
 ## handles the creation of world data labels
-func _handle_world_stats(curr_world: Sprite2D, curr_labels: Array):
+func _handle_world_panel(curr_world: Sprite2D, curr_labels: Array):
 	if is_instance_valid(curr_world):
 		if not curr_world.is_queued_for_deletion():
 			# world
@@ -183,36 +229,36 @@ func _handle_world_stats(curr_world: Sprite2D, curr_labels: Array):
 						_make_stat_labels(curr_world.data.terrain.data.biome, "world_stats", curr_labels)
 
 
-## handles the creation of party data labels
-func _handle_party_stats(curr_party: Dictionary, curr_labels: Array):
-	var members = curr_party.members
-	# if party members exist,
-	if not members.is_empty():
-		# for each party member,
-		for p in members:
-			# if player is valid,
-			if is_instance_valid(p):
-				# and if not queued for deletion,
-				if not p.is_queued_for_deletion():
-					var player_labels = _check_obj_labels(p, curr_labels)
-					var is_player_labels = player_labels.front()
-					# if no labels,
-					if not is_player_labels:
-						# make player name label
-						var new_name_label = Label.new()
-						new_name_label.add_theme_font_override(
-							"font", preload("res://src/assets/JetBrainsMono-Medium.ttf"))
-						new_name_label.text = p.name
-						# make empty label since 2 grid cols
-						var new_empty_label = Label.new()
-						self.party_stats.add_child(new_name_label)
-						self.party_stats.add_child(new_empty_label)
-						# make stat labels
-						_make_stat_labels(p, "party_stats", curr_labels)
+## handles the creation of player data labels
+func _handle_player_panel(p: Player, curr_labels: Array):
+	# if player is valid,
+	if is_instance_valid(p):
+		# and if not queued for deletion,
+		if not p.is_queued_for_deletion():
+			var player_labels = _check_obj_labels(p, curr_labels)
+			var is_player_labels = player_labels.front()
+			# if no labels,
+			if not is_player_labels:
+				# make player name label
+				var new_name_label = Label.new()
+				new_name_label.add_theme_font_override(
+					"font", preload("res://src/assets/JetBrainsMono-Medium.ttf"))
+				new_name_label.add_theme_font_size_override("font_size", 14)
+				new_name_label.text = p.name
+				# make empty label since 2 grid cols
+				var new_empty_label = Label.new()
+				self.player_stats.add_child(new_name_label)
+				self.player_stats.add_child(new_empty_label)
+
+				# make stat labels
+				_make_stat_labels(p, "player_stats", curr_labels)
+
+				# make abilities panel
+				_make_abilities_labels(p, "player_abilities", curr_labels)
 
 
 ## handles the creation of enemy data labels
-func _handle_enemy_stats(curr_enemies: Array, curr_labels: Array):
+func _handle_enemy_panel(curr_enemies: Array, curr_labels: Array):
 	# if enemies exist,
 	if not curr_enemies.is_empty():
 		# for each enemy,
@@ -229,6 +275,7 @@ func _handle_enemy_stats(curr_enemies: Array, curr_labels: Array):
 						var new_name_label = Label.new()
 						new_name_label.add_theme_font_override(
 							"font", preload("res://src/assets/JetBrainsMono-Medium.ttf"))
+						new_name_label.add_theme_font_size_override("font_size", 14)
 						new_name_label.text = e.name
 						# make empty label since 2 grid cols
 						var new_empty_label = Label.new()
@@ -262,24 +309,32 @@ func _ready() -> void:
 
 ## traverses label object data recursively until label entry key found, 
 ## and updates data label text with result
-func _traverse_update(entry: Dictionary, data: Variant):
-	if data is Dictionary:
-		for key in data:
-			# if entry key found,
-			if key == entry.key:
-				# update data label text and return
-				entry.data.text = str(data[key])
-				return
-			
-			# continue traversing data until found
-			_traverse_update(entry, data[key])
+func _update_entry(entry: Dictionary):
+	# split key path
+	var keys = entry.path.split(".", false, 0)
+	if not keys.is_empty():
+		# step into dict according to key path
+		var entry_data = entry.obj.data
+		for k in keys:
+			# account for array indexes
+			if entry_data is Array && k.is_valid_int():
+				k = int(k)
+			# account for script objects
+			if entry_data is GDScript:
+				entry_data = entry_data.new()
+
+			# update label entry data
+			entry_data = entry_data[k]
+
+		# update data label text with result
+		entry.data.text = str(entry_data)
 
 
 ## updates all labels existing in the passed labels array
 func _update_label_entries(curr_labels: Array):
 	# for each label entry,
 	for l in curr_labels:
-		_traverse_update(l, l.obj.data)
+		_update_entry(l)
 
 
 func _process(_delta: float) -> void:
@@ -288,11 +343,11 @@ func _process(_delta: float) -> void:
 		_remove_invalids(self.labels)
 
 	# handle object label creation
-	_handle_world_stats(self.world, self.labels)
-	_handle_party_stats(self.world.data.party, self.labels)
+	_handle_world_panel(self.world, self.labels)
+	_handle_player_panel(self.world.data.player, self.labels)
 	var enemy_controller = self.world.data.controller.enemy_controller
 	var enemies = enemy_controller.enemies
-	_handle_enemy_stats(enemies, self.labels)
+	_handle_enemy_panel(enemies, self.labels)
 
 	# update label data
 	_update_label_entries(self.labels)

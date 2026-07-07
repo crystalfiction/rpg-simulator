@@ -49,11 +49,6 @@ Create a procedurally generated RPG simulation that embraces chaos and instabili
   - [x] _item system_: players have a chance to randomly find items including weapons, armor
     - [x] _weapons_: any class can equip any type of weapon; the only determinant is weapon skills
     - [x] _armor_: any class can equip any armor type, but each armor type has benefits and drawbacks, relying mainly on armor skill of that particular type
-  - [ ] _party system_: player has a random chance to encounter neutral entities, within particular progress thresholds, that can be adopted into the player's party
-    - [ ] progress thresholds are determined by player : enemy stat ratios
-      - thresholds act primarily as a way to smooth out world randomness by giving agency to the player at specific progress levels
-    - [ ] neutral entities are a type of player starting with a randomized class
-    - [ ] player can choose to adopt this player into their party or pass
 - [x] _enemy system_: player encounters enemies across the world when attempting to interact with resources
 - [x] _environmental system_: create a dynamic environment with terrain, weather, and organic life simulation that directly impacts the player's world interaction somehow
   - [x] simulates a basic world environment using procedurally generated terrain samples
@@ -62,9 +57,14 @@ Create a procedurally generated RPG simulation that embraces chaos and instabili
 ### Further
 
 - [ ] _subclass system_: once a particular stance threshold is reached, player can choose to specialize in an associated subclass
-  - [ ] _stance system_: each base class has 3 "stances" that can be cycled through, allowing experience to be accumulated for that particular stance
+  - [ ] _stance system_: player has 3 "stances" that can be cycled through, allowing experience to be accumulated for that particular stance
     - [ ] stances represent strategy/role types: defensive, offensive, utility
     - [ ] only one stance can be active at a time, but players can switch stance when a new party member is acquired
+- [ ] _party system_: player has a random chance to encounter neutral entities, within particular progress thresholds, that can be adopted into the player's party
+  - [ ] progress thresholds are determined by player : enemy stat ratios
+    - thresholds act primarily as a way to smooth out world randomness by giving agency to the player at specific progress levels
+  - [ ] neutral entities are a type of player starting with a randomized class
+  - [ ] player can choose to adopt this player into their party or pass
 - [ ] _environment simulation_
   - [ ] implement organic matter to terrain with basic life simulation
 

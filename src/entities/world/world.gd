@@ -4,7 +4,7 @@ class_name World extends Entity
 var init_world: Resource = preload("res://src/entities/world/world.tscn")
 var init_data: Dictionary = {
 	"terrain": {},
-	"party": {},
+	"player": null,
 }
 
 
@@ -12,7 +12,6 @@ var init_data: Dictionary = {
 func init_scene() -> Sprite2D:
 	var new_scene: Sprite2D = self.init_world.instantiate()
 	return new_scene
-
 
 ## initializes the entity
 func _init() -> void:

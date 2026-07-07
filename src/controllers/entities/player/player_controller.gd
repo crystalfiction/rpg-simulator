@@ -232,7 +232,7 @@ func _init_party_controller() -> Controller:
 
 
 ## initializes a new player entity
-func _init_player_entity(is_initial: bool = true):
+func _init_player_entity():
 	# create new player scene of class
 	var new_player_script = Player.new()
 	var new_player = new_player_script.init_scene()
@@ -253,20 +253,24 @@ func _init_player_entity(is_initial: bool = true):
 	var base_class_obj: Resource = new_player_script.PlayerClasses[0].new()
 	# set data structure
 	new_player.data.stats = base_class_obj.stats
+	new_player.data.actions.abilities = base_class_obj.class_abilities
 	# TODO: get user-defined attribute spread
 	# for now, manually set spread
-	var attributes: Array = ["stamina", "strength", "perception"]
-	var attr_spread: Array = [1, 1, 1]
-	var i: int = 0
-	for a in attributes:
-		var n = attr_spread[i]
-		new_player.data.stats[a] += n
-		i += 1
+	# var attributes: Array = ["stamina", "strength", "perception"]
+	# var attr_spread: Array = [1, 1, 1]
+	# var i: int = 0
+	# for a in attributes:
+	# 	var n = attr_spread[i]
+	# 	new_player.data.stats[a] += n
+	# 	i += 1
 	# spin up class script to get class data/abilities
 	var class_obj: Resource = new_player_script.PlayerClasses[p_class].new()
 	var abilities: Array = new_player.data.actions.abilities
 	for a in class_obj.class_abilities:
-		abilities.push_back(a)
+		abilities.push_front(a)
+	# sort abilities by cooldown
+	abilities.sort_custom(
+		func(a, b): return a.new().data.cooldown > b.new().data.cooldown)
 	new_player.data.actions.abilities = abilities
 
 	# stats
@@ -280,21 +284,17 @@ func _init_player_entity(is_initial: bool = true):
 	var new_inventory_controller = InventoryController.new(new_player)
 	new_player.data.inventory.controller = new_inventory_controller
 
-	# weapon
+	# equipment
 	var new_weapon = UnarmedWeapon.new()
 	new_player.data.inventory.equipped.weapon = new_weapon
-	_progress_skill(new_player, new_weapon.get_weapon_class_string())
 	new_player.data.inventory.equipped.weapon = new_weapon
 	
-	# if initial player,
-	if is_initial:
-		# set as lead and add to party
-		self.party_controller.update_party_lead(new_player)
-	# if not initial player,
-	else:
-		# add to party
-		self.party_controller.add_party_member(new_player)
-
+	# initialize skills
+	_progress_skill(new_player, "ARMOR")
+	_progress_skill(new_player, new_weapon.get_weapon_class_string())
+	
+	self.world.data.player = new_player
+	
 	# add player to tree
 	self.add_child(new_player)
 
@@ -402,6 +402,6 @@ func _process_cycle(p: Player):
 
 func _process(_delta: float) -> void:
 	# if party lead is valid,
-	if is_instance_valid(self.world.data.party.lead):
+	if is_instance_valid(self.world.data.player):
 		# process player cycles
-		_process_cycle(self.world.data.party.lead)
+		_process_cycle(self.world.data.player)
