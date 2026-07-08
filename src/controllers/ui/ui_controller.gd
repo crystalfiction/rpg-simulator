@@ -8,10 +8,10 @@ var FileLogger: Node
 # components
 @export var world_stats: GridContainer
 @export var player_vitals: GridContainer
+@export var player_combat_vitals: GridContainer
 @export var player_stats: GridContainer
 @export var player_abilities: GridContainer
-@export var enemy_stats: GridContainer
-@export var enemy_vitals: GridContainer
+@export var enemy_combat_vitals: GridContainer
 
 var label_settings: LabelSettings
 var labels = []
@@ -23,7 +23,23 @@ var label_entry = {
 }
 
 var label_filters = {
+	"world": [
+		"uid",
+		"controller",
+	],
+	"terrain": [
+		"uid",
+		"controller",
+		"on_change",
+		"grid",
+		"tile_map",
+		"biome",
+	],
+	"biome": [
+		"class"
+	],
 	"player": [
+		"uid",
 		"controller",
 		"world",
 		"class",
@@ -39,6 +55,7 @@ var label_filters = {
 		"inventory.controller"
 	],
 	"enemy": [
+		"uid",
 		"controller",
 		"world",
 		"stats.base_health",
@@ -151,6 +168,85 @@ func _make_abilities_labels(p: Player, container: String, curr_labels: Array):
 				curr_labels.append(new_label_entry)
 
 
+func _make_entity_vitals(entity: Entity, container: String, curr_labels: Array):
+	# make player name label
+	var new_name_label = Label.new()
+	new_name_label.add_theme_font_override(
+		"font", preload("res://src/assets/JetBrainsMono-Medium.ttf"))
+	# new_name_label.add_theme_font_size_override("font_size", 14)
+	new_name_label.text = entity.name
+	new_name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	self[container].add_child(new_name_label)
+
+	# level label
+	var new_level_label = Label.new()
+	new_level_label.add_theme_font_override(
+		"font", preload("res://src/assets/JetBrainsMono-Medium.ttf"))
+	new_level_label.add_theme_font_size_override("font_size", 14)
+	new_level_label.text = str(entity.data.stats.level)
+	self[container].add_child(new_level_label)
+
+	var new_level_entry = self.label_entry.duplicate()
+	new_level_entry.obj = entity
+	new_level_entry.path = "stats.level"
+	new_level_entry.name = new_level_label
+	new_level_entry.data = new_level_label
+	curr_labels.append(new_level_entry)
+
+	# health bar
+	var new_health_bar = ProgressBar.new()
+	new_health_bar.value = entity.data.stats.health
+	new_health_bar.max_value = entity.data.stats.max_health
+	new_health_bar.show_percentage = false
+	new_health_bar.custom_minimum_size = Vector2(0, 8) # bar height
+	var health_fill = StyleBoxFlat.new()
+	health_fill.bg_color = Color(0.471, 0.631, 0.314) # fill color
+	new_health_bar.add_theme_stylebox_override("fill", health_fill)
+	self[container].add_child(new_health_bar)
+	
+	var health_bar_entry = self.label_entry.duplicate()
+	health_bar_entry.obj = entity
+	health_bar_entry.path = "stats.health"
+	health_bar_entry.name = new_health_bar
+	health_bar_entry.data = new_health_bar
+	curr_labels.append(health_bar_entry)
+
+	# make additional entry to update health max_value
+	var health_bar_max = self.label_entry.duplicate()
+	health_bar_max.obj = entity
+	health_bar_max.path = "stats.max_health"
+	health_bar_max.name = new_health_bar
+	health_bar_max.data = new_health_bar
+	curr_labels.append(health_bar_max)
+	
+	# exp bar
+	if "exp" in entity.data.stats:
+		var new_exp_bar = ProgressBar.new()
+		new_exp_bar.value = entity.data.stats.exp
+		new_exp_bar.max_value = entity.data.stats.exp_cap
+		new_exp_bar.show_percentage = false
+		new_exp_bar.custom_minimum_size = Vector2(0, 6) # bar height
+		var exp_fill = StyleBoxFlat.new()
+		exp_fill.bg_color = Color(0.314, 0.541, 0.631) # fill color
+		new_exp_bar.add_theme_stylebox_override("fill", exp_fill)
+		self[container].add_child(new_exp_bar)
+
+		var exp_bar_entry = self.label_entry.duplicate()
+		exp_bar_entry.obj = entity
+		exp_bar_entry.path = "stats.exp"
+		exp_bar_entry.name = new_exp_bar
+		exp_bar_entry.data = new_exp_bar
+		curr_labels.append(exp_bar_entry)
+
+		# make additional entry to update exp max_value
+		var exp_bar_max = self.label_entry.duplicate()
+		exp_bar_max.obj = entity
+		exp_bar_max.path = "stats.exp_cap"
+		exp_bar_max.name = new_exp_bar
+		exp_bar_max.data = new_exp_bar
+		curr_labels.append(exp_bar_max)
+
+
 ## recursively traverses obj data dictionaries and creates labels
 ## for non-dictionary data types
 func _traverse_make(
@@ -171,17 +267,27 @@ func _traverse_make(
 		
 		# end of nest,
 		else:
-			# filter data,
-			if obj is Player:
+			# data label filtering
+			if obj is World:
+				if curr_path not in self.label_filters.world:
+					# make labels
+					_make_stat_label(obj, key, curr_path, curr_entry, container, curr_labels)
+			elif obj is Terrain:
+				if curr_path not in self.label_filters.terrain:
+					# make labels
+					_make_stat_label(obj, key, curr_path, curr_entry, container, curr_labels)
+			elif obj is Biome:
+				if curr_path not in self.label_filters.biome:
+					# make labels
+					_make_stat_label(obj, key, curr_path, curr_entry, container, curr_labels)
+			elif obj is Player:
 				if curr_path not in self.label_filters.player:
 					# make labels
 					_make_stat_label(obj, key, curr_path, curr_entry, container, curr_labels)
-			
 			elif obj is Enemy:
 				if curr_path not in self.label_filters.enemy:
 					# make labels
 					_make_stat_label(obj, key, curr_path, curr_entry, container, curr_labels)
-
 			# no filtering,
 			else:
 				# make labels
@@ -267,70 +373,6 @@ func _handle_world_panel(curr_world: Sprite2D, curr_labels: Array):
 						_make_stat_labels(curr_world.data.terrain.data.biome, "world_stats", curr_labels)
 
 
-func _make_entity_vitals(entity: Entity, container: String, curr_labels: Array):
-	# make player name label
-	var new_name_label = Label.new()
-	new_name_label.add_theme_font_override(
-		"font", preload("res://src/assets/JetBrainsMono-Medium.ttf"))
-	new_name_label.add_theme_font_size_override("font_size", 14)
-	new_name_label.text = entity.name
-	new_name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	self[container].add_child(new_name_label)
-
-	# health bar
-	var new_health_bar = ProgressBar.new()
-	new_health_bar.value = entity.data.stats.health
-	new_health_bar.max_value = entity.data.stats.max_health
-	new_health_bar.show_percentage = false
-	new_health_bar.custom_minimum_size = Vector2(0, 8) # bar height
-	var health_fill = StyleBoxFlat.new()
-	health_fill.bg_color = Color(0.471, 0.631, 0.314) # fill color
-	new_health_bar.add_theme_stylebox_override("fill", health_fill)
-	self[container].add_child(new_health_bar)
-	
-	var health_bar_entry = self.label_entry.duplicate()
-	health_bar_entry.obj = entity
-	health_bar_entry.path = "stats.health"
-	health_bar_entry.name = new_health_bar
-	health_bar_entry.data = new_health_bar
-	curr_labels.append(health_bar_entry)
-
-	# make additional entry to update health max_value
-	var health_bar_max = self.label_entry.duplicate()
-	health_bar_max.obj = entity
-	health_bar_max.path = "stats.max_health"
-	health_bar_max.name = new_health_bar
-	health_bar_max.data = new_health_bar
-	curr_labels.append(health_bar_max)
-	
-	# exp bar
-	if "exp" in entity.data.stats:
-		var new_exp_bar = ProgressBar.new()
-		new_exp_bar.value = entity.data.stats.exp
-		new_exp_bar.max_value = entity.data.stats.exp_cap
-		new_exp_bar.show_percentage = false
-		new_exp_bar.custom_minimum_size = Vector2(0, 6) # bar height
-		var exp_fill = StyleBoxFlat.new()
-		exp_fill.bg_color = Color(0.314, 0.541, 0.631) # fill color
-		new_exp_bar.add_theme_stylebox_override("fill", exp_fill)
-		self[container].add_child(new_exp_bar)
-
-		var exp_bar_entry = self.label_entry.duplicate()
-		exp_bar_entry.obj = entity
-		exp_bar_entry.path = "stats.exp"
-		exp_bar_entry.name = new_exp_bar
-		exp_bar_entry.data = new_exp_bar
-		curr_labels.append(exp_bar_entry)
-
-		# make additional entry to update exp max_value
-		var exp_bar_max = self.label_entry.duplicate()
-		exp_bar_max.obj = entity
-		exp_bar_max.path = "stats.exp_cap"
-		exp_bar_max.name = new_exp_bar
-		exp_bar_max.data = new_exp_bar
-		curr_labels.append(exp_bar_max)
-
-
 ## handles the creation of player data labels
 func _handle_player_panel(p: Player, curr_labels: Array):
 	# if player is valid,
@@ -350,30 +392,44 @@ func _handle_player_panel(p: Player, curr_labels: Array):
 				_make_abilities_labels(p, "player_abilities", curr_labels)
 
 
-## handles the creation of enemy data labels
-func _handle_enemy_panel(curr_enemies: Array, curr_labels: Array):
-	# if enemies exist,
-	if not curr_enemies.is_empty():
+## handles the creation of the combat panel items such as combat vitals
+func _handle_combat_panel(p: Player, enemies: Array, curr_labels: Array):
+	# make player vitals
+	# if player is valid,
+	if is_instance_valid(p):
+		# and if not queued for deletion,
+		if not p.is_queued_for_deletion():
+			# check if player combat vitals container empty before making
+			var container_children = self.player_combat_vitals.get_children()
+			if container_children.is_empty():
+				_make_entity_vitals(p, "player_combat_vitals", curr_labels)
+	
+	# player invalid,
+	else:
+		# delete lingering labels
+		var children = self.player_combat_vitals.get_children()
+		for label in children:
+			if is_instance_valid(label):
+				if not label.is_queued_for_deletion():
+					label.queue_free()
+
+	# make enemy vitals
+	if not enemies.is_empty():
 		# for each enemy,
-		for e in curr_enemies:
+		for e in enemies:
 			# if enemy is valid,
 			if is_instance_valid(e):
 				# and if not queued for deletion,
 				if not e.is_queued_for_deletion():
-					var enemy_labels = _check_obj_labels(e, curr_labels)
-					var is_enemy_labels = enemy_labels.front()
-					# if no labels,
-					if not is_enemy_labels:
-						_make_entity_vitals(e, "enemy_vitals", curr_labels)
-
-						# make stat labels
-						_make_stat_labels(e, "enemy_stats", curr_labels)
+					# check if enemy combat vitals container empty before making
+					var container_children = self.enemy_combat_vitals.get_children()
+					if container_children.is_empty():
+						_make_entity_vitals(e, "enemy_combat_vitals", curr_labels)
 	
 	# enemies array empty,
 	else:
-		# delete lingering name labels
-		var children = self.enemy_stats.get_children()
-		children.append_array(self.enemy_vitals.get_children())
+		# delete lingering labels
+		var children = self.enemy_combat_vitals.get_children()
 		for label in children:
 			if is_instance_valid(label):
 				if not label.is_queued_for_deletion():
@@ -405,9 +461,19 @@ func _update_entry(entry: Dictionary):
 			# account for array indexes
 			if entry_data is Array && k.is_valid_int():
 				k = int(k)
+			
 			# account for script objects
 			if entry_data is GDScript:
+				# spin up script for data
 				entry_data = entry_data.new()
+				# if attack,
+				if entry_data is AttackAction:
+					# define source for data calculations
+					entry_data.data.src = entry.obj
+					# if attack has multiplier,
+					if entry_data.has_method("calculate_multiplier"):
+						# calculate it
+						entry_data.calculate_multiplier()
 
 			# update label entry data
 			entry_data = entry_data[k]
@@ -446,13 +512,21 @@ func _process(_delta: float) -> void:
 	if not self.labels.is_empty():
 		_remove_invalids(self.labels)
 
-	# handle object label creation
+	# if world valid,
 	if is_instance_valid(self.world):
+		# handle world panel
 		_handle_world_panel(self.world, self.labels)
 		
+		# if player valid,
 		if is_instance_valid(self.world.data.player):
+			# handle player panel
 			_handle_player_panel(self.world.data.player, self.labels)
-		
+			
+			# handle combat panel
+			var enemy_controller = self.world.data.controller.enemy_controller
+			var enemies = enemy_controller.enemies
+			_handle_combat_panel(self.world.data.player, enemies, self.labels)
+
 		# player invalid
 		else:
 			# remove invalid labels
@@ -462,10 +536,6 @@ func _process(_delta: float) -> void:
 	else:
 		# remove invalid labels
 		_remove_invalids(self.labels)
-
-	var enemy_controller = self.world.data.controller.enemy_controller
-	var enemies = enemy_controller.enemies
-	_handle_enemy_panel(enemies, self.labels)
 
 	# update label data
 	if not self.labels.is_empty():
