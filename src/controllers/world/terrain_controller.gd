@@ -16,7 +16,7 @@ var grid_scale: Vector2i = Vector2i(32, 32)
 
 var terrain_iterations: int
 
-var soil_variance = 0.066
+var soil_variance = 0.055
 
 
 # Terrain Helpers

@@ -7,10 +7,11 @@ var FileLogger: Node
 
 # components
 @export var world_stats: GridContainer
+@export var player_vitals: GridContainer
 @export var player_stats: GridContainer
 @export var player_abilities: GridContainer
-@export var player_developments: GridContainer
 @export var enemy_stats: GridContainer
+@export var enemy_vitals: GridContainer
 
 var label_settings: LabelSettings
 var labels = []
@@ -19,6 +20,38 @@ var label_entry = {
 	"path": "", # data path
 	"name": null, # name label
 	"data": null, # data label
+}
+
+var label_filters = {
+	"player": [
+		"controller",
+		"world",
+		"class",
+		"stats.base_health",
+		"stats.base_attack",
+		"stats.armor_factor",
+		"stats.base_crit",
+		"stats.base_dodge",
+		"actions.controller",
+		"actions.action",
+		"actions.abilities",
+		"encounters.active",
+		"inventory.controller"
+	],
+	"enemy": [
+		"controller",
+		"world",
+		"stats.base_health",
+		"stats.base_attack",
+		"stats.base_crit",
+		"stats.base_dodge",
+		"actions.controller",
+		"actions.action",
+		"actions.abilities",
+		"encounters.active",
+		"inventory.controller",
+		"inventory.bag"
+	]
 }
 
 var string_n := 12
@@ -130,12 +163,29 @@ func _traverse_make(
 	for key in data:
 		var curr_entry = data[key]
 		var curr_path = path + str(key)
+		# if entry is dictionary,
 		if curr_entry is Dictionary:
 			# append path before traversing deeper
 			curr_path += "."
 			_traverse_make(obj, curr_entry, container, curr_labels, curr_path)
+		
+		# end of nest,
 		else:
-			_make_stat_label(obj, key, curr_path, curr_entry, container, curr_labels)
+			# filter data,
+			if obj is Player:
+				if curr_path not in self.label_filters.player:
+					# make labels
+					_make_stat_label(obj, key, curr_path, curr_entry, container, curr_labels)
+			
+			elif obj is Enemy:
+				if curr_path not in self.label_filters.enemy:
+					# make labels
+					_make_stat_label(obj, key, curr_path, curr_entry, container, curr_labels)
+
+			# no filtering,
+			else:
+				# make labels
+				_make_stat_label(obj, key, curr_path, curr_entry, container, curr_labels)
 
 
 ## makes name and data ui labels for data entry 
@@ -183,20 +233,8 @@ func _make_stat_label(
 ## makes stat labels in the given stat container for the passed object
 ## and adds label entries to labels reference array
 func _make_stat_labels(obj: Variant, container: String, curr_labels: Array):
-	# filter object data
-	var data_filtered = obj.data.duplicate()
-	if obj is Player:
-		var player_filters = [
-			"uid",
-			"controller",
-			"world",
-			"inventory"
-		]
-		for key in player_filters:
-			data_filtered.erase(key)
-
 	# traverse data dict and make labels
-	_traverse_make(obj, data_filtered, container, curr_labels)
+	_traverse_make(obj, obj.data, container, curr_labels)
 
 
 ## handles the creation of world data labels
@@ -229,6 +267,70 @@ func _handle_world_panel(curr_world: Sprite2D, curr_labels: Array):
 						_make_stat_labels(curr_world.data.terrain.data.biome, "world_stats", curr_labels)
 
 
+func _make_entity_vitals(entity: Entity, container: String, curr_labels: Array):
+	# make player name label
+	var new_name_label = Label.new()
+	new_name_label.add_theme_font_override(
+		"font", preload("res://src/assets/JetBrainsMono-Medium.ttf"))
+	new_name_label.add_theme_font_size_override("font_size", 14)
+	new_name_label.text = entity.name
+	new_name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	self[container].add_child(new_name_label)
+
+	# health bar
+	var new_health_bar = ProgressBar.new()
+	new_health_bar.value = entity.data.stats.health
+	new_health_bar.max_value = entity.data.stats.max_health
+	new_health_bar.show_percentage = false
+	new_health_bar.custom_minimum_size = Vector2(0, 8) # bar height
+	var health_fill = StyleBoxFlat.new()
+	health_fill.bg_color = Color(0.471, 0.631, 0.314) # fill color
+	new_health_bar.add_theme_stylebox_override("fill", health_fill)
+	self[container].add_child(new_health_bar)
+	
+	var health_bar_entry = self.label_entry.duplicate()
+	health_bar_entry.obj = entity
+	health_bar_entry.path = "stats.health"
+	health_bar_entry.name = new_health_bar
+	health_bar_entry.data = new_health_bar
+	curr_labels.append(health_bar_entry)
+
+	# make additional entry to update health max_value
+	var health_bar_max = self.label_entry.duplicate()
+	health_bar_max.obj = entity
+	health_bar_max.path = "stats.max_health"
+	health_bar_max.name = new_health_bar
+	health_bar_max.data = new_health_bar
+	curr_labels.append(health_bar_max)
+	
+	# exp bar
+	if "exp" in entity.data.stats:
+		var new_exp_bar = ProgressBar.new()
+		new_exp_bar.value = entity.data.stats.exp
+		new_exp_bar.max_value = entity.data.stats.exp_cap
+		new_exp_bar.show_percentage = false
+		new_exp_bar.custom_minimum_size = Vector2(0, 6) # bar height
+		var exp_fill = StyleBoxFlat.new()
+		exp_fill.bg_color = Color(0.314, 0.541, 0.631) # fill color
+		new_exp_bar.add_theme_stylebox_override("fill", exp_fill)
+		self[container].add_child(new_exp_bar)
+
+		var exp_bar_entry = self.label_entry.duplicate()
+		exp_bar_entry.obj = entity
+		exp_bar_entry.path = "stats.exp"
+		exp_bar_entry.name = new_exp_bar
+		exp_bar_entry.data = new_exp_bar
+		curr_labels.append(exp_bar_entry)
+
+		# make additional entry to update exp max_value
+		var exp_bar_max = self.label_entry.duplicate()
+		exp_bar_max.obj = entity
+		exp_bar_max.path = "stats.exp_cap"
+		exp_bar_max.name = new_exp_bar
+		exp_bar_max.data = new_exp_bar
+		curr_labels.append(exp_bar_max)
+
+
 ## handles the creation of player data labels
 func _handle_player_panel(p: Player, curr_labels: Array):
 	# if player is valid,
@@ -239,16 +341,7 @@ func _handle_player_panel(p: Player, curr_labels: Array):
 			var is_player_labels = player_labels.front()
 			# if no labels,
 			if not is_player_labels:
-				# make player name label
-				var new_name_label = Label.new()
-				new_name_label.add_theme_font_override(
-					"font", preload("res://src/assets/JetBrainsMono-Medium.ttf"))
-				new_name_label.add_theme_font_size_override("font_size", 14)
-				new_name_label.text = p.name
-				# make empty label since 2 grid cols
-				var new_empty_label = Label.new()
-				self.player_stats.add_child(new_name_label)
-				self.player_stats.add_child(new_empty_label)
+				_make_entity_vitals(p, "player_vitals", curr_labels)
 
 				# make stat labels
 				_make_stat_labels(p, "player_stats", curr_labels)
@@ -271,16 +364,8 @@ func _handle_enemy_panel(curr_enemies: Array, curr_labels: Array):
 					var is_enemy_labels = enemy_labels.front()
 					# if no labels,
 					if not is_enemy_labels:
-						# make enemy name label
-						var new_name_label = Label.new()
-						new_name_label.add_theme_font_override(
-							"font", preload("res://src/assets/JetBrainsMono-Medium.ttf"))
-						new_name_label.add_theme_font_size_override("font_size", 14)
-						new_name_label.text = e.name
-						# make empty label since 2 grid cols
-						var new_empty_label = Label.new()
-						self.enemy_stats.add_child(new_name_label)
-						self.enemy_stats.add_child(new_empty_label)
+						_make_entity_vitals(e, "enemy_vitals", curr_labels)
+
 						# make stat labels
 						_make_stat_labels(e, "enemy_stats", curr_labels)
 	
@@ -288,6 +373,7 @@ func _handle_enemy_panel(curr_enemies: Array, curr_labels: Array):
 	else:
 		# delete lingering name labels
 		var children = self.enemy_stats.get_children()
+		children.append_array(self.enemy_vitals.get_children())
 		for label in children:
 			if is_instance_valid(label):
 				if not label.is_queued_for_deletion():
@@ -326,8 +412,26 @@ func _update_entry(entry: Dictionary):
 			# update label entry data
 			entry_data = entry_data[k]
 
-		# update data label text with result
-		entry.data.text = str(entry_data)
+			# format entry data
+			if is_instance_valid(entry_data):
+				if entry_data is Armor or entry_data is Weapon:
+					entry_data = entry_data.get_script().get_global_name()
+
+		# determine what is being updated,
+		if entry.data is Label:
+			# update label text if label
+			entry.data.text = str(entry_data)
+		elif entry.data is ProgressBar:
+			# check which bar is being updated,
+			if (
+				entry.path == "stats.exp_cap" or
+				entry.path == "stats.max_health"
+			):
+				# update max value if exp cap
+				entry.data.max_value = entry_data
+			else:
+				# otherwise update value
+				entry.data.value = entry_data
 
 
 ## updates all labels existing in the passed labels array
@@ -343,11 +447,26 @@ func _process(_delta: float) -> void:
 		_remove_invalids(self.labels)
 
 	# handle object label creation
-	_handle_world_panel(self.world, self.labels)
-	_handle_player_panel(self.world.data.player, self.labels)
+	if is_instance_valid(self.world):
+		_handle_world_panel(self.world, self.labels)
+		
+		if is_instance_valid(self.world.data.player):
+			_handle_player_panel(self.world.data.player, self.labels)
+		
+		# player invalid
+		else:
+			# remove invalid labels
+			_remove_invalids(self.labels)
+	
+	# world invalid,
+	else:
+		# remove invalid labels
+		_remove_invalids(self.labels)
+
 	var enemy_controller = self.world.data.controller.enemy_controller
 	var enemies = enemy_controller.enemies
 	_handle_enemy_panel(enemies, self.labels)
 
 	# update label data
-	_update_label_entries(self.labels)
+	if not self.labels.is_empty():
+		_update_label_entries(self.labels)

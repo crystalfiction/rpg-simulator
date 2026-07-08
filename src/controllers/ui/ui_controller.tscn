@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://ce6ie113viqdg" path="res://src/controllers/ui/ui_controller.gd" id="1_2yfeh"]
 [ext_resource type="FontFile" uid="uid://dvjb12pu7hof1" path="res://src/assets/JetBrainsMono-Medium.ttf" id="2_1mjrn"]
 
-[node name="UiController" type="Control" unique_id=694900400 node_paths=PackedStringArray("world_stats", "player_stats", "player_abilities", "enemy_stats")]
+[node name="UiController" type="Control" unique_id=694900400 node_paths=PackedStringArray("world_stats", "player_vitals", "player_stats", "player_abilities", "enemy_stats", "enemy_vitals")]
 top_level = true
 layout_mode = 3
 anchors_preset = 11
@@ -15,9 +15,11 @@ grow_horizontal = 0
 grow_vertical = 2
 script = ExtResource("1_2yfeh")
 world_stats = NodePath("PanelContainer/MarginContainer/VBoxContainer/TabContainer/World/WorldStats")
-player_stats = NodePath("PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer/Stats/VBoxContainer/ScrollContainer/PlayerStats")
+player_vitals = NodePath("PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer/Stats/VBoxContainer/PlayerVitals")
+player_stats = NodePath("PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer/Stats/VBoxContainer/PlayerStats")
 player_abilities = NodePath("PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer/Abilities/Abilities")
-enemy_stats = NodePath("PanelContainer/MarginContainer/VBoxContainer/TabContainer/Enemy/EnemyStats")
+enemy_stats = NodePath("PanelContainer/MarginContainer/VBoxContainer/TabContainer/Enemy/VBoxContainer/EnemyStats")
+enemy_vitals = NodePath("PanelContainer/MarginContainer/VBoxContainer/TabContainer/Enemy/VBoxContainer/EnemyVitals")
 
 [node name="PanelContainer" type="PanelContainer" parent="." unique_id=459534008]
 layout_mode = 1
@@ -69,11 +71,11 @@ metadata/_tab_index = 0
 layout_mode = 2
 theme_override_constants/separation = 4
 
-[node name="ScrollContainer" type="ScrollContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer/Stats/VBoxContainer" unique_id=928294908]
-custom_minimum_size = Vector2(0, 730)
+[node name="PlayerVitals" type="GridContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer/Stats/VBoxContainer" unique_id=2057702895]
 layout_mode = 2
+theme_override_constants/v_separation = 0
 
-[node name="PlayerStats" type="GridContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer/Stats/VBoxContainer/ScrollContainer" unique_id=156362244]
+[node name="PlayerStats" type="GridContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer/Stats/VBoxContainer" unique_id=156362244]
 layout_mode = 2
 theme_override_constants/v_separation = -2
 columns = 2
@@ -99,7 +101,14 @@ theme_override_constants/margin_left = 8
 theme_override_constants/margin_right = 8
 metadata/_tab_index = 1
 
-[node name="EnemyStats" type="GridContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/Enemy" unique_id=91714677]
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/Enemy" unique_id=709895643]
+layout_mode = 2
+
+[node name="EnemyVitals" type="GridContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/Enemy/VBoxContainer" unique_id=1263486365]
+layout_mode = 2
+theme_override_constants/v_separation = 0
+
+[node name="EnemyStats" type="GridContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/Enemy/VBoxContainer" unique_id=91714677]
 layout_mode = 2
 theme_override_constants/v_separation = -2
 columns = 2

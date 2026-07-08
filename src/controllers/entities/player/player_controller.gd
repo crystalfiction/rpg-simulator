@@ -8,7 +8,7 @@ var init_class: Player.PlayerClass = Player.PlayerClass.BASE
 
 var party_controller: Controller
 
-var exp_step: int = 10
+var exp_step: int
 var exp_rate: int
 var exp_cap: int
 
@@ -99,7 +99,7 @@ func move_towards_tile(p: Player, t: Tile) -> bool:
 ## and evaluates rewards accordingly
 func check_resource_surplus(p: Player):
 	# get # of times regen amt fits into missing health
-	var regen_amt: float = p.data.stats.max_health * float(p.data.stats.regen_rate)
+	var regen_amt: float = p.data.stats.base_health * float(p.data.stats.regen_rate)
 	var n_regen = snapped((p.data.stats.max_health - p.data.stats.health) / regen_amt, 0.01)
 	# check if food surplus,
 	if p.data.resources.food > 0 && (
@@ -140,7 +140,7 @@ func _process_rewards(p: Player, encounter: Dictionary):
 
 	# check for item rewards
 	var r = randf()
-	var n = 0.05
+	var n = 0.05 # 5% for enemy to drop item
 	if r <= n:
 		var r_slots = ["weapon", "head", "chest", "legs", "feet"]
 		var r_item = r_slots.pick_random()
@@ -166,13 +166,14 @@ func _process_rewards(p: Player, encounter: Dictionary):
 		# check if player has item already equipped
 		var equipped = p.data.inventory.controller.get_equipped(r_item)
 		# if not,
-		if not equipped:
+		if equipped == null:
 			# equip it
 			p.data.inventory.controller.equip_item(new_item)
 		# if so,
 		else:
 			# add to bag
 			p.data.inventory.controller.add_item(new_item)
+			p.data.inventory.items = p.data.inventory.controller.get_item_count()
 		
 		FileLogger.log_message(self,
 			p.name + "has acquired a new " +
@@ -256,22 +257,23 @@ func _init_player_entity():
 	new_player.data.actions.abilities = base_class_obj.class_abilities
 	# TODO: get user-defined attribute spread
 	# for now, manually set spread
-	# var attributes: Array = ["stamina", "strength", "perception"]
-	# var attr_spread: Array = [1, 1, 1]
-	# var i: int = 0
-	# for a in attributes:
-	# 	var n = attr_spread[i]
-	# 	new_player.data.stats[a] += n
-	# 	i += 1
+	var attributes: Array = ["stamina", "strength", "perception"]
+	var attr_spread: Array = [1, 1, 1]
+	var i: int = 0
+	for a in attributes:
+		var n = attr_spread[i]
+		new_player.data.stats[a] += n
+		i += 1
 	# spin up class script to get class data/abilities
-	var class_obj: Resource = new_player_script.PlayerClasses[p_class].new()
-	var abilities: Array = new_player.data.actions.abilities
-	for a in class_obj.class_abilities:
-		abilities.push_front(a)
-	# sort abilities by cooldown
-	abilities.sort_custom(
-		func(a, b): return a.new().data.cooldown > b.new().data.cooldown)
-	new_player.data.actions.abilities = abilities
+	if p_class != Player.PlayerClass.BASE:
+		var class_obj: Resource = new_player_script.PlayerClasses[p_class].new()
+		var abilities: Array = new_player.data.actions.abilities
+		for a in class_obj.class_abilities:
+			abilities.push_front(a)
+		# sort abilities by cooldown
+		abilities.sort_custom(
+			func(a, b): return a.new().data.cooldown > b.new().data.cooldown)
+		new_player.data.actions.abilities = abilities
 
 	# stats
 	var new_stats = _calculate_stats(new_player)
@@ -286,6 +288,7 @@ func _init_player_entity():
 
 	# equipment
 	var new_weapon = UnarmedWeapon.new()
+	# var new_weapon = Weapon.WeaponClasses.values().pick_random().new()
 	new_player.data.inventory.equipped.weapon = new_weapon
 	new_player.data.inventory.equipped.weapon = new_weapon
 	

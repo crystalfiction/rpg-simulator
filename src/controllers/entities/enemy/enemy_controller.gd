@@ -14,11 +14,11 @@ func spawn_enemies(n: int = 1) -> Array:
 		var new_weapon = UnarmedWeapon.new()
 		new_enemy.data.inventory.equipped.weapon = new_weapon
 		new_enemies.append(new_enemy)
+		# initialize armor skill
+		_progress_skill(new_enemy, "ARMOR")
 		# initialize weapon skill
 		_progress_skill(
 			new_enemy, new_enemy.data.inventory.equipped.weapon.get_weapon_class_string())
-		# initialize armor skill
-		_progress_skill(new_enemy, "ARMOR")
 			
 	self.enemies = new_enemies
 	return new_enemies

@@ -24,7 +24,8 @@ func _progress_skill(entity: Entity, skill: String):
 		entity.data.skills[skill] = _calculate_skill(
 			entity.data.skills[skill])
 	
-	if skill in entity.data.skills:
+	# skill already initialized,
+	else:
 		entity.data.skills[skill].exp += entity.data.skills[skill].step
 		entity.data.skills[skill] = _check_skill(entity.data.skills[skill])
 
@@ -42,7 +43,7 @@ func _calculate_exp(e: Entity) -> Dictionary:
 	# if player,
 	if e is Player:
 		stats.level += 1
-		self.exp_step = 10
+		self.exp_step = 10 + stats.level
 		# quadratic formula
 		self.exp_cap = self.exp_step * (stats.level ** 2)
 		# exponential formula
@@ -89,7 +90,7 @@ func _calculate_attributes(e: Entity) -> Dictionary:
 	# player class bonuses
 	if e is Player:
 		# regen
-		var regen_step = clamp(stats.stamina * 0.0001, 0, 1)
+		var regen_step = clamp(stats.stamina * 0.001, 0, 1)
 		stats.regen_rate += regen_step
 		
 		# CLASS BONUSES
@@ -169,13 +170,17 @@ func evaluate_combat(attack: AttackAction):
 	# ARMOR
 	# account for armor skill if applicable,
 	var armor_skill = 0
+	var armor_bonus = 0.0
 	if "skills" in attack.data.target.data:
 		if "ARMOR" in attack.data.target.data.skills:
 			armor_skill = attack.data.target.data.skills.ARMOR.level
-			target_armor += armor_skill / 10
+			armor_bonus = snapped(target_armor * (armor_skill / (target_armor + 1.0)), 0.1)
+			attack.data.target.data.skills.ARMOR.bonus = armor_bonus # save only bonus
+			target_armor = armor_bonus
+
 	# calculate armor factor
 	var base_health = attack.data.target.data.stats.base_health
-	var armor_factor = target_armor + (base_health * 10) + src_level
+	var armor_factor = target_armor + base_health + src_level
 	# calculate armor reduction
 	var armor_reduc = snapped(
 		(float(target_armor) / float(armor_factor)),
@@ -302,11 +307,27 @@ func evaluate_combat(attack: AttackAction):
 	# progress armor skill
 	if "skills" in attack.data.target.data:
 		if (result == "HITS" || result == "CRITS"):
-			_progress_skill(attack.data.target, "ARMOR")
+			# check if armor equipped,
+			var equipped = false
+			for s in Armor.ArmorSlot:
+				if s != null:
+					var slot_s = s.to_lower()
+					if attack.data.target.data.inventory.equipped[slot_s] != null:
+						equipped = true
+
+			# if armor equipped in any slot,			
+			if equipped:
+				# if crit, 2x progress
+				if result == "CRITS":
+					_progress_skill(attack.data.src, equipped_weapon.get_weapon_class_string())
+				_progress_skill(attack.data.target, "ARMOR")
 
 	# progress weapon skill
 	if "skills" in attack.data.src.data:
 		if (result == "HITS" || result == "CRITS"):
+			# if crit, 2x progress
+			if result == "CRITS":
+				_progress_skill(attack.data.src, equipped_weapon.get_weapon_class_string())
 			_progress_skill(attack.data.src, equipped_weapon.get_weapon_class_string())
 
 	# flag action complete

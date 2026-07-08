@@ -15,7 +15,7 @@ var rainfall_max = 1.00
 var drainage_min = 0.00
 var drainage_max = 1.00
 
-var erosion_factor = 0.005
+var erosion_factor = 0.006
 
 var weather_metrics: Dictionary
 

@@ -59,7 +59,8 @@ var player_data: Dictionary = {
 			"legs": null,
 			"feet": null
 		},
-		"bag": []
+		"bag": [],
+		"items": 0,
 	}
 }
 
