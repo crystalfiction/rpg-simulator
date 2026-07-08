@@ -49,10 +49,30 @@ Create a procedurally generated RPG simulation that embraces chaos and instabili
   - [x] _item system_: players have a chance to randomly find items including weapons, armor
     - [x] _weapons_: any class can equip any type of weapon; the only determinant is weapon skills
     - [x] _armor_: any class can equip any armor type, but each armor type has benefits and drawbacks, relying mainly on armor skill of that particular type
+    - [ ] items are randomly generated from a list of stat modifiers on creation
 - [x] _enemy system_: player encounters enemies across the world when attempting to interact with resources
 - [x] _environmental system_: create a dynamic environment with terrain, weather, and organic life simulation that directly impacts the player's world interaction somehow
   - [x] simulates a basic world environment using procedurally generated terrain samples
     - [x] player resources are generated according to tile conditions related to terrain
+- [ ] _ui system_: create a basic, functional UI that displays data relevant to a playthrough and allows the user to make necessary decisions regarding their character
+  - [ ] world panel
+    - [ ] terrain: allows user to see stats related to world generation, including biome and resources left
+  - [ ] player panel
+    - [x] stats
+    - [x] abilities: shows all abilities available to the player, including the ability's stats
+    - [ ] skills: shows all player skills, prioritizing active ones
+    - [ ] inventory
+      - [ ] equipment viewer/editor
+        - [ ] item data
+        - [ ] unequip/equip items
+      - [ ] bag viewer/editor
+        - [ ] item data
+        - [ ] rearrange items
+        - [ ] delete items
+        - [ ] item count
+  - [ ] combat panel: shows only high-level data regarding the entities in a combat encounter
+    - [ ] entity vitals
+    - [ ] vital stats -> name, level, health, exp(if applicable)
 
 ### Further
 
