@@ -9,7 +9,9 @@ var init_data = {
 
 func calculate_multiplier():
     # initialize multiplier
-    pass
+    var strength: int = self.data.src.data.stats.strength
+    var strength_bonus: float = clampf(strength / 100.0, 0, 1)
+    self.data.multiplier += strength_bonus
 
 # initialize data before _ready
 func _init() -> void:

@@ -4,7 +4,7 @@ extends EntityController
 var party_controller_script = preload("res://src/controllers/entities/player/party_controller.gd")
 
 # components
-var init_class: Player.PlayerClass = Player.PlayerClass.BASE
+var init_class: Player.PlayerClass = Player.PlayerClass.WANDERER
 
 var party_controller: Controller
 

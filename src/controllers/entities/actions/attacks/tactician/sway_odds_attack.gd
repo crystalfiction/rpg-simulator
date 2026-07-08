@@ -10,7 +10,9 @@ var init_data = {
 
 func calculate_multiplier():
     # initialize multiplier
-    pass
+    var perception: int = self.data.src.data.stats.perception
+    var perception_bonus: float = clampf(perception / 100.0, 0, 1)
+    self.data.multiplier += perception_bonus
 
 # initialize data before _ready
 func _init() -> void:

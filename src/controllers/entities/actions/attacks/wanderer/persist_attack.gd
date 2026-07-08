@@ -10,7 +10,10 @@ var init_data = {
 
 func calculate_multiplier():
     # initialize multiplier
-    pass
+    var stamina: int = self.data.src.data.stats.stamina
+    var stam_bonus: float = clampf(stamina / 100.0, 0, 1)
+    self.data.multiplier += stam_bonus
+
 
 # initialize data before _ready
 func _init() -> void:
