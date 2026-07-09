@@ -388,15 +388,15 @@ func _process_cycle(p: Player):
 	var time_controller = world.data.controller.time_controller
 	if time_controller:
 		if time_controller.cycling:
+			# check player health,
+			_check_player(p)
+			
 			# if terrain map complete,
 			if self.world.data.terrain.data.map_complete:
 				# reset player health
 				# and wait for new map to be initialized
 				p.data.stats.health = p.data.stats.max_health
 				return
-
-			# check player health,
-			_check_player(p)
 			
 			# get player action for cycle
 			if is_instance_valid(p):

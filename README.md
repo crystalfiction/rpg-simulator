@@ -63,12 +63,13 @@ Create a procedurally generated RPG simulation that embraces chaos and instabili
     - [x] skills: shows all player skills
     - [ ] inventory
       - [ ] equipment viewer/editor
-        - [x] item data
-        - [ ] unequip/equip items
+        - [ ] item stats
+        - [ ] unequip items
       - [ ] bag viewer/editor
-        - [ ] item data
+        - [x] item data
         - [ ] rearrange items
-        - [ ] delete items
+        - [x] equip items
+        - [x] delete items
   - [x] combat panel: shows only high-level data regarding the entities in a combat encounter
     - [x] entity vitals
     - [x] vital stats -> name, level

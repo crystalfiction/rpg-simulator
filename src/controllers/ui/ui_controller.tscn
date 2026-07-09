@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://ce6ie113viqdg" path="res://src/controllers/ui/ui_controller.gd" id="1_2yfeh"]
 [ext_resource type="FontFile" uid="uid://dvjb12pu7hof1" path="res://src/assets/JetBrainsMono-Medium.ttf" id="2_1mjrn"]
 
-[node name="UiController" type="Control" unique_id=694900400 node_paths=PackedStringArray("world_stats", "player_vitals", "player_combat_vitals", "player_stats", "player_abilities", "player_equipped", "player_bags", "enemy_combat_vitals")]
+[node name="UiController" type="Control" unique_id=694900400 node_paths=PackedStringArray("world_stats", "player_vitals", "player_combat_vitals", "player_stats", "player_abilities", "player_equipped", "player_bags", "player_bag_controls", "bag_item_select", "bag_equip_btn", "bag_delete_btn", "enemy_combat_vitals")]
 top_level = true
 layout_mode = 3
 anchors_preset = 11
@@ -20,7 +20,11 @@ player_combat_vitals = NodePath("PanelContainer/MarginContainer/VBoxContainer/Ta
 player_stats = NodePath("PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer/Stats/VBoxContainer/PlayerStats")
 player_abilities = NodePath("PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer/Abilities/Abilities")
 player_equipped = NodePath("PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer/Inventory/HFlowContainer/Equipped2")
-player_bags = NodePath("PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer/Inventory/HFlowContainer/Bags2")
+player_bags = NodePath("PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer/Inventory/HFlowContainer/BagItems")
+player_bag_controls = NodePath("PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer/Inventory/HFlowContainer/BagControls")
+bag_item_select = NodePath("PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer/Inventory/HFlowContainer/BagControls/OptionButton")
+bag_equip_btn = NodePath("PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer/Inventory/HFlowContainer/BagControls/HBoxContainer/BagEquipBtn")
+bag_delete_btn = NodePath("PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer/Inventory/HFlowContainer/BagControls/HBoxContainer/BagDeleteBtn")
 enemy_combat_vitals = NodePath("PanelContainer/MarginContainer/VBoxContainer/TabContainer/Combat/VBoxContainer/EnemyVitals")
 
 [node name="PanelContainer" type="PanelContainer" parent="." unique_id=459534008]
@@ -125,10 +129,31 @@ layout_mode = 2
 theme_override_fonts/font = ExtResource("2_1mjrn")
 text = "Bags"
 
-[node name="Bags2" type="GridContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer/Inventory/HFlowContainer" unique_id=940241521]
+[node name="BagItems" type="GridContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer/Inventory/HFlowContainer" unique_id=940241521]
 layout_mode = 2
 theme_override_constants/v_separation = 0
 columns = 2
+
+[node name="BagControls" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer/Inventory/HFlowContainer" unique_id=1866455042]
+layout_mode = 2
+
+[node name="OptionButton" type="OptionButton" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer/Inventory/HFlowContainer/BagControls" unique_id=884946078]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_1mjrn")
+theme_override_font_sizes/font_size = 13
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer/Inventory/HFlowContainer/BagControls" unique_id=1020550372]
+layout_mode = 2
+
+[node name="BagEquipBtn" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer/Inventory/HFlowContainer/BagControls/HBoxContainer" unique_id=1113555337]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Equip"
+
+[node name="BagDeleteBtn" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer/Inventory/HFlowContainer/BagControls/HBoxContainer" unique_id=169553931]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Delete"
 
 [node name="Combat" type="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer" unique_id=2032826631]
 visible = false

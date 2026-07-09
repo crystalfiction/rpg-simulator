@@ -153,6 +153,13 @@ func evaluate_combat(attack: AttackAction):
 			0.01)
 		# if entity has skills,
 		if "skills" in attack.data.src.data:
+			# if missing weapon skill for equipped weapon,
+			var src_inventory = attack.data.src.data.inventory
+			var curr_weapon = src_inventory.equipped.weapon.get_weapon_class_string()
+			if curr_weapon not in attack.data.src.data.skills:
+				# create it
+				_progress_skill(attack.data.src, curr_weapon)
+
 			# calculate skill damage bonus
 			var weapon_string = equipped_weapon.get_weapon_class_string()
 			var skill_level = attack.data.src.data.skills[weapon_string].level

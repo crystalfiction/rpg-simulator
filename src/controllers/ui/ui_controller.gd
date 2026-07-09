@@ -13,6 +13,10 @@ var FileLogger: Node
 @export var player_abilities: GridContainer
 @export var player_equipped: GridContainer
 @export var player_bags: GridContainer
+@export var player_bag_controls: VBoxContainer
+@export var bag_item_select: OptionButton
+@export var bag_equip_btn: Button
+@export var bag_delete_btn: Button
 @export var enemy_combat_vitals: GridContainer
 
 var label_settings: LabelSettings
@@ -276,6 +280,48 @@ func _make_inventory_equipped(p: Player, curr_labels: Array):
 			"player_equipped", curr_labels)
 
 
+func _handle_bag_controls(
+	p: Player, path: String, curr_labels: Array
+):
+	var item_select: OptionButton = self.player_bag_controls.get_child(0)
+	var keys = path.split(".", false, 0)
+	var curr_data = p.data
+	for key in keys:
+		if key.is_valid_int():
+			key = key.to_int()
+		curr_data = curr_data[key]
+	
+	var item_id = int(keys[keys.size() - 1]) # bag array index
+	var item_string = curr_data.get_script().get_global_name()
+	item_select.add_item(item_string, item_id)
+
+
+## handles item equipment for bag equipment buttons
+func _handle_bag_equip(p: Player, options: OptionButton) -> bool:
+	# get selected item
+	var selected = options.get_selected_id()
+	if selected < 0:
+		return false
+	# format new item
+	var new_item = p.data.inventory.bags[selected]
+	var curr_item = null
+	if new_item is Weapon:
+		curr_item = p.data.inventory.equipped.weapon
+	elif new_item is Armor:
+		var slot = new_item.get_armor_slot_string().to_lower()
+		curr_item = p.data.inventory.equipped[slot]
+	# swap item at selected index with currently equipped item
+	p.data.inventory.bags[selected] = curr_item
+	# equip selected item
+	p.data.inventory.controller.equip_item(new_item)
+	return true
+
+
+## handles bag deletion for player inventory items
+func _handle_bag_delete(p: Player, options: OptionButton, curr_labels: Array):
+	pass
+
+
 ## handles creation of inventory bags view
 func _make_inventory_bags(p: Player, curr_labels: Array):
 	var bags: Array = p.data.inventory.bags
@@ -288,9 +334,10 @@ func _make_inventory_bags(p: Player, curr_labels: Array):
 			# if no obj labels,
 			if not is_obj_labels:
 				# make labels
-					_make_stat_label(
-						p, str(i), path, item,
-						"player_bags", curr_labels)
+				_make_stat_label(
+					p, str(i), path, item,
+					"player_bags", curr_labels)
+				_handle_bag_controls(p, path, curr_labels)
 			
 			# if obj labels,
 			else:
@@ -304,6 +351,7 @@ func _make_inventory_bags(p: Player, curr_labels: Array):
 					_make_stat_label(
 						p, str(i), path, item,
 						"player_bags", curr_labels)
+					_handle_bag_controls(p, path, curr_labels)
 					
 			# increment index
 			i += 1
@@ -478,6 +526,16 @@ func _handle_inventory_panel(p: Player, curr_labels: Array):
 			
 			# make bag labels
 			_make_inventory_bags(p, curr_labels)
+
+			# make bag controls
+			if not self.bag_equip_btn.is_connected("pressed", _handle_bag_equip):
+				self.bag_equip_btn.pressed.connect(
+					_handle_bag_equip.bind(p, self.bag_item_select)
+				)
+			if not self.bag_delete_btn.is_connected("pressed", _handle_bag_delete):
+				self.bag_delete_btn.pressed.connect(
+					_handle_bag_delete.bind(p, self.bag_item_select, self.labels)
+				)
 
 
 ## handles the creation of the combat panel items such as combat vitals
