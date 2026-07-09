@@ -140,8 +140,8 @@ func _process_rewards(p: Player, encounter: Dictionary):
 
 	# check for item rewards
 	var r = randf()
-	var n = 0.05 # 5% for enemy to drop item
-	if r <= n && p.data.inventory.items <= 10:
+	var n = 0.10 # 5% for enemy to drop item
+	if r <= n && p.data.inventory.bags.size() < 10:
 		var r_slots = ["weapon", "head", "chest", "legs", "feet"]
 		var r_item = r_slots.pick_random()
 		var new_item = null
@@ -165,19 +165,20 @@ func _process_rewards(p: Player, encounter: Dictionary):
 		
 		# check if player has item already equipped
 		var equipped = p.data.inventory.controller.get_equipped(r_item)
+		var equipment_string = new_item.get_script().get_global_name()
 		# if not,
 		if equipped == null:
 			# equip it
 			p.data.inventory.controller.equip_item(new_item)
+			FileLogger.log_message(self,
+				p.name + " has equipped a new " +
+				equipment_string)
 		# if so,
 		else:
 			# add to bag
 			p.data.inventory.controller.add_item(new_item)
-			p.data.inventory.items = p.data.inventory.controller.get_item_count()
-		
-		FileLogger.log_message(self,
-			p.name + "has acquired a new " +
-			new_item.get_equipment_type_string())
+			FileLogger.log_message(self,
+				"A new " + equipment_string + " has been added to bags")
 
 	# check if level_up
 	var level_up = false

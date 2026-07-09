@@ -268,6 +268,7 @@ func _make_entity_vitals(entity: Entity, container: String, curr_labels: Array):
 func _make_inventory_equipped(p: Player, curr_labels: Array):
 	var equipped: Dictionary = p.data.inventory.equipped
 	for key in equipped:
+		# make name/item labels
 		var curr_slot = equipped[key]
 		var path = "inventory.equipped." + key
 		_make_stat_label(
@@ -279,12 +280,33 @@ func _make_inventory_equipped(p: Player, curr_labels: Array):
 func _make_inventory_bags(p: Player, curr_labels: Array):
 	var bags: Array = p.data.inventory.bags
 	var i = 0
-	for item in bags:
-		var path = "inventory.bags." + str(i)
-		_make_stat_label(
-			p, str(i), path, item,
-			"player_bags", curr_labels)
-		i += 1
+	if not bags.is_empty():
+		for item in bags:
+			var obj_labels = _check_obj_labels(p, "player_bags", curr_labels)
+			var is_obj_labels = obj_labels[0]
+			var path = "inventory.bags." + str(i)
+			# if no obj labels,
+			if not is_obj_labels:
+				# make labels
+					_make_stat_label(
+						p, str(i), path, item,
+						"player_bags", curr_labels)
+			
+			# if obj labels,
+			else:
+				# check if current bag slot label exists
+				var label_paths = []
+				for l in obj_labels[1]:
+					label_paths.append(l.path)
+
+				if path not in label_paths:
+					# make item stat label
+					_make_stat_label(
+						p, str(i), path, item,
+						"player_bags", curr_labels)
+					
+			# increment index
+			i += 1
 
 
 ## recursively traverses obj data dictionaries and creates labels
@@ -371,9 +393,11 @@ func _make_stat_label(
 	new_label_entry.data = new_data_label
 	new_label_entry.container = container
 
+	# add to tree
 	self[container].add_child(new_name_label)
 	self[container].add_child(new_data_label)
 
+	# add to label entries ref
 	curr_labels.append(new_label_entry)
 
 
@@ -452,11 +476,8 @@ func _handle_inventory_panel(p: Player, curr_labels: Array):
 			if not is_equipped_labels:
 				_make_inventory_equipped(p, curr_labels)
 			
-			var bag_labels = _check_obj_labels(p, "player_bags", curr_labels)
-			var is_bag_labels = bag_labels.front()
-			if not is_bag_labels:
-				# make stat labels
-				_make_inventory_bags(p, curr_labels)
+			# make bag labels
+			_make_inventory_bags(p, curr_labels)
 
 
 ## handles the creation of the combat panel items such as combat vitals
@@ -541,7 +562,7 @@ func _update_entry(entry: Dictionary):
 					if entry_data.has_method("calculate_multiplier"):
 						# calculate it
 						entry_data.calculate_multiplier()
-
+			
 			# update label entry data
 			entry_data = entry_data[k]
 

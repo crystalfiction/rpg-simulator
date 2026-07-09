@@ -128,7 +128,7 @@ text = "Bags"
 [node name="Bags2" type="GridContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer/Inventory/HFlowContainer" unique_id=940241521]
 layout_mode = 2
 theme_override_constants/v_separation = 0
-columns = 4
+columns = 2
 
 [node name="Combat" type="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer" unique_id=2032826631]
 visible = false

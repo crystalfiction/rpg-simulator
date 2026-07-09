@@ -60,10 +60,10 @@ Create a procedurally generated RPG simulation that embraces chaos and instabili
   - [ ] player panel
     - [x] stats
     - [x] abilities: shows all abilities available to the player, including the ability's stats
-    - [ ] skills: shows all player skills, prioritizing active ones
+    - [x] skills: shows all player skills
     - [ ] inventory
       - [ ] equipment viewer/editor
-        - [ ] item data
+        - [x] item data
         - [ ] unequip/equip items
       - [ ] bag viewer/editor
         - [ ] item data
