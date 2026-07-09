@@ -11,6 +11,8 @@ var FileLogger: Node
 @export var player_combat_vitals: GridContainer
 @export var player_stats: GridContainer
 @export var player_abilities: GridContainer
+@export var player_equipped: GridContainer
+@export var player_bags: GridContainer
 @export var enemy_combat_vitals: GridContainer
 
 var label_settings: LabelSettings
@@ -20,6 +22,7 @@ var label_entry = {
 	"path": "", # data path
 	"name": null, # name label
 	"data": null, # data label
+	"container": null, # object container
 }
 
 var label_filters = {
@@ -52,7 +55,14 @@ var label_filters = {
 		"actions.action",
 		"actions.abilities",
 		"encounters.active",
-		"inventory.controller"
+		"inventory.controller",
+		"inventory.equipped.weapon",
+		"inventory.equipped.head",
+		"inventory.equipped.chest",
+		"inventory.equipped.legs",
+		"inventory.equipped.feet",
+		"inventory.bags",
+		"inventory.items"
 	],
 	"enemy": [
 		"uid",
@@ -103,12 +113,13 @@ func _remove_invalids(curr_labels: Array):
 			curr_labels.erase(invalid)
 
 
-## checks for existing labels given the passed obj,
+## checks for existing labels given the passed obj and container,
 ## and returns [bool, [labels]] depending on existence
-func _check_obj_labels(obj: Variant, curr_labels: Array) -> Array:
+func _check_obj_labels(obj: Variant, container: String, curr_labels: Array) -> Array:
 	if is_instance_valid(obj):
 		if !obj.is_queued_for_deletion():
-			var found = curr_labels.filter(func(l): return l.obj == obj)
+			var found = curr_labels.filter(
+				func(l): return l.obj == obj && l.container == container)
 			if found.size() == 0:
 				return [false, ]
 			else:
@@ -164,10 +175,11 @@ func _make_abilities_labels(p: Player, container: String, curr_labels: Array):
 				new_label_entry.path = path
 				new_label_entry.name = new_name_label
 				new_label_entry.data = new_data_label
-
+				new_label_entry.container = container
 				curr_labels.append(new_label_entry)
 
 
+## creates combat entity vitals in combat UI panel
 func _make_entity_vitals(entity: Entity, container: String, curr_labels: Array):
 	# make player name label
 	var new_name_label = Label.new()
@@ -191,6 +203,7 @@ func _make_entity_vitals(entity: Entity, container: String, curr_labels: Array):
 	new_level_entry.path = "stats.level"
 	new_level_entry.name = new_level_label
 	new_level_entry.data = new_level_label
+	new_level_entry.container = container
 	curr_labels.append(new_level_entry)
 
 	# health bar
@@ -209,6 +222,7 @@ func _make_entity_vitals(entity: Entity, container: String, curr_labels: Array):
 	health_bar_entry.path = "stats.health"
 	health_bar_entry.name = new_health_bar
 	health_bar_entry.data = new_health_bar
+	health_bar_entry.container = container
 	curr_labels.append(health_bar_entry)
 
 	# make additional entry to update health max_value
@@ -217,6 +231,7 @@ func _make_entity_vitals(entity: Entity, container: String, curr_labels: Array):
 	health_bar_max.path = "stats.max_health"
 	health_bar_max.name = new_health_bar
 	health_bar_max.data = new_health_bar
+	health_bar_max.container = container
 	curr_labels.append(health_bar_max)
 	
 	# exp bar
@@ -236,6 +251,7 @@ func _make_entity_vitals(entity: Entity, container: String, curr_labels: Array):
 		exp_bar_entry.path = "stats.exp"
 		exp_bar_entry.name = new_exp_bar
 		exp_bar_entry.data = new_exp_bar
+		exp_bar_entry.container = container
 		curr_labels.append(exp_bar_entry)
 
 		# make additional entry to update exp max_value
@@ -244,7 +260,31 @@ func _make_entity_vitals(entity: Entity, container: String, curr_labels: Array):
 		exp_bar_max.path = "stats.exp_cap"
 		exp_bar_max.name = new_exp_bar
 		exp_bar_max.data = new_exp_bar
+		exp_bar_max.container = container
 		curr_labels.append(exp_bar_max)
+
+
+## handles creation of inventory equipment view
+func _make_inventory_equipped(p: Player, curr_labels: Array):
+	var equipped: Dictionary = p.data.inventory.equipped
+	for key in equipped:
+		var curr_slot = equipped[key]
+		var path = "inventory.equipped." + key
+		_make_stat_label(
+			p, key, path, curr_slot,
+			"player_equipped", curr_labels)
+
+
+## handles creation of inventory bags view
+func _make_inventory_bags(p: Player, curr_labels: Array):
+	var bags: Array = p.data.inventory.bags
+	var i = 0
+	for item in bags:
+		var path = "inventory.bags." + str(i)
+		_make_stat_label(
+			p, str(i), path, item,
+			"player_bags", curr_labels)
+		i += 1
 
 
 ## recursively traverses obj data dictionaries and creates labels
@@ -329,6 +369,7 @@ func _make_stat_label(
 	new_label_entry.path = path
 	new_label_entry.name = new_name_label
 	new_label_entry.data = new_data_label
+	new_label_entry.container = container
 
 	self[container].add_child(new_name_label)
 	self[container].add_child(new_data_label)
@@ -348,7 +389,7 @@ func _handle_world_panel(curr_world: Sprite2D, curr_labels: Array):
 	if is_instance_valid(curr_world):
 		if not curr_world.is_queued_for_deletion():
 			# world
-			var world_labels = _check_obj_labels(curr_world, curr_labels).front()
+			var world_labels = _check_obj_labels(curr_world, "world_stats", curr_labels).front()
 			# if no labels,
 			if not world_labels:
 				# make them
@@ -357,7 +398,7 @@ func _handle_world_panel(curr_world: Sprite2D, curr_labels: Array):
 			# terrain
 			if "terrain" in curr_world.data:
 				# check for existing labels
-				var terrain_labels = _check_obj_labels(curr_world.data.terrain, curr_labels).front()
+				var terrain_labels = _check_obj_labels(curr_world.data.terrain, "world_stats", curr_labels).front()
 				# if no labels,
 				if not terrain_labels:
 					# make them
@@ -366,7 +407,7 @@ func _handle_world_panel(curr_world: Sprite2D, curr_labels: Array):
 				# biome
 				if "biome" in curr_world.data.terrain.data:
 					var biome_labels = _check_obj_labels(
-						curr_world.data.terrain.data.biome, curr_labels).front()
+						curr_world.data.terrain.data.biome, "world_stats", curr_labels).front()
 					# if no labels,
 					if not biome_labels:
 						# make them
@@ -379,17 +420,43 @@ func _handle_player_panel(p: Player, curr_labels: Array):
 	if is_instance_valid(p):
 		# and if not queued for deletion,
 		if not p.is_queued_for_deletion():
-			var player_labels = _check_obj_labels(p, curr_labels)
-			var is_player_labels = player_labels.front()
-			# if no labels,
-			if not is_player_labels:
+			# vitals
+			var vital_labels = _check_obj_labels(p, "player_vitals", curr_labels)
+			var is_vital_labels = vital_labels.front()
+			if not is_vital_labels:
 				_make_entity_vitals(p, "player_vitals", curr_labels)
-
+			
+			# stats
+			var stat_labels = _check_obj_labels(p, "player_stats", curr_labels)
+			var is_stat_labels = stat_labels.front()
+			if not is_stat_labels:
 				# make stat labels
 				_make_stat_labels(p, "player_stats", curr_labels)
-
+			
+			# abilities
+			var ability_labels = _check_obj_labels(p, "player_abilities", curr_labels)
+			var is_ability_labels = ability_labels.front()
+			if not is_ability_labels:
 				# make abilities panel
 				_make_abilities_labels(p, "player_abilities", curr_labels)
+
+
+## handles creation of player inventory panel
+func _handle_inventory_panel(p: Player, curr_labels: Array):
+	# if player is valid,
+	if is_instance_valid(p):
+		# and if not queued for deletion,
+		if not p.is_queued_for_deletion():
+			var equipped_labels = _check_obj_labels(p, "player_equipped", curr_labels)
+			var is_equipped_labels = equipped_labels.front()
+			if not is_equipped_labels:
+				_make_inventory_equipped(p, curr_labels)
+			
+			var bag_labels = _check_obj_labels(p, "player_bags", curr_labels)
+			var is_bag_labels = bag_labels.front()
+			if not is_bag_labels:
+				# make stat labels
+				_make_inventory_bags(p, curr_labels)
 
 
 ## handles the creation of the combat panel items such as combat vitals
@@ -521,6 +588,9 @@ func _process(_delta: float) -> void:
 		if is_instance_valid(self.world.data.player):
 			# handle player panel
 			_handle_player_panel(self.world.data.player, self.labels)
+
+			# handle inventory panel
+			_handle_inventory_panel(self.world.data.player, self.labels)
 			
 			# handle combat panel
 			var enemy_controller = self.world.data.controller.enemy_controller

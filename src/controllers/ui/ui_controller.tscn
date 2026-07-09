@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://ce6ie113viqdg" path="res://src/controllers/ui/ui_controller.gd" id="1_2yfeh"]
 [ext_resource type="FontFile" uid="uid://dvjb12pu7hof1" path="res://src/assets/JetBrainsMono-Medium.ttf" id="2_1mjrn"]
 
-[node name="UiController" type="Control" unique_id=694900400 node_paths=PackedStringArray("world_stats", "player_vitals", "player_stats", "player_abilities", "player_combat_vitals", "player_combat_stats", "enemy_combat_vitals", "enemy_combat_stats")]
+[node name="UiController" type="Control" unique_id=694900400 node_paths=PackedStringArray("world_stats", "player_vitals", "player_combat_vitals", "player_stats", "player_abilities", "player_equipped", "player_bags", "enemy_combat_vitals")]
 top_level = true
 layout_mode = 3
 anchors_preset = 11
@@ -16,12 +16,12 @@ grow_vertical = 2
 script = ExtResource("1_2yfeh")
 world_stats = NodePath("PanelContainer/MarginContainer/VBoxContainer/TabContainer/World/WorldStats")
 player_vitals = NodePath("PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer/Stats/VBoxContainer/PlayerVitals")
+player_combat_vitals = NodePath("PanelContainer/MarginContainer/VBoxContainer/TabContainer/Combat/VBoxContainer/PlayerVitals")
 player_stats = NodePath("PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer/Stats/VBoxContainer/PlayerStats")
 player_abilities = NodePath("PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer/Abilities/Abilities")
-player_combat_vitals = NodePath("PanelContainer/MarginContainer/VBoxContainer/TabContainer/Combat/VBoxContainer/PlayerVitals")
-player_combat_stats = NodePath("PanelContainer/MarginContainer/VBoxContainer/TabContainer/Combat/VBoxContainer/PlayerCombatStats")
+player_equipped = NodePath("PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer/Inventory/HFlowContainer/Equipped2")
+player_bags = NodePath("PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer/Inventory/HFlowContainer/Bags2")
 enemy_combat_vitals = NodePath("PanelContainer/MarginContainer/VBoxContainer/TabContainer/Combat/VBoxContainer/EnemyVitals")
-enemy_combat_stats = NodePath("PanelContainer/MarginContainer/VBoxContainer/TabContainer/Combat/VBoxContainer/EnemyCombatStats")
 
 [node name="PanelContainer" type="PanelContainer" parent="." unique_id=459534008]
 layout_mode = 1
@@ -47,22 +47,24 @@ layout_mode = 2
 size_flags_vertical = 3
 theme_override_fonts/font = ExtResource("2_1mjrn")
 theme_override_font_sizes/font_size = 15
-current_tab = 1
+current_tab = 0
 
 [node name="Player" type="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer" unique_id=167004360]
-visible = false
 layout_mode = 2
-theme_override_constants/margin_left = 4
-theme_override_constants/margin_right = 4
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 4
 metadata/_tab_index = 0
 
 [node name="TabContainer" type="TabContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player" unique_id=1680796160]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_1mjrn")
-theme_override_font_sizes/font_size = 15
-current_tab = 0
+theme_override_font_sizes/font_size = 14
+current_tab = 2
 
 [node name="Stats" type="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer" unique_id=394951077]
+visible = false
 layout_mode = 2
 theme_override_constants/margin_left = 4
 theme_override_constants/margin_top = 4
@@ -97,10 +99,44 @@ layout_mode = 2
 theme_override_constants/v_separation = -2
 columns = 2
 
+[node name="Inventory" type="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer" unique_id=448238365]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+metadata/_tab_index = 2
+
+[node name="HFlowContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer/Inventory" unique_id=1267822791]
+layout_mode = 2
+
+[node name="Equipped" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer/Inventory/HFlowContainer" unique_id=785157147]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_1mjrn")
+text = "Equipped"
+
+[node name="Equipped2" type="GridContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer/Inventory/HFlowContainer" unique_id=738374359]
+layout_mode = 2
+theme_override_constants/v_separation = 0
+columns = 2
+
+[node name="Bags" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer/Inventory/HFlowContainer" unique_id=136684474]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_1mjrn")
+text = "Bags"
+
+[node name="Bags2" type="GridContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer/Inventory/HFlowContainer" unique_id=940241521]
+layout_mode = 2
+theme_override_constants/v_separation = 0
+columns = 4
+
 [node name="Combat" type="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer" unique_id=2032826631]
+visible = false
 layout_mode = 2
 theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 4
 metadata/_tab_index = 1
 
 [node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/Combat" unique_id=709895643]
@@ -126,7 +162,9 @@ columns = 2
 visible = false
 layout_mode = 2
 theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 4
 metadata/_tab_index = 2
 
 [node name="WorldStats" type="GridContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/World" unique_id=1827575150]

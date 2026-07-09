@@ -4,7 +4,7 @@ extends EntityController
 var party_controller_script = preload("res://src/controllers/entities/player/party_controller.gd")
 
 # components
-var init_class: Player.PlayerClass = Player.PlayerClass.WANDERER
+var init_class: Player.PlayerClass = Player.PlayerClass.BASE
 
 var party_controller: Controller
 
@@ -141,7 +141,7 @@ func _process_rewards(p: Player, encounter: Dictionary):
 	# check for item rewards
 	var r = randf()
 	var n = 0.05 # 5% for enemy to drop item
-	if r <= n:
+	if r <= n && p.data.inventory.items <= 10:
 		var r_slots = ["weapon", "head", "chest", "legs", "feet"]
 		var r_item = r_slots.pick_random()
 		var new_item = null

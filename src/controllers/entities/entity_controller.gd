@@ -81,8 +81,8 @@ func _calculate_attributes(e: Entity) -> Dictionary:
 	var stamina_multi = 10
 	var stamina_step = stats.stamina * stamina_multi
 	# strength
-	var strength_multi = 0.25
-	var strength_step = stats.strength * (1 + strength_multi)
+	var strength_multi = 2
+	var strength_step = stats.strength * strength_multi
 	# perception
 	var perception_multi = 0.001
 	var perception_step = stats.perception * perception_multi
@@ -101,7 +101,7 @@ func _calculate_attributes(e: Entity) -> Dictionary:
 				stamina_step = stats.stamina * stamina_multi
 			Player.PlayerClass.BRUTE:
 				strength_multi *= 1.5
-				strength_step = stats.strength * (1 + strength_multi)
+				strength_step = stats.strength * strength_multi
 			Player.PlayerClass.TACTICIAN:
 				perception_multi *= 1.5
 				perception_step = stats.perception * perception_multi
@@ -113,8 +113,8 @@ func _calculate_attributes(e: Entity) -> Dictionary:
 	# strength
 	stats.attack = snapped(stats.base_attack + strength_step, 0.01)
 	# perception
-	stats.crit_chance = snapped(stats.base_crit + perception_step, 0.01)
-	stats.dodge_chance = snapped(stats.base_dodge + perception_step, 0.01)
+	stats.crit_chance = snapped(stats.base_crit + perception_step, 0.001)
+	stats.dodge_chance = snapped(stats.base_dodge + perception_step, 0.001)
 	
 	# return stats
 	return stats

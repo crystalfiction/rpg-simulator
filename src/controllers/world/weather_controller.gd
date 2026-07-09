@@ -15,7 +15,7 @@ var rainfall_max = 1.00
 var drainage_min = 0.00
 var drainage_max = 1.00
 
-var erosion_factor = 0.006
+var erosion_factor = 0.008
 
 var weather_metrics: Dictionary
 
@@ -39,13 +39,24 @@ func _apply_erosion(curr_terrain: Array) -> Array:
 				0, 1
 			)
 			w.data.terrain.density = new_soil_density
-			# get neighbors
-			var neighbors = self.Utils.get_neighbors(w, curr_terrain)
-			for n in neighbors:
-				n.data.terrain.density = clamp(
-					n.data.terrain.density - (w.data.weather.erosion * n.data.terrain.density), # 50% of source tile erosion value
-					0, 1
-				)
+			
+			# conditions for outer tiles
+			var conditions = (
+				w.data.grid_idx.x == 0 or
+				w.data.grid_idx.x == self.parent.grid_scale.x - 1 or
+				w.data.grid_idx.y == 0 or
+				w.data.grid_idx.y == self.parent.grid_scale.y - 1
+			)
+			# if not outer tile,
+			if not conditions:
+				# erode neighbors
+				var neighbors = self.Utils.get_neighbors(w, curr_terrain)
+				for n in neighbors:
+					# apply neighbor erosion
+					n.data.terrain.density = clamp(
+						n.data.terrain.density - (w.data.weather.erosion * n.data.terrain.density),
+						0, 1
+					)
 			# update texture string
 			w.data.terrain.texture = self.Utils.get_soil_texture(w)
 			# update metrics

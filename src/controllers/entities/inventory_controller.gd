@@ -15,7 +15,7 @@ func add_item(item: Item) -> bool:
 	if item == null:
 		return false
 	items.append(item)
-	self.entity.data.inventory.bag = self.items
+	self.entity.data.inventory.bags = self.items
 	return true
 
 
@@ -132,6 +132,17 @@ func get_equipped(slot_name: String) -> Equipment:
 	if slot_name in entity.data.inventory.equipped:
 		return entity.data.inventory.equipped[slot_name]
 	return null
+
+
+func get_all_equipped() -> Array:
+	var slot_names = Armor.ArmorSlot.keys()
+	slot_names.push_front("weapon")
+	var equipped = []
+	for s in slot_names:
+		s.to_lower()
+		if s in entity.data.inventory.equipped:
+			equipped.append(entity.data.inventory.equipped[s])
+	return equipped
 
 
 ## returns all backpack items

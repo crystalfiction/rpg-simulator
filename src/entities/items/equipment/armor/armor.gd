@@ -20,6 +20,11 @@ var armor_data = {
 }
 
 
+func get_armor_slot_string() -> String:
+	var slot = self.Slot
+	return ArmorSlot.find_key(slot)
+
+
 ## initializes the entity data
 func _init() -> void:
 	self.EquipType = EquipmentType.ARMOR
