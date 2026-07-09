@@ -15,9 +15,9 @@ grow_horizontal = 0
 grow_vertical = 2
 script = ExtResource("1_2yfeh")
 world_stats = NodePath("PanelContainer/MarginContainer/VBoxContainer/TabContainer/World/WorldStats")
-player_vitals = NodePath("PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer/Stats/VBoxContainer/PlayerVitals")
+player_vitals = NodePath("PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer/Stats/ScrollContainer/VBoxContainer/PlayerVitals")
 player_combat_vitals = NodePath("PanelContainer/MarginContainer/VBoxContainer/TabContainer/Combat/VBoxContainer/PlayerVitals")
-player_stats = NodePath("PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer/Stats/VBoxContainer/PlayerStats")
+player_stats = NodePath("PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer/Stats/ScrollContainer/VBoxContainer/PlayerStats")
 player_abilities = NodePath("PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer/Abilities/Abilities")
 player_equipped = NodePath("PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer/Inventory/HFlowContainer/Equipped2")
 player_bags = NodePath("PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer/Inventory/HFlowContainer/BagItems")
@@ -65,10 +65,9 @@ metadata/_tab_index = 0
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_1mjrn")
 theme_override_font_sizes/font_size = 14
-current_tab = 2
+current_tab = 0
 
 [node name="Stats" type="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer" unique_id=394951077]
-visible = false
 layout_mode = 2
 theme_override_constants/margin_left = 4
 theme_override_constants/margin_top = 4
@@ -76,15 +75,21 @@ theme_override_constants/margin_right = 4
 theme_override_constants/margin_bottom = 4
 metadata/_tab_index = 0
 
-[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer/Stats" unique_id=895393496]
+[node name="ScrollContainer" type="ScrollContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer/Stats" unique_id=608515021]
+custom_minimum_size = Vector2(0, 727)
 layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer/Stats/ScrollContainer" unique_id=895393496]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 theme_override_constants/separation = 4
 
-[node name="PlayerVitals" type="GridContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer/Stats/VBoxContainer" unique_id=2057702895]
+[node name="PlayerVitals" type="GridContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer/Stats/ScrollContainer/VBoxContainer" unique_id=2057702895]
 layout_mode = 2
 theme_override_constants/v_separation = 0
 
-[node name="PlayerStats" type="GridContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer/Stats/VBoxContainer" unique_id=156362244]
+[node name="PlayerStats" type="GridContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer/Stats/ScrollContainer/VBoxContainer" unique_id=156362244]
 layout_mode = 2
 theme_override_constants/v_separation = -2
 columns = 2
@@ -104,6 +109,7 @@ theme_override_constants/v_separation = -2
 columns = 2
 
 [node name="Inventory" type="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TabContainer/Player/TabContainer" unique_id=448238365]
+visible = false
 layout_mode = 2
 theme_override_constants/margin_left = 4
 theme_override_constants/margin_top = 4

@@ -94,6 +94,21 @@ func _get_substring(string: String, n: int) -> String:
 	return substring
 
 
+## removes a single label entry and its labels
+func _remove_label_entry(entry: Dictionary, curr_labels: Array):
+	# remove name label
+	if is_instance_valid(entry.name):
+		if not entry.name.is_queued_for_deletion():
+			entry.name.queue_free()
+	# remove data label
+	if is_instance_valid(entry.data):
+		if not entry.data.is_queued_for_deletion():
+			entry.data.queue_free()
+	# remove label entry ref
+	curr_labels.erase(entry)
+	self.labels = curr_labels
+
+
 ## removes labels and label entries with invalid objects
 func _remove_invalids(curr_labels: Array):
 	# remove labels if player invalid
@@ -105,16 +120,9 @@ func _remove_invalids(curr_labels: Array):
 	)
 	if not invalids.is_empty():
 		for invalid in invalids:
-			# remove name label
-			if is_instance_valid(invalid.name):
-				if not invalid.name.is_queued_for_deletion():
-					invalid.name.queue_free()
-			# remove data label
-			if is_instance_valid(invalid.data):
-				if not invalid.data.is_queued_for_deletion():
-					invalid.data.queue_free()
-			# remove label entry ref
-			curr_labels.erase(invalid)
+			_remove_label_entry(invalid, curr_labels)
+	
+	self.labels = curr_labels
 
 
 ## checks for existing labels given the passed obj and container,
@@ -302,6 +310,7 @@ func _handle_bag_equip(p: Player, options: OptionButton) -> bool:
 	var selected = options.get_selected_id()
 	if selected < 0:
 		return false
+		
 	# format new item
 	var new_item = p.data.inventory.bags[selected]
 	var curr_item = null
@@ -319,8 +328,24 @@ func _handle_bag_equip(p: Player, options: OptionButton) -> bool:
 
 ## handles bag deletion for player inventory items
 func _handle_bag_delete(p: Player, options: OptionButton, curr_labels: Array):
-	pass
+	# get selected item
+	var selected = options.get_selected_id()
+	if selected < 0:
+		return
 
+	# remove label entries/labels first to avoid update errors
+	var curr_item = p.data.inventory.bags[selected]
+	for l in curr_labels:
+		# get item labels
+		if l.path.contains("inventory.bags."):
+			_remove_label_entry(l, curr_labels)
+	
+	# remove item from items/bags
+	p.data.inventory.controller.remove_item(curr_item)
+	
+	# remove selected option after processing with its data
+	options.remove_item(selected)
+	options.selected = 0 if options.item_count > 0 else -1
 
 ## handles creation of inventory bags view
 func _make_inventory_bags(p: Player, curr_labels: Array):
@@ -504,6 +529,25 @@ func _handle_player_panel(p: Player, curr_labels: Array):
 			if not is_stat_labels:
 				# make stat labels
 				_make_stat_labels(p, "player_stats", curr_labels)
+			else:
+				# check for new skills
+				var existing_skills = stat_labels[1]
+				var existing_paths = []
+				for s in range(existing_skills.size() - 1):
+					existing_paths.append(existing_skills[s].path)
+				# check player skills,
+				for key in p.data.skills:
+					# if skill in player data but not labels,
+					var path_idx = existing_paths.find_custom(func(pth): return pth.contains(key))
+					if path_idx < 0:
+						# delete stats labels
+						var stats_labels = self.player_stats.get_children()
+						for l in stats_labels:
+							if is_instance_valid(l):
+								if not l.is_queued_for_deletion():
+									l.queue_free()
+
+						_remove_invalids(curr_labels)
 			
 			# abilities
 			var ability_labels = _check_obj_labels(p, "player_abilities", curr_labels)
@@ -658,6 +702,10 @@ func _process(_delta: float) -> void:
 	if not self.labels.is_empty():
 		_remove_invalids(self.labels)
 
+	# update label data
+	if not self.labels.is_empty():
+		_update_label_entries(self.labels)
+
 	# if world valid,
 	if is_instance_valid(self.world):
 		# handle world panel
@@ -685,7 +733,3 @@ func _process(_delta: float) -> void:
 	else:
 		# remove invalid labels
 		_remove_invalids(self.labels)
-
-	# update label data
-	if not self.labels.is_empty():
-		_update_label_entries(self.labels)
