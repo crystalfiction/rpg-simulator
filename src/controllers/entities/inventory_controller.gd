@@ -25,6 +25,8 @@ func remove_item(item: Item) -> bool:
 	if item == null or item not in items:
 		return false
 	items.erase(item)
+	self.entity.data.inventory.bags = self.items
+	self.entity.data.inventory.items = self.entity.data.inventory.controller.get_item_count()
 	return true
 
 
@@ -33,6 +35,8 @@ func remove_item_at(index: int) -> bool:
 	if index < 0 or index >= items.size():
 		return false
 	items.remove_at(index)
+	self.entity.data.inventory.bags = self.items
+	self.entity.data.inventory.items = self.entity.data.inventory.controller.get_item_count()
 	return true
 
 

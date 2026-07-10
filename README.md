@@ -54,25 +54,20 @@ Create a procedurally generated RPG simulation that embraces chaos and instabili
 - [x] _environmental system_: create a dynamic environment with terrain, weather, and organic life simulation that directly impacts the player's world interaction somehow
   - [x] simulates a basic world environment using procedurally generated terrain samples
     - [x] player resources are generated according to tile conditions related to terrain
-- [ ] _ui system_: create a basic, functional UI that displays data relevant to a playthrough and allows the user to make necessary decisions regarding their character
-  - [ ] world panel
+- [x] _ui system_: create a basic, functional UI that displays data relevant to a playthrough and allows the user to make necessary decisions regarding their character
+  - [x] world panel
     - [x] terrain: allows user to see stats related to world generation, including biome and resources left
-  - [ ] player panel
+  - [x] player panel
     - [x] stats
     - [x] abilities: shows all abilities available to the player, including the ability's stats
     - [x] skills: shows all player skills
-    - [ ] inventory
-      - [ ] equipment viewer/editor
-        - [ ] item stats
-        - [ ] unequip items
-      - [ ] bag viewer/editor
-        - [x] item data
-        - [ ] rearrange items
-        - [x] equip items
-        - [x] delete items
+    - [x] inventory
+      - [x] equipment viewer/editor
+        - [x] equipment slots
+        - [x] equipment stats
   - [x] combat panel: shows only high-level data regarding the entities in a combat encounter
     - [x] entity vitals
-    - [x] vital stats -> name, level
+    - [x] vital stats -> name, level, health
 
 ### Further
 

@@ -12,11 +12,6 @@ var FileLogger: Node
 @export var player_stats: GridContainer
 @export var player_abilities: GridContainer
 @export var player_equipped: GridContainer
-@export var player_bags: GridContainer
-@export var player_bag_controls: VBoxContainer
-@export var bag_item_select: OptionButton
-@export var bag_equip_btn: Button
-@export var bag_delete_btn: Button
 @export var enemy_combat_vitals: GridContainer
 
 var label_settings: LabelSettings
@@ -106,7 +101,6 @@ func _remove_label_entry(entry: Dictionary, curr_labels: Array):
 			entry.data.queue_free()
 	# remove label entry ref
 	curr_labels.erase(entry)
-	self.labels = curr_labels
 
 
 ## removes labels and label entries with invalid objects
@@ -206,7 +200,7 @@ func _make_entity_vitals(entity: Entity, container: String, curr_labels: Array):
 	var new_level_label = Label.new()
 	new_level_label.add_theme_font_override(
 		"font", preload("res://src/assets/JetBrainsMono-Medium.ttf"))
-	new_level_label.add_theme_font_size_override("font_size", 14)
+	# new_level_label.add_theme_font_size_override("font_size", 14)
 	new_level_label.text = str(entity.data.stats.level)
 	self[container].add_child(new_level_label)
 
@@ -217,6 +211,22 @@ func _make_entity_vitals(entity: Entity, container: String, curr_labels: Array):
 	new_level_entry.data = new_level_label
 	new_level_entry.container = container
 	curr_labels.append(new_level_entry)
+	
+	# health label
+	var new_health_label = Label.new()
+	new_health_label.add_theme_font_override(
+		"font", preload("res://src/assets/JetBrainsMono-Medium.ttf"))
+	new_health_label.add_theme_font_size_override("font_size", 14)
+	new_health_label.text = str(entity.data.stats.health)
+	self[container].add_child(new_health_label)
+
+	var new_health_entry = self.label_entry.duplicate()
+	new_health_entry.obj = entity
+	new_health_entry.path = "stats.health"
+	new_health_entry.name = new_health_label
+	new_health_entry.data = new_health_label
+	new_health_entry.container = container
+	curr_labels.append(new_health_entry)
 
 	# health bar
 	var new_health_bar = ProgressBar.new()
@@ -278,108 +288,32 @@ func _make_entity_vitals(entity: Entity, container: String, curr_labels: Array):
 
 ## handles creation of inventory equipment view
 func _make_inventory_equipped(p: Player, curr_labels: Array):
+	# make name, data labels for each equipped slot
 	var equipped: Dictionary = p.data.inventory.equipped
 	for key in equipped:
-		# make name/item labels
+		# make slot, item name labels
 		var curr_slot = equipped[key]
 		var path = "inventory.equipped." + key
-		_make_stat_label(
-			p, key, path, curr_slot,
-			"player_equipped", curr_labels)
-
-
-func _handle_bag_controls(
-	p: Player, path: String, curr_labels: Array
-):
-	var item_select: OptionButton = self.player_bag_controls.get_child(0)
-	var keys = path.split(".", false, 0)
-	var curr_data = p.data
-	for key in keys:
-		if key.is_valid_int():
-			key = key.to_int()
-		curr_data = curr_data[key]
-	
-	var item_id = int(keys[keys.size() - 1]) # bag array index
-	var item_string = curr_data.get_script().get_global_name()
-	item_select.add_item(item_string, item_id)
-
-
-## handles item equipment for bag equipment buttons
-func _handle_bag_equip(p: Player, options: OptionButton) -> bool:
-	# get selected item
-	var selected = options.get_selected_id()
-	if selected < 0:
-		return false
-		
-	# format new item
-	var new_item = p.data.inventory.bags[selected]
-	var curr_item = null
-	if new_item is Weapon:
-		curr_item = p.data.inventory.equipped.weapon
-	elif new_item is Armor:
-		var slot = new_item.get_armor_slot_string().to_lower()
-		curr_item = p.data.inventory.equipped[slot]
-	# swap item at selected index with currently equipped item
-	p.data.inventory.bags[selected] = curr_item
-	# equip selected item
-	p.data.inventory.controller.equip_item(new_item)
-	return true
-
-
-## handles bag deletion for player inventory items
-func _handle_bag_delete(p: Player, options: OptionButton, curr_labels: Array):
-	# get selected item
-	var selected = options.get_selected_id()
-	if selected < 0:
-		return
-
-	# remove label entries/labels first to avoid update errors
-	var curr_item = p.data.inventory.bags[selected]
-	for l in curr_labels:
-		# get item labels
-		if l.path.contains("inventory.bags."):
-			_remove_label_entry(l, curr_labels)
-	
-	# remove item from items/bags
-	p.data.inventory.controller.remove_item(curr_item)
-	
-	# remove selected option after processing with its data
-	options.remove_item(selected)
-	options.selected = 0 if options.item_count > 0 else -1
-
-## handles creation of inventory bags view
-func _make_inventory_bags(p: Player, curr_labels: Array):
-	var bags: Array = p.data.inventory.bags
-	var i = 0
-	if not bags.is_empty():
-		for item in bags:
-			var obj_labels = _check_obj_labels(p, "player_bags", curr_labels)
-			var is_obj_labels = obj_labels[0]
-			var path = "inventory.bags." + str(i)
-			# if no obj labels,
-			if not is_obj_labels:
-				# make labels
-				_make_stat_label(
-					p, str(i), path, item,
-					"player_bags", curr_labels)
-				_handle_bag_controls(p, path, curr_labels)
+		var curr_entry = curr_labels.find_custom(func(l): return l.path == path)
+		var labels_exist = curr_entry > 0
+		if not labels_exist:
+			_make_stat_label(
+				p, key, path, curr_slot,
+				"player_equipped", curr_labels)
 			
-			# if obj labels,
-			else:
-				# check if current bag slot label exists
-				var label_paths = []
-				for l in obj_labels[1]:
-					label_paths.append(l.path)
-
-				if path not in label_paths:
-					# make item stat label
+		# make item stat labels if item equipped
+		if labels_exist && curr_slot != null:
+			var item_stats = curr_slot.data.stats
+			for k in item_stats:
+				var stat_data = item_stats[k]
+				var item_path = path + ".data.stats." + k
+				var item_labels_exist = curr_labels.find_custom(func(l): return l.path == item_path) > 0
+				if not item_labels_exist:
+					# get inventory slot data label as sibling 
+					var sibling_node = curr_labels[curr_entry].data
 					_make_stat_label(
-						p, str(i), path, item,
-						"player_bags", curr_labels)
-					_handle_bag_controls(p, path, curr_labels)
-					
-			# increment index
-			i += 1
+						p, k, item_path, stat_data,
+						"player_equipped", curr_labels, sibling_node)
 
 
 ## recursively traverses obj data dictionaries and creates labels
@@ -437,13 +371,23 @@ func _make_stat_label(
 	path: String,
 	data: Variant,
 	container: String,
-	curr_labels: Array
+	curr_labels: Array,
+	sibling: Node = null
 ):
 	# name label
 	var new_name_label = Label.new()
 	new_name_label.label_settings = self.label_settings
 	new_name_label.name = key
-	new_name_label.text = path
+	
+	# format name labels
+	var path_formatted = path
+	if path_formatted == "inventory.equipped." + key:
+		path_formatted = path_formatted.replace("inventory.equipped.", "")
+	if path_formatted.contains("inventory.equipped"):
+		path_formatted = ".".join(
+			[path_formatted.get_slice(".", 4), path_formatted.get_slice(".", 5)])
+	new_name_label.text = path_formatted
+	
 	# force width clipping
 	new_name_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	new_name_label.custom_minimum_size.x = 128
@@ -467,8 +411,17 @@ func _make_stat_label(
 	new_label_entry.container = container
 
 	# add to tree
-	self[container].add_child(new_name_label)
-	self[container].add_child(new_data_label)
+	# if sibling node passed,
+	if sibling:
+		# add labels as siblings
+		sibling.add_sibling(new_name_label)
+		new_name_label.add_sibling(new_data_label)
+	
+	# no sibling passed,
+	else:
+		# add child at end
+		self[container].add_child(new_name_label)
+		self[container].add_child(new_data_label)
 
 	# add to label entries ref
 	curr_labels.append(new_label_entry)
@@ -563,23 +516,8 @@ func _handle_inventory_panel(p: Player, curr_labels: Array):
 	if is_instance_valid(p):
 		# and if not queued for deletion,
 		if not p.is_queued_for_deletion():
-			var equipped_labels = _check_obj_labels(p, "player_equipped", curr_labels)
-			var is_equipped_labels = equipped_labels.front()
-			if not is_equipped_labels:
-				_make_inventory_equipped(p, curr_labels)
-			
-			# make bag labels
-			_make_inventory_bags(p, curr_labels)
-
-			# make bag controls
-			if not self.bag_equip_btn.is_connected("pressed", _handle_bag_equip):
-				self.bag_equip_btn.pressed.connect(
-					_handle_bag_equip.bind(p, self.bag_item_select)
-				)
-			if not self.bag_delete_btn.is_connected("pressed", _handle_bag_delete):
-				self.bag_delete_btn.pressed.connect(
-					_handle_bag_delete.bind(p, self.bag_item_select, self.labels)
-				)
+			# make inventory labels
+			_make_inventory_equipped(p, curr_labels)
 
 
 ## handles the creation of the combat panel items such as combat vitals
@@ -593,7 +531,6 @@ func _handle_combat_panel(p: Player, enemies: Array, curr_labels: Array):
 			var container_children = self.player_combat_vitals.get_children()
 			if container_children.is_empty():
 				_make_entity_vitals(p, "player_combat_vitals", curr_labels)
-	
 	# player invalid,
 	else:
 		# delete lingering labels
@@ -615,7 +552,6 @@ func _handle_combat_panel(p: Player, enemies: Array, curr_labels: Array):
 					var container_children = self.enemy_combat_vitals.get_children()
 					if container_children.is_empty():
 						_make_entity_vitals(e, "enemy_combat_vitals", curr_labels)
-	
 	# enemies array empty,
 	else:
 		# delete lingering labels
@@ -651,6 +587,9 @@ func _update_entry(entry: Dictionary):
 			# account for array indexes
 			if entry_data is Array && k.is_valid_int():
 				k = int(k)
+				# skip if key out of bounds
+				if k > entry_data.size() - 1:
+					return
 			
 			# account for script objects
 			if entry_data is GDScript:
@@ -668,15 +607,20 @@ func _update_entry(entry: Dictionary):
 			# update label entry data
 			entry_data = entry_data[k]
 
-			# format entry data
+		# determine what is being updated,
+		# if label,
+		if entry.data is Label:
+			# format text
 			if is_instance_valid(entry_data):
+				# if armor or weapon,
 				if entry_data is Armor or entry_data is Weapon:
+					# make text class name
 					entry_data = entry_data.get_script().get_global_name()
 
-		# determine what is being updated,
-		if entry.data is Label:
 			# update label text if label
 			entry.data.text = str(entry_data)
+		
+		# if progress bar,
 		elif entry.data is ProgressBar:
 			# check which bar is being updated,
 			if (
@@ -701,10 +645,6 @@ func _process(_delta: float) -> void:
 	# check for invalid labels
 	if not self.labels.is_empty():
 		_remove_invalids(self.labels)
-
-	# update label data
-	if not self.labels.is_empty():
-		_update_label_entries(self.labels)
 
 	# if world valid,
 	if is_instance_valid(self.world):
@@ -733,3 +673,7 @@ func _process(_delta: float) -> void:
 	else:
 		# remove invalid labels
 		_remove_invalids(self.labels)
+
+	# update label data
+	if not self.labels.is_empty():
+		_update_label_entries(self.labels)

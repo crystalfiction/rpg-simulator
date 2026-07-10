@@ -173,12 +173,6 @@ func _process_rewards(p: Player, encounter: Dictionary):
 			FileLogger.log_message(self,
 				p.name + " has equipped a new " +
 				equipment_string)
-		# if so,
-		else:
-			# add to bag
-			p.data.inventory.controller.add_item(new_item)
-			FileLogger.log_message(self,
-				"A new " + equipment_string + " has been added to bags")
 
 	# check if level_up
 	var level_up = false
